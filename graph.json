@@ -1,0 +1,14 @@
+{
+  "nodes": [
+    {"label": "My mother", "x": 440, "y": 410},
+    {"label": "My father", "x": 440, "y": 364},
+    {"label": "Me", "x": 442, "y": 470},
+    {"label": "My brother", "x": 470, "y": 314}
+  ],
+  "links": [
+    {"source":  1, "target":  2},
+    {"source":  0, "target":  2},
+    {"source":  1, "target":  3},
+    {"source":  0, "target":  3}
+  ]
+}

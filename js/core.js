@@ -1,106 +1,60 @@
-var margin = {
-	top : 100,
-	right : 50,
-	bottom : 100,
-	left : 50
-}, width = 900 - margin.left - margin.right, height = 500 - margin.top
-		- margin.bottom;
+var width = 960, height = 500;
 
-var tree = d3.layout.tree().separation(function(a, b) {
-	return a.parent === b.parent ? 1 : 1.2;
-}).children(function(d) {
-	return d.parents;
-}).size([ width, height ]);
+var force = d3.layout.force().size([ width, height ]).charge(-400)
+		.linkDistance(200).on("tick", tick);
 
-var svg = d3.select("#tree").attr("bgcolor", "#2c2c2c").append("svg").attr(
-		"width", width + margin.left + margin.right).attr("height",
-		height + margin.top + margin.bottom).append("g").attr("transform",
-		"translate(" + margin.left + "," + margin.top + ")");
+var drag = force.drag().on("dragstart", dragstart);
 
-var nodes = tree.nodes(getData());
+var svg = d3.select("body").append("svg").attr("width", width).attr("height",
+		height);
 
-var node = svg.selectAll(".node").data(nodes).enter().append("g");
+var link = svg.selectAll(".link"), node = svg.selectAll(".node");
 
-node.append("rect").attr("width", 140).attr("height", 80).attr("fill", "tan")
-		.attr("x", function(d) {
-			return d.x - 70;
-		}).attr("y", function(d) {
-			return height - d.y - 40;
-		});
+d3.json("graph.json", function(error, graph) {
+	force.nodes(graph.nodes).links(graph.links).start();
 
-node.append("text").attr("font-size", "16px").attr("fill", "black").attr("x",
-		function(d) {
-			return d.x;
-		}).attr("y", function(d) {
-	return height - d.y - 15;
-}).style("text-anchor", "middle").text(function(d) {
-	return d.name;
+	link = link.data(graph.links).enter().append("line").attr("class", "link");
+
+	node = node.data(graph.nodes).enter().append("g");
+
+	node.append("circle").attr("class", "node").attr("r", 45).on("dblclick",
+			dblclick).call(drag);
+
+	node.append("text").attr("font-size", "16px").attr("fill", "black").text(
+			function(d) {
+				return d.label;
+			});
 });
 
-node.append("text").attr("font-size", "12px").attr("x", function(d) {
-	return d.x;
-}).attr("y", function(d) {
-	return 10 + height - d.y;
-}).style("text-anchor", "middle").text(function(d) {
-	return d.born + "–" + d.died;
-});
+function tick() {
+	
+	link.attr("x1", function(d) {
+		return d.source.x;
+	}).attr("y1", function(d) {
+		return d.source.y;
+	}).attr("x2", function(d) {
+		return d.target.x;
+	}).attr("y2", function(d) {
+		return d.target.y;
+	});
 
-node.append("text").attr("font-size", "11px").attr("x", function(d) {
-	return d.x;
-}).attr("y", function(d) {
-	return 28 + height - d.y;
-}).style("text-anchor", "middle").text(function(d) {
-	return d.location;
-});
+	node.selectAll("circle").attr("cx", function(d) {
+		return d.x;
+	}).attr("cy", function(d) {
+		return d.y;
+	});
+	
+	node.selectAll("text").attr("x", function(d) {
+		return d.x - 40;
+	}).attr("y", function(d) {
+		return d.y + 10;
+	});
+}
 
-var link = svg.selectAll(".link").data(tree.links(nodes)).enter().insert(
-		"path", "g").attr("fill", "none").attr("stroke", "#000").attr("stroke",
-		"#000").attr("shape-rendering", "crispEdges").attr("d", connect);
+function dblclick(d) {
+	d3.select(this).classed("fixed", d.fixed = false);
+}
 
-function connect(d, i) {
-	return "M" + d.source.x + "," + (height - d.source.y) + "V"
-			+ (height - (3 * d.source.y + 4 * d.target.y) / 7) + "H"
-			+ d.target.x + "V" + (height - d.target.y);
-};
-
-function getData() {
-	return {
-		"name" : "Clifford Shanks",
-		"born" : 1862,
-		"died" : 1906,
-		"location" : "Petersburg, VA",
-		"parents" : [ {
-			"name" : "James Shanks",
-			"born" : 1831,
-			"died" : 1884,
-			"location" : "Petersburg, VA",
-			"parents" : [ {
-				"name" : "Robert Shanks",
-				"born" : 1781,
-				"died" : 1871,
-				"location" : "Ireland/Petersburg, VA"
-			}, {
-				"name" : "Elizabeth Shanks",
-				"born" : 1795,
-				"died" : 1871,
-				"location" : "Ireland/Petersburg, VA"
-			} ]
-		}, {
-			"name" : "Ann Emily Brown",
-			"born" : 1826,
-			"died" : 1866,
-			"location" : "Brunswick/Petersburg, VA",
-			"parents" : [ {
-				"name" : "Henry Brown",
-				"born" : 1792,
-				"died" : 1845,
-				"location" : "Montgomery, NC"
-			}, {
-				"name" : "Sarah Houchins",
-				"born" : 1793,
-				"died" : 1882,
-				"location" : "Montgomery, NC"
-			} ]
-		} ]
-	};
-};
+function dragstart(d) {
+	d3.select(this).classed("fixed", d.fixed = true);
+}
