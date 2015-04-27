@@ -1,15 +1,23 @@
 .link {
-	stroke: #000;
-	stroke-width: 1.5px;
+	stroke-width: 15px;
+	stroke: brown;
+	fill: none;
 }
 
 .node {
 	cursor: move;
-	fill: #ccc;
-	stroke: #000;
-	stroke-width: 1.5px;
+	fill: green;
+	stroke: brown;
+	stroke-width: 3.5px;
 }
 
-.node.fixed {
-	fill: #f00;
+.profile-frame {
+	stroke-width: 4px;
+	stroke: black;
+	fill: none;
+}
+
+.detail {
+	
+	margin-left: 400px;
 }

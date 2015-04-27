@@ -1,14 +1,24 @@
 {
   "nodes": [
-    {"label": "My mother", "x": 440, "y": 410},
-    {"label": "My father", "x": 440, "y": 364},
-    {"label": "Me", "x": 442, "y": 470},
-    {"label": "My brother", "x": 470, "y": 314}
+    {"label": "My mother", "x": 300, "y": 600, "img": "", "fixed": true},
+    {"label": "My father", "x": 500, "y": 600, "img": "", "fixed": true},
+    {"label": "", "x": 400, "y": 500, "fixed": true},
+    {"label": "Me", "x": 200, "y": 300, "img": "", "fixed": true},
+    {"label": "My brother", "x": 350, "y": 300, "img": "", "fixed": true},
+    {"label": "My sister", "x": 500, "y": 300, "img": "sister.jpeg", "fixed": true},
+    {"label": "Tom", "x": 700, "y": 300, "img": "", "fixed": true},
+    {"label": "", "x": 600, "y": 250, "fixed": true},
+    {"label": "Chris", "x": 600, "y": 100, "fixed": true}
+    
   ],
   "links": [
-    {"source":  1, "target":  2},
-    {"source":  0, "target":  2},
-    {"source":  1, "target":  3},
-    {"source":  0, "target":  3}
+    {"source": 0, "target": 2},
+    {"source": 1, "target": 2},
+    {"source": 2, "target": 3},
+    {"source": 2, "target": 4},
+    {"source": 2, "target": 5},
+    {"source": 5, "target": 7},
+    {"source": 6, "target": 7},
+    {"source": 7, "target": 8}
   ]
 }
