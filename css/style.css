@@ -1,16 +1,39 @@
 .link {
-	stroke-width: 15px;
+	stroke-width: 5px;
 	stroke: brown;
 	fill: none;
+	opacity: .6;
 }
 
 .node {
 	cursor: move;
-	fill: green;
 	stroke: brown;
-	stroke-width: 3.5px;
+	fill: green;
+	stroke-width: 1.5px;
+	opacity: .4;
 }
 
+.name {
+	fill: brown;
+	font-size: 12px;
+}
+
+.node--selected {
+	
+	opacity: 1;
+	fill: green;
+}
+
+.profile-image--selected {
+	
+}
+
+.label--selected {
+
+	font-size: 15px;
+}
+
+}
 .profile-frame {
 	stroke-width: 4px;
 	stroke: black;
@@ -18,6 +41,5 @@
 }
 
 .detail {
-	
 	margin-left: 400px;
 }

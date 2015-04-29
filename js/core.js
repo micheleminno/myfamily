@@ -1,12 +1,14 @@
-var width = 1200, height = 800;
+var serverUrl = 'http://localhost:8090';
+
+var width = 1800, height = 1200;
 
 var force = d3.layout.force().size([ width, height ]).charge(-800)
 		.linkDistance(300).on("tick", tick);
 
-var drag = force.drag();
+var drag = force.drag().on("dragend", dragend);
 
 var svg = d3.select("body").append("svg").attr("width", width).attr("height",
-		height);
+		height).on("click", clickSvg);
 
 var detail = d3.select("body").append("div").attr("class", "detail").style(
 		"opacity", 0);
@@ -14,7 +16,9 @@ var detail = d3.select("body").append("div").attr("class", "detail").style(
 var link = svg.selectAll(".link"), node = svg.selectAll(".node"), doc = svg
 		.selectAll(".doc");
 
-d3.json("graph.json", function(error, graph) {
+$.get(serverUrl + "/graph", function(graphString) {
+
+	var graph = JSON.parse(graphString);
 
 	force.nodes(graph.nodes).links(graph.links).start();
 
@@ -31,24 +35,28 @@ d3.json("graph.json", function(error, graph) {
 	node.each(function(d) {
 
 		currentNode = d3.select(this);
-		if (d.label != "") {
+		
+		currentNode.on("click", clickNode);
+		
+		if (d.person) {
 
 			currentNode.append("circle").attr("class", "node").attr("r", 50)
 					.call(drag);
 
-			currentNode.append("image").attr("xlink:href", "./img/" + d.img)
-					.attr("width", 40).attr("height", 40);
+			currentNode.append("image").attr("class", "profile-image").attr(
+					"cursor", "move").attr("xlink:href", "./img/" + d.img)
+					.attr("width", 40).attr("height", 40).call(drag);
 
-			currentNode.append("rect").attr("width", 40).attr("height", 40)
-					.attr("class", "profile-frame");
+			// currentNode.append("rect").attr("width", 40).attr("height", 40)
+			// .attr("class", "profile-frame");
 
-			currentNode.append("text").attr("font-size", "12px").attr("fill",
-					"white").text(function(d) {
-				return d.label;
-			});
+			currentNode.append("text").attr("class", "name")
+					.attr("dy", ".40em").text(function(d) {
+						return d.label;
+					});
 		} else {
 
-			currentNode.append("ellipse").attr("rx", 40).attr("ry", 20).attr(
+			currentNode.append("ellipse").attr("rx", 20).attr("ry", 10).attr(
 					"fill", "brown").call(drag);
 		}
 	});
@@ -56,7 +64,7 @@ d3.json("graph.json", function(error, graph) {
 	d3.json("documents.json", function(error, documents) {
 
 		svg.append("rect").attr("width", 800).attr("height", 40).attr("x", 200)
-				.attr("y", 750).attr("class", "data-stream");
+				.attr("y", 950).attr("class", "data-stream");
 
 		doc = doc.data(documents.data).enter().append("g");
 
@@ -65,10 +73,10 @@ d3.json("graph.json", function(error, graph) {
 					return "./img/" + d.file;
 				}).attr("width", 40).attr("height", 40).attr("x", function(d) {
 			return 200 + d.index * 40;
-		}).attr("y", 750);
+		}).attr("y", 950);
 
 		doc.append("rect").attr("width", 40).attr("height", 40).attr("x", 200)
-				.attr("y", 750).attr("class", "profile-frame");
+				.attr("y", 950).attr("class", "profile-frame");
 
 		doc.on("mouseover", docMouseovered).on("mouseout", docMouseouted);
 
@@ -127,21 +135,4 @@ function tick() {
 	}).attr("cy", function(d) {
 		return d.y;
 	});
-
-	d3.select("#save").on("click", save);
-
-	function save() {
-
-		var data = '';
-
-		var circles = svg.selectAll("circle");
-		var json_circles = JSON.stringify(circles.data());
-		data += 'var jsonCircles = ' + json_circles + ';<br><br>';
-
-		var lines = svg.selectAll("path");
-		var json_lines = JSON.stringify(lines.data());
-		data += 'var jsonPaths = ' + json_lines + ';';
-
-		d3.select("#console").html(data);
-	}
 }
