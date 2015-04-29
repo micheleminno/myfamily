@@ -64,7 +64,7 @@ $.get(serverUrl + "/graph", function(graphString) {
 	d3.json("documents.json", function(error, documents) {
 
 		svg.append("rect").attr("width", 800).attr("height", 40).attr("x", 200)
-				.attr("y", 950).attr("class", "data-stream");
+				.attr("y", 1150).attr("class", "data-stream");
 
 		doc = doc.data(documents.data).enter().append("g");
 
@@ -73,10 +73,10 @@ $.get(serverUrl + "/graph", function(graphString) {
 					return "./img/" + d.file;
 				}).attr("width", 40).attr("height", 40).attr("x", function(d) {
 			return 200 + d.index * 40;
-		}).attr("y", 950);
+		}).attr("y", 1150);
 
 		doc.append("rect").attr("width", 40).attr("height", 40).attr("x", 200)
-				.attr("y", 950).attr("class", "profile-frame");
+				.attr("y", 1150).attr("class", "profile-frame");
 
 		doc.on("mouseover", docMouseovered).on("mouseout", docMouseouted);
 

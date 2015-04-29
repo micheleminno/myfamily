@@ -37,7 +37,7 @@ function clickNode(d) {
 			y - 100).attr("xlink:href", "./img/" + d.img);
 
 	selection.append("text").attr('class', "label--selected")
-			.attr("y", y - 120).attr("x", x - 20).text(d.label);
+			.attr("y", y - 120).attr("x", x - 50).text(d.label);
 
 	d3.event.stopPropagation();
 };
