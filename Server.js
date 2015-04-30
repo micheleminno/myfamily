@@ -16,6 +16,12 @@ app.get('/', function(req, res) {
 	res.sendfile('myfamily/index.html');
 });
 
+app.get('/documents', function(req, res) {
+
+	var documents = JSON.parse(fs.readFileSync('documents.json', 'utf8'));
+	res.end(JSON.stringify(documents));
+});
+
 app.get('/graph', function(req, res) {
 
 	var graph = JSON.parse(fs.readFileSync('graph.json', 'utf8'));

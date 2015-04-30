@@ -9,12 +9,6 @@ function docMouseouted(d) {
 	// detail.html("");
 };
 
-function dragend(d) {
-
-	$.get(serverUrl + '/updateNode?label=' + d.label + '&x=' + d.x + '&y='
-			+ d.y);
-};
-
 function clickNode(d) {
 
 	if (d3.event.defaultPrevented) {
@@ -50,3 +44,29 @@ function clickSvg(d) {
 	selection.select(".profile-image--selected").remove();
 	selection.select(".label--selected").remove();
 };
+
+function zoomed() {
+
+	container.attr("transform", "translate(" + d3.event.translate + ")scale("
+			+ d3.event.scale + ")");
+}
+
+function dragstarted(d) {
+
+	d3.event.sourceEvent.stopPropagation();
+	d3.select(this).classed("dragging", true);
+}
+
+function dragged(d) {
+
+	d3.select(this).attr("cx", d.x = d3.event.x).attr("cy", d.y = d3.event.y);
+
+}
+
+function dragended(d) {
+
+	d3.select(this).classed("dragging", false);
+
+	$.get(serverUrl + '/updateNode?label=' + d.label + '&x=' + d.x + '&y='
+			+ d.y);
+}

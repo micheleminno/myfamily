@@ -1,9 +1,10 @@
 {
   "data": [
-    {"index": 0, "title": "photo 1", "file": "photo1.jpeg"},
-    {"index": 1, "title": "photo 2", "file": "photo2.jpeg"},
-    {"index": 2, "title": "photo 3", "file": "photo3.jpeg"},
-    {"index": 3, "title": "photo 4", "file": "photo4.jpeg"},
-    {"index": 4, "title": "photo 5", "file": "photo5.jpeg"}
+    {"index": 0, "title": "photo 1", "file": "photo_famiglia.jpg"},
+    {"index": 1, "title": "photo 2", "file": "photo_laurea.jpg"},
+    {"index": 2, "title": "photo 3", "file": "photo_mic_matt_nonna.jpg"},
+    {"index": 3, "title": "photo 4", "file": "photo_mic_matt.jpg"},
+    {"index": 4, "title": "photo 5", "file": "photo_mic_rob.jpg"},
+    {"index": 5, "title": "photo 6", "file": "photo_mic_zia_carla.jpg"}
   ]
 }

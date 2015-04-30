@@ -19,9 +19,12 @@
 }
 
 .node--selected {
-	
 	opacity: 1;
 	fill: green;
+}
+
+.profile-image {
+	cursor: move;
 }
 
 .profile-image--selected {
@@ -29,7 +32,6 @@
 }
 
 .label--selected {
-
 	fill: brown;
 	font-size: 15px;
 	font-weight: bold;

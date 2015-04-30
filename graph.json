@@ -3,8 +3,8 @@
 		{
 			"index": 0,
 			"label": "Graziella Scippa",
-			"x": 762,
-			"y": 773,
+			"x": 718,
+			"y": 747,
 			"img": "",
 			"person": true,
 			"fixed": true
@@ -12,8 +12,8 @@
 		{
 			"index": 1,
 			"label": "Francesco Minno",
-			"x": 1039,
-			"y": 742,
+			"x": 1042,
+			"y": 655,
 			"img": "",
 			"person": true,
 			"fixed": true
@@ -22,15 +22,15 @@
 			"index": 2,
 			"label": "Graziella Scippa e Francesco Minno",
 			"x": 906,
-			"y": 700,
+			"y": 770,
 			"person": false,
 			"fixed": true
 		},
 		{
 			"index": 3,
 			"label": "Michele Minno",
-			"x": 896,
-			"y": 564,
+			"x": 782,
+			"y": 597,
 			"img": "michele.jpg",
 			"person": true,
 			"fixed": true
@@ -38,8 +38,8 @@
 		{
 			"index": 4,
 			"label": "Matteo Minno",
-			"x": 1034,
-			"y": 542,
+			"x": 972,
+			"y": 444,
 			"img": "matteo.jpg",
 			"person": true,
 			"fixed": true
@@ -47,8 +47,8 @@
 		{
 			"index": 5,
 			"label": "Francesca Pazzaglia",
-			"x": 445,
-			"y": 1008,
+			"x": 525,
+			"y": 975,
 			"img": "",
 			"person": true,
 			"fixed": true
@@ -75,7 +75,7 @@
 			"index": 8,
 			"label": "Angela Scippa",
 			"x": 704,
-			"y": 473,
+			"y": 467,
 			"img": "",
 			"person": true,
 			"fixed": true
@@ -84,7 +84,7 @@
 			"index": 9,
 			"label": "Rosetta Scippa",
 			"x": 371,
-			"y": 571,
+			"y": 574,
 			"img": "",
 			"person": true,
 			"fixed": true
@@ -92,7 +92,7 @@
 		{
 			"index": 10,
 			"label": "Nicola Scippa",
-			"x": 257,
+			"x": 254,
 			"y": 635,
 			"img": "",
 			"person": true,
@@ -101,7 +101,7 @@
 		{
 			"index": 11,
 			"label": "Angelo Sbariggi",
-			"x": 509,
+			"x": 505,
 			"y": 548,
 			"img": "",
 			"person": true,
@@ -128,8 +128,8 @@
 		{
 			"index": 14,
 			"label": "Carlo Sbariggi",
-			"x": 369,
-			"y": 344,
+			"x": 366,
+			"y": 276,
 			"img": "",
 			"person": true,
 			"fixed": true
@@ -137,8 +137,8 @@
 		{
 			"index": 15,
 			"label": "Stefano Sbariggi",
-			"x": 544,
-			"y": 415,
+			"x": 593,
+			"y": 366,
 			"img": "stefano.jpg",
 			"person": true,
 			"fixed": true
@@ -146,8 +146,8 @@
 		{
 			"index": 16,
 			"label": "Carla Lupi",
-			"x": 137,
-			"y": 610,
+			"x": 70,
+			"y": 602,
 			"img": "",
 			"person": true,
 			"fixed": true
@@ -200,7 +200,7 @@
 		{
 			"index": 22,
 			"label": "Angela Scippa e Walter Cometti",
-			"x": 742,
+			"x": 743,
 			"y": 348,
 			"img": "",
 			"person": false,
@@ -254,8 +254,8 @@
 		{
 			"index": 28,
 			"label": "Alfonso Fagiolo",
-			"x": 1554,
-			"y": 711,
+			"x": 1552,
+			"y": 717,
 			"img": "",
 			"person": true,
 			"fixed": true
@@ -290,8 +290,8 @@
 		{
 			"index": 32,
 			"label": "Giorgio Fagiolo e Martina Morici",
-			"x": 1501,
-			"y": 417,
+			"x": 1519,
+			"y": 411,
 			"img": "",
 			"person": false,
 			"fixed": true
@@ -308,8 +308,8 @@
 		{
 			"index": 34,
 			"label": "Alberto Minno e Fiorella Bianchi",
-			"x": 1247,
-			"y": 520,
+			"x": 1193,
+			"y": 540,
 			"img": "",
 			"person": false,
 			"fixed": true
@@ -327,7 +327,7 @@
 			"index": 36,
 			"label": "Alessandra Minno",
 			"x": 1153,
-			"y": 398,
+			"y": 399,
 			"img": "alessandra.jpg",
 			"person": true,
 			"fixed": true
@@ -344,8 +344,8 @@
 		{
 			"index": 38,
 			"label": "Mirko Caravaggio e Raffaella Cometti",
-			"x": 786,
-			"y": 178,
+			"x": 803,
+			"y": 159,
 			"img": "",
 			"person": false,
 			"fixed": true
@@ -353,8 +353,8 @@
 		{
 			"index": 39,
 			"label": "Daniele Caravaggio",
-			"x": 788,
-			"y": 95,
+			"x": 747,
+			"y": -10,
 			"img": "",
 			"person": true,
 			"fixed": true
@@ -362,8 +362,8 @@
 		{
 			"index": 40,
 			"label": "Laura Marini",
-			"x": 1444,
-			"y": 307,
+			"x": 1364,
+			"y": 295,
 			"img": "laura.jpg",
 			"person": true,
 			"fixed": true
@@ -371,8 +371,8 @@
 		{
 			"index": 41,
 			"label": "Laura Marini e Lorenzo Minno",
-			"x": 1349,
-			"y": 263,
+			"x": 1533,
+			"y": 183,
 			"img": "",
 			"person": false,
 			"fixed": true
@@ -380,8 +380,8 @@
 		{
 			"index": 42,
 			"label": "Niccolò Minno",
-			"x": 1390,
-			"y": 173,
+			"x": 1566,
+			"y": 39,
 			"img": "niccolo.jpg",
 			"person": true,
 			"fixed": true
@@ -389,8 +389,8 @@
 		{
 			"index": 43,
 			"label": "Simona",
-			"x": 575,
-			"y": 212,
+			"x": 656,
+			"y": 211,
 			"img": "",
 			"person": true,
 			"fixed": true
@@ -416,8 +416,8 @@
 		{
 			"index": 46,
 			"label": "Matteo Sbariggi",
-			"x": 364,
-			"y": 119,
+			"x": 304,
+			"y": 31,
 			"img": "",
 			"person": true,
 			"fixed": true
@@ -434,8 +434,8 @@
 		{
 			"index": 48,
 			"label": "Martina Ferrara",
-			"x": 1052,
-			"y": 176,
+			"x": 989,
+			"y": 96,
 			"img": "martina_ferrara.jpg",
 			"person": true,
 			"fixed": true
@@ -443,8 +443,8 @@
 		{
 			"index": 49,
 			"label": "Francesco Ferrara",
-			"x": 1221,
-			"y": 170,
+			"x": 1223,
+			"y": -4,
 			"img": "",
 			"person": true,
 			"fixed": true
@@ -452,8 +452,8 @@
 		{
 			"index": 50,
 			"label": "Alessandra Minno e Maurizio Ferrara",
-			"x": 1142,
-			"y": 234,
+			"x": 1127,
+			"y": 237,
 			"img": "",
 			"person": false,
 			"fixed": true

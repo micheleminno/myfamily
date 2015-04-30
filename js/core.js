@@ -1,20 +1,33 @@
 var serverUrl = 'http://localhost:8090';
 
-var width = 1800, height = 1200;
+var width = 1800;
+var height = 1200;
+
+var zoom = d3.behavior.zoom().scaleExtent([ .5, 2 ]).on("zoom", zoomed);
+
+var svg = d3.select("body").append("svg").attr("width", width).attr("height",
+		height).on("click", clickSvg).append("g").attr("transform",
+		"translate(200, 300)scale(.5)").call(zoom);
+
+var rect = svg.append("rect").attr("width", width).attr("height", height)
+		.style("fill", "none").style("pointer-events", "all");
+
+var container = svg.append("g");
 
 var force = d3.layout.force().size([ width, height ]).charge(-800)
 		.linkDistance(300).on("tick", tick);
 
-var drag = force.drag().on("dragend", dragend);
+var drag = force.drag().origin(function(d) {
+	return d;
+}).on("dragstart", dragstarted).on("drag", dragged).on("dragend", dragended);
 
-var svg = d3.select("body").append("svg").attr("width", width).attr("height",
-		height).on("click", clickSvg);
 
 var detail = d3.select("body").append("div").attr("class", "detail").style(
 		"opacity", 0);
 
-var link = svg.selectAll(".link"), node = svg.selectAll(".node"), doc = svg
-		.selectAll(".doc");
+var link = container.selectAll(".link");
+var node = container.selectAll(".node");
+var doc = container.selectAll(".doc");
 
 $.get(serverUrl + "/graph", function(graphString) {
 
@@ -35,48 +48,53 @@ $.get(serverUrl + "/graph", function(graphString) {
 	node.each(function(d) {
 
 		currentNode = d3.select(this);
-		
-		currentNode.on("click", clickNode);
-		
+
+		currentNode.on("click", clickNode).call(drag);
+
 		if (d.person) {
 
-			currentNode.append("circle").attr("class", "node").attr("r", 50)
-					.call(drag);
+			currentNode.append("circle").attr("class", "node").attr("r", 50);
 
 			currentNode.append("image").attr("class", "profile-image").attr(
-					"cursor", "move").attr("xlink:href", "./img/" + d.img)
-					.attr("width", 40).attr("height", 40).call(drag);
+					"xlink:href", "./img/" + d.img).attr("width", 40).attr(
+					"height", 40);
 
-			// currentNode.append("rect").attr("width", 40).attr("height", 40)
-			// .attr("class", "profile-frame");
-
-			currentNode.append("text").attr("class", "label")
-					.attr("dy", ".40em").text(function(d) {
-						return d.label;
-					});
+			currentNode.append("text").attr("class", "label").attr("dy",
+					".40em").text(function(d) {
+				return d.label;
+			});
 		} else {
 
 			currentNode.append("ellipse").attr("rx", 20).attr("ry", 10).attr(
-					"fill", "brown").call(drag);
+					"fill", "brown").attr("cursor", "move");
 		}
 	});
 
-	d3.json("documents.json", function(error, documents) {
+	$.get(serverUrl + "/documents", function(documentsString) {
 
-		svg.append("rect").attr("width", 800).attr("height", 40).attr("x", 200)
-				.attr("y", 1150).attr("class", "data-stream");
+		var documents = JSON.parse(documentsString);
+
+		var streamHeight = 100;
+		var streamY = 1100;
+		var streamX = 100;
+
+		container.append("rect").attr("width", width).attr("height",
+				streamHeight).attr("x", streamX).attr("y", streamY).attr(
+				"class", "data-stream");
 
 		doc = doc.data(documents.data).enter().append("g");
 
 		doc = doc.append("image").attr("class", "doc").attr("xlink:href",
 				function(d) {
 					return "./img/" + d.file;
-				}).attr("width", 40).attr("height", 40).attr("x", function(d) {
-			return 200 + d.index * 40;
-		}).attr("y", 1150);
+				}).attr("width", 100).attr("height", streamHeight).attr("x",
+				function(d) {
+					return streamX + d.index * 100;
+				}).attr("y", streamY);
 
-		doc.append("rect").attr("width", 40).attr("height", 40).attr("x", 200)
-				.attr("y", 1150).attr("class", "profile-frame");
+		doc.append("rect").attr("width", 100).attr("height", streamHeight)
+				.attr("x", streamX).attr("y", streamY).attr("class",
+						"profile-frame");
 
 		doc.on("mouseover", docMouseovered).on("mouseout", docMouseouted);
 
@@ -119,12 +137,6 @@ function tick() {
 	});
 
 	node.selectAll(".profile-image").attr("x", function(d) {
-		return d.x - 20;
-	}).attr("y", function(d) {
-		return d.y - 20;
-	});
-
-	node.selectAll(".profile-frame").attr("x", function(d) {
 		return d.x - 20;
 	}).attr("y", function(d) {
 		return d.y - 20;
