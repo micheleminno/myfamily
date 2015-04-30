@@ -398,7 +398,7 @@
 		{
 			"index": 44,
 			"label": "Simona e Simone Sbariggi",
-			"x": 491,
+			"x": 460,
 			"y": 192,
 			"img": "",
 			"person": false,
@@ -416,7 +416,7 @@
 		{
 			"index": 46,
 			"label": "Matteo Sbariggi",
-			"x": 423,
+			"x": 364,
 			"y": 119,
 			"img": "",
 			"person": true,
@@ -434,8 +434,8 @@
 		{
 			"index": 48,
 			"label": "Martina Ferrara",
-			"x": 1060,
-			"y": 116,
+			"x": 1052,
+			"y": 176,
 			"img": "martina_ferrara.jpg",
 			"person": true,
 			"fixed": true
@@ -443,8 +443,8 @@
 		{
 			"index": 49,
 			"label": "Francesco Ferrara",
-			"x": 1207,
-			"y": 134,
+			"x": 1221,
+			"y": 170,
 			"img": "",
 			"person": true,
 			"fixed": true

@@ -50,7 +50,7 @@ $.get(serverUrl + "/graph", function(graphString) {
 			// currentNode.append("rect").attr("width", 40).attr("height", 40)
 			// .attr("class", "profile-frame");
 
-			currentNode.append("text").attr("class", "name")
+			currentNode.append("text").attr("class", "label")
 					.attr("dy", ".40em").text(function(d) {
 						return d.label;
 					});
@@ -106,19 +106,19 @@ function tick() {
 
 	link.attr("d", diagonal);
 
-	node.selectAll("circle").attr("cx", function(d) {
+	node.selectAll(".node").attr("cx", function(d) {
 		return d.x;
 	}).attr("cy", function(d) {
 		return d.y;
 	});
 
-	node.selectAll("text").attr("x", function(d) {
+	node.selectAll(".label").attr("x", function(d) {
 		return d.x - 25;
 	}).attr("y", function(d) {
 		return d.y + 35;
 	});
 
-	node.selectAll("image").attr("x", function(d) {
+	node.selectAll(".profile-image").attr("x", function(d) {
 		return d.x - 20;
 	}).attr("y", function(d) {
 		return d.y - 20;
