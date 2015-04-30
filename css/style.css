@@ -1,3 +1,8 @@
+.background {
+	stroke-width: 5px;
+	stroke: black;
+}
+
 .link {
 	stroke-width: 5px;
 	stroke: brown;
@@ -21,6 +26,11 @@
 .node--selected {
 	opacity: 1;
 	fill: green;
+}
+
+.node--tagged circle {
+	opacity: 1;
+	fill: yellow;
 }
 
 .profile-image {

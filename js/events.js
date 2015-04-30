@@ -1,12 +1,39 @@
 function docMouseovered(d) {
 
-	detail.transition().duration(200).style("opacity", .85);
-	detail.html("<img src= './img/" + d.file + "' />");
+	var selection = d3.select(this);
+	selection.moveToFront();
+
+	var doc = selection[0][0];
+
+	doc.width.baseVal.value = 200;
+	doc.height.baseVal.value = 200;
+	doc.x.baseVal.value -= 50;
+	doc.y.baseVal.value -= 50;
+
+	node.classed("node--tagged", function(n) {
+
+		if (d.tagged) {
+			var nodeIndex = d.tagged.indexOf(n.index);
+			if (nodeIndex > -1) {
+				return true;
+			}
+		}
+
+		return false;
+	});
 };
 
 function docMouseouted(d) {
 
-	// detail.html("");
+	var selection = d3.select(this);
+	var doc = selection[0][0];
+
+	doc.width.baseVal.value = 100;
+	doc.height.baseVal.value = 100;
+	doc.x.baseVal.value += 50;
+	doc.y.baseVal.value += 50;
+
+	node.classed("node--tagged", false);
 };
 
 function clickNode(d) {
@@ -16,33 +43,44 @@ function clickNode(d) {
 	}
 
 	var selection = d3.select(this);
-	var circle = selection.select("circle")[0][0];
-
-	var x = circle.cx.baseVal.value;
-	var y = circle.cy.baseVal.value;
-
-	selection.append("circle").attr('r', 200).attr("cx", x).attr("cy", y).attr(
-			'class', "node--selected");
-
 	selection.moveToFront();
 
-	selection.append("image").attr("width", 200).attr("height", 200).attr(
-			'class', "profile-image--selected").attr("x", x - 100).attr("y",
-			y - 100).attr("xlink:href", "./img/" + d.img);
+	selection.append("circle").attr('r', 400).attr("cx", d.x).attr("cy", d.y)
+			.attr('class', "node--selected");
 
-	selection.append("text").attr('class', "label--selected")
-			.attr("y", y - 120).attr("x", x - 50).text(d.label);
+	selection.append("image").attr("width", 200).attr("height", 200).attr(
+			'class', "profile-image--selected").attr("x", d.x - 100).attr("y",
+			d.y - 320).attr("xlink:href", "./img/" + d.img);
+
+	selection.append("text").attr('class', "label--selected").attr("y",
+			d.y - 350).attr("x", d.x - 50).text(d.label);
+
+	$.get(serverUrl + "/documents/" + d.index, function(documentsString) {
+
+		var documents = JSON.parse(documentsString);
+		
+		var offset = 0;
+		for (docIndex in documents) {
+
+			var doc = documents[docIndex];
+
+			selection.append("image").attr("width", 200).attr("height", 200)
+					.attr('class', "doc--selected").attr("xlink:href",
+							"./img/" + doc.file).attr("y", d.y + 100).attr("x",
+							d.x - 200 + offset);
+			offset += 50;
+		}
+	});
 
 	d3.event.stopPropagation();
 };
 
 function clickSvg(d) {
 
-	var selection = d3.select(this);
-
-	selection.select(".node--selected").remove();
-	selection.select(".profile-image--selected").remove();
-	selection.select(".label--selected").remove();
+	svg.selectAll(".node--selected").remove();
+	svg.selectAll(".doc--selected").remove();
+	svg.selectAll(".profile-image--selected").remove();
+	svg.selectAll(".label--selected").remove();
 };
 
 function zoomed() {

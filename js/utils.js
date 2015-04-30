@@ -1,10 +1,10 @@
-
 d3.selection.prototype.moveToFront = function() {
-  return this.each(function(){
-    this.parentNode.appendChild(this);
-  });
+	
+	return this.each(function() {
+	
+		this.parentNode.appendChild(this);
+	});
 };
-
 
 function wrap(text, width) {
 	text
@@ -19,7 +19,7 @@ function wrap(text, width) {
 				var x = text.attr("x");
 				var y = text.attr("y");
 				var dy = parseFloat(text.attr("dy"));
-				
+
 				var tspan = text.text(null).append("tspan").attr("x", x).attr(
 						"y", y).attr("dy", dy + "em");
 

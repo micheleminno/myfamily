@@ -21,10 +21,6 @@ var drag = force.drag().origin(function(d) {
 	return d;
 }).on("dragstart", dragstarted).on("drag", dragged).on("dragend", dragended);
 
-
-var detail = d3.select("body").append("div").attr("class", "detail").style(
-		"opacity", 0);
-
 var link = container.selectAll(".link");
 var node = container.selectAll(".node");
 var doc = container.selectAll(".doc");
@@ -78,11 +74,11 @@ $.get(serverUrl + "/graph", function(graphString) {
 		var streamY = 1100;
 		var streamX = 100;
 
-		container.append("rect").attr("width", width).attr("height",
-				streamHeight).attr("x", streamX).attr("y", streamY).attr(
-				"class", "data-stream");
+		container.append("g").append("rect").attr("width", width).attr(
+				"height", streamHeight).attr("x", streamX).attr("y", streamY)
+				.attr("class", "data-stream");
 
-		doc = doc.data(documents.data).enter().append("g");
+		doc = doc.data(documents.data).enter();
 
 		doc = doc.append("image").attr("class", "doc").attr("xlink:href",
 				function(d) {

@@ -22,6 +22,24 @@ app.get('/documents', function(req, res) {
 	res.end(JSON.stringify(documents));
 });
 
+app.get('/documents/:nodeIndex', function(req, res) {
+
+	var nodeIndex = req.param('nodeIndex');
+
+	var documents = JSON.parse(fs.readFileSync('documents.json', 'utf8'));
+	var nodeDocuments = [];
+
+	documents["data"].forEach(function(d) {
+
+		var taggedIndex = d.tagged.indexOf(parseInt(nodeIndex));
+		if (taggedIndex > -1) {
+			nodeDocuments.push(d);
+		}
+	});
+
+	res.end(JSON.stringify(nodeDocuments));
+});
+
 app.get('/graph', function(req, res) {
 
 	var graph = JSON.parse(fs.readFileSync('graph.json', 'utf8'));
@@ -66,6 +84,6 @@ app.get('/updateNode', function(req, res) {
 		nodes : nodes,
 		links : links
 	}, null, "\t"), 'utf8');
-	
+
 	res.end("graph updated");
 });
