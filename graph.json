@@ -3,8 +3,8 @@
 		{
 			"index": 0,
 			"label": "Graziella Scippa",
-			"x": 829,
-			"y": 679,
+			"x": 807,
+			"y": 690,
 			"img": "graziella.png",
 			"person": true,
 			"fixed": true
@@ -13,7 +13,7 @@
 			"index": 1,
 			"label": "Francesco Minno",
 			"x": 1074,
-			"y": 683,
+			"y": 681,
 			"img": "francesco_minno.png",
 			"person": true,
 			"fixed": true
@@ -29,8 +29,8 @@
 		{
 			"index": 3,
 			"label": "Michele Minno",
-			"x": 865,
-			"y": 423,
+			"x": 874,
+			"y": 334,
 			"img": "michele.jpg",
 			"person": true,
 			"fixed": true
@@ -191,8 +191,8 @@
 		{
 			"index": 21,
 			"label": "Raffaella Cometti",
-			"x": 611,
-			"y": 181,
+			"x": 633,
+			"y": 140,
 			"img": "raffaella.jpg",
 			"person": true,
 			"fixed": true
@@ -236,8 +236,8 @@
 		{
 			"index": 26,
 			"label": "Alberto Minno",
-			"x": 1304,
-			"y": 641,
+			"x": 1278,
+			"y": 628,
 			"img": "",
 			"person": true,
 			"fixed": true
@@ -335,8 +335,8 @@
 		{
 			"index": 37,
 			"label": "Mirko Caravaggi",
-			"x": 726,
-			"y": 169,
+			"x": 774,
+			"y": 146,
 			"img": "",
 			"person": true,
 			"fixed": true
@@ -353,8 +353,8 @@
 		{
 			"index": 39,
 			"label": "Daniele Caravaggi",
-			"x": 755,
-			"y": -106,
+			"x": 731,
+			"y": -91,
 			"img": "",
 			"person": true,
 			"fixed": true
@@ -362,8 +362,8 @@
 		{
 			"index": 40,
 			"label": "Laura Marini",
-			"x": 1571,
-			"y": 188,
+			"x": 1573,
+			"y": 182,
 			"img": "laura.jpg",
 			"person": true,
 			"fixed": true
@@ -388,7 +388,7 @@
 		},
 		{
 			"index": 43,
-			"label": "Simona Ferrario",
+			"label": "Simona Ferraro",
 			"x": 167,
 			"y": 176,
 			"img": "",

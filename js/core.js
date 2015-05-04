@@ -71,12 +71,28 @@ $.get(serverUrl + "/graph", function(graphString) {
 		var documents = JSON.parse(documentsString);
 
 		var streamHeight = 100;
-		var streamY = 1100;
+		var streamWidth = width - 200;
+		var streamY = 1250;
 		var streamX = 100;
 
-		container.append("g").append("rect").attr("width", width).attr(
-				"height", streamHeight).attr("x", streamX).attr("y", streamY)
-				.attr("class", "data-stream");
+		var containerNode = container.append("g");
+
+		containerNode.append("circle").attr("r", 35).attr("cx", streamX - 60)
+				.attr("cy", streamY + 50).attr("class", "navigator");
+
+		containerNode.append("text").attr("class", "navigator-arrow").attr("x",
+				streamX - 70).attr("y", streamY + 60).text("<");
+
+		containerNode.append("circle").attr("r", 35).attr("cx",
+				streamX + streamWidth + 55).attr("cy", streamY + 50).attr("class",
+				"navigator");
+
+		containerNode.append("text").attr("class", "navigator-arrow").attr("x",
+				streamX + streamWidth + 50).attr("y", streamY + 60).text(">");
+
+		containerNode.append("rect").attr("width", streamWidth).attr("height",
+				streamHeight).attr("x", streamX).attr("y", streamY).attr(
+				"class", "data-stream");
 
 		doc = doc.data(documents.data).enter();
 

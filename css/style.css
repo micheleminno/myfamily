@@ -28,6 +28,32 @@
 	fill: green;
 }
 
+.doc--selected {
+	fill: red;
+}
+
+.navigator {
+	stroke-width: 5px;
+	stroke: black;
+	fill: none;
+}
+
+.navigator-arrow {
+	font-size: 40px;
+	font-weight: bold;
+}
+
+.navigator--selected {
+	stroke-width: 4px;
+	stroke: black;
+	fill: white;
+}
+
+.navigator-arrow--selected {
+	font-size: 30px;
+	font-weight: bold;
+}
+
 .node--tagged circle {
 	opacity: 1;
 	fill: yellow;
@@ -47,11 +73,28 @@
 	font-weight: bold;
 }
 
-}
 .profile-frame {
 	stroke-width: 4px;
 	stroke: black;
 	fill: none;
+}
+
+.profile-frame--selected {
+	stroke-width: 4px;
+	stroke: yellow;
+	fill: none;
+}
+
+.profile-frame--invisible {
+	opacity: 0;
+	fill: none;
+}
+
+.closeDocText {
+	
+	font-size: 55px;
+	font-weight: bold;
+	fill: black;
 }
 
 .detail {
