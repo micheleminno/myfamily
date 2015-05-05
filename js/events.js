@@ -50,13 +50,13 @@ function docClicked(d) {
 	var grandParent = d3.select(this.parentNode.parentNode);
 
 	var doc = selection[0][0];
-
+	
 	grandParent.append("image").attr("class", "zoomedDoc").moveToFront().attr(
 			"width", 1200).attr("height", 1200).attr("xlink:href",
-			doc.href.baseVal).attr("x", d.x - 400).attr("y", d.y - 500);
-	grandParent.append("text").attr("class", "closeDocText").attr("x",
-			d.x + 710).attr("y", d.y - 290).text("[X]").on("click",
-			closeDocClicked);
+			doc.href.baseVal).attr("x", 1200).attr("y", -100);
+	grandParent.append("text").attr("class", "closeDocText")
+			.attr("x", 2300).attr("y", 0).text("[X]").on("click",
+					closeDocClicked);
 
 	d3.event.stopPropagation();
 };
@@ -97,7 +97,7 @@ function clickNode(d) {
 	selectedNode = d3.select(this).moveToFront().append("g").attr("class",
 			"selection");
 
-	var centerX = width / 2;
+	var centerX = width / 5;
 	var centerY = height / 2;
 	var maxRowSize = 10;
 
@@ -106,9 +106,9 @@ function clickNode(d) {
 
 	selectedNode.append("image").attr("width", 200).attr("height", 200).attr(
 			'class', "profile-image--selected").attr("x", centerX - 100).attr(
-			"y", -50).attr("xlink:href", "./img/" + d.img);
+			"y", 0).attr("xlink:href", "./img/" + d.img);
 
-	selectedNode.append("text").attr('class', "label--selected").attr("y", -80)
+	selectedNode.append("text").attr('class', "label--selected").attr("y", -30)
 			.attr("x", centerX - 50).text(d.label);
 
 	$

@@ -3,8 +3,8 @@
 		{
 			"index": 0,
 			"label": "Graziella Scippa",
-			"x": 741,
-			"y": 710,
+			"x": 707,
+			"y": 676,
 			"img": "graziella.png",
 			"person": true,
 			"fixed": true
@@ -29,8 +29,8 @@
 		{
 			"index": 3,
 			"label": "Michele Minno",
-			"x": 901,
-			"y": 380,
+			"x": 913,
+			"y": 424,
 			"img": "michele.jpg",
 			"person": true,
 			"fixed": true
@@ -38,8 +38,8 @@
 		{
 			"index": 4,
 			"label": "Matteo Minno",
-			"x": 1330,
-			"y": 550,
+			"x": 1054,
+			"y": 464,
 			"img": "matteo.jpg",
 			"person": true,
 			"fixed": true
