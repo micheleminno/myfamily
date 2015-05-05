@@ -13,9 +13,13 @@ function docMouseovered(d) {
 	node.classed("node--tagged", function(n) {
 
 		if (d.tagged) {
-			var nodeIndex = d.tagged.indexOf(n.index);
-			if (nodeIndex > -1) {
-				return true;
+
+			for (taggedIndex in d.tagged) {
+
+				var taggedNode = d.tagged[taggedIndex];
+				if (taggedNode["node"] == parseInt(n.index)) {
+					return true;
+				}
 			}
 		}
 
@@ -37,6 +41,10 @@ function docMouseouted(d) {
 };
 
 function docClicked(d) {
+
+	if (d3.event.defaultPrevented) {
+		return;
+	}
 
 	var selection = d3.select(this);
 	var grandParent = d3.select(this.parentNode.parentNode);
@@ -77,6 +85,9 @@ function forwardMain() {
 
 var selectedNode;
 
+var docDrag = d3.behavior.drag().on("dragstart", docDragstarted).on("drag",
+		docDragged).on("dragend", docDragended);
+
 function clickNode(d) {
 
 	if (d3.event.defaultPrevented) {
@@ -100,40 +111,74 @@ function clickNode(d) {
 	selectedNode.append("text").attr('class', "label--selected").attr("y", -80)
 			.attr("x", centerX - 50).text(d.label);
 
-	$.get(serverUrl + "/documents/" + d.index,
-			function(documentsString) {
+	$
+			.get(
+					serverUrl + "/documents/" + d.index,
+					function(documentsString) {
 
-				var documents = JSON.parse(documentsString);
+						var documents = JSON.parse(documentsString);
 
-				var offset = 0;
+						var container = selectedNode.append("g");
 
-				for (docIndex in documents) {
+						var offset = 0;
 
-					var doc = documents[docIndex];
+						for (docIndex in documents) {
 
-					var thumbnail = selectedNode.append("g");
-					var docNode = thumbnail.append("image");
+							var doc = documents[docIndex];
 
-					docNode.attr("width", 100).attr("height", 80).attr('class',
-							"doc--selected").attr("xlink:href",
-							"./img/" + doc.file)
-							.attr("x", centerX / 2 + offset).attr(
-									"y",
-									centerY / 2 + 100
-											* Math.floor(docIndex / maxRowSize))
-							.on("click", docClicked);
+							var docNode = container.append("image");
 
-					offset += 100;
-					if (offset >= 100 * maxRowSize) {
-						offset = 0;
-					}
-				}
-			});
+							var defaultX = centerX / 2 + offset;
+							var defaultY = centerY / 2 + 100
+									* Math.floor(docIndex / maxRowSize);
+
+							var filtered = doc.tagged.filter(function(n) {
+								return n.node == d.index;
+							});
+
+							docNode
+									.attr("width", 100)
+									.attr("id", doc.index)
+									.attr("height", 80)
+									.attr("xlink:href", "./img/" + doc.file)
+									.attr("cursor", "move")
+									.attr(
+											"x",
+											function() {
+												if (filtered) {
+													return filtered[0].position ? filtered[0].position.x
+															: defaultX;
+												} else {
+													return defaultX;
+												}
+											})
+									.attr(
+											"y",
+											function() {
+												if (filtered) {
+													return filtered[0].position ? filtered[0].position.y
+															: defaultY;
+												} else {
+													return defaultY;
+												}
+											}).on("click", docClicked).call(
+											docDrag);
+
+							offset += 100;
+							if (offset >= 100 * maxRowSize) {
+								offset = 0;
+							}
+						}
+					});
 
 	d3.event.stopPropagation();
 };
 
 function clickSvg(d) {
+
+	if (d3.event.defaultPrevented) {
+		return;
+	}
 
 	var sel = svg.selectAll(".selection");
 	sel.remove();
@@ -145,22 +190,49 @@ function zoomed() {
 			+ d3.event.scale + ")");
 }
 
-function dragstarted(d) {
+function nodeDragstarted(d) {
 
 	d3.event.sourceEvent.stopPropagation();
 	d3.select(this).classed("dragging", true);
 }
 
-function dragged(d) {
+function nodeDragged(d) {
 
-	d3.select(this).attr("cx", d.x = d3.event.x).attr("cy", d.y = d3.event.y);
+	d3.select(this).attr("x", d.x = d3.event.x).attr("y", d.y = d3.event.y);
 
 }
 
-function dragended(d) {
+function nodeDragended(d) {
 
 	d3.select(this).classed("dragging", false);
 
 	$.get(serverUrl + '/updateNode?label=' + d.label + '&x=' + d.x + '&y='
 			+ d.y);
+}
+
+function docDragstarted(d) {
+
+	d3.event.sourceEvent.stopPropagation();
+	d3.select(this).classed("dragging", true);
+}
+
+function docDragged(d) {
+
+	var sel = d3.select(this);
+	sel.attr("x", d.x = d3.event.x - parseInt(sel.attr("width")) / 2).attr("y",
+			d.y = d3.event.y - parseInt(sel.attr("height")) / 2);
+}
+
+function docDragended(d) {
+
+	var sel = d3.select(this);
+	sel.classed("dragging", false);
+
+	var document = sel[0][0];
+	var x = document.x.baseVal.value;
+	var y = document.y.baseVal.value;
+	var id = document.attributes.id.nodeValue;
+
+	$.get(serverUrl + '/updateDoc?node=' + d.index + '&index=' + id + '&x=' + x
+			+ '&y=' + y);
 }

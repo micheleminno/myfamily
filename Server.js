@@ -31,8 +31,17 @@ app.get('/documents/:nodeIndex', function(req, res) {
 
 	documents["data"].forEach(function(d) {
 
-		var taggedIndex = d.tagged.indexOf(parseInt(nodeIndex));
-		if (taggedIndex > -1) {
+		var found = false;
+		for (taggedIndex in d.tagged) {
+
+			var taggedNode = d.tagged[taggedIndex];
+			if (taggedNode["node"] == parseInt(nodeIndex)) {
+				found = true;
+				break;
+			}
+		}
+
+		if (found) {
 			nodeDocuments.push(d);
 		}
 	});
@@ -52,7 +61,9 @@ app.get('/updateNode', function(req, res) {
 	var x = parseInt(req.query.x);
 	var y = parseInt(req.query.y);
 
-	var graph = JSON.parse(fs.readFileSync('graph.json', 'utf8'));
+	var file = 'graph.json';
+
+	var graph = JSON.parse(fs.readFileSync(file, 'utf8'));
 
 	var links = graph.links;
 	var nodes = graph.nodes;
@@ -73,17 +84,68 @@ app.get('/updateNode', function(req, res) {
 
 	if (!found) {
 
-		nodes.push({
-			label : label,
-			x : x,
-			y : y
-		});
+		res.end("Node not found");
+
+	} else {
+
+		fs.writeFile(file, JSON.stringify({
+			nodes : nodes,
+			links : links
+		}, null, "\t"), 'utf8');
+
+		res.end(file + " updated");
+	}
+});
+
+app.get('/updateDoc', function(req, res) {
+
+	var node = req.query.node;
+	var index = req.query.index;
+	var x = parseInt(req.query.x);
+	var y = parseInt(req.query.y);
+
+	var file = 'documents.json';
+
+	var parsedFile = JSON.parse(fs.readFileSync(file, 'utf8'));
+
+	var docs = parsedFile.data;
+
+	var found = false;
+	var nodeFound = false;
+
+	for (docIndex in docs) {
+
+		var currentDoc = docs[docIndex];
+		if (currentDoc.index == index) {
+
+			found = true;
+
+			for (taggedIndex in currentDoc.tagged) {
+
+				var taggedNode = currentDoc.tagged[taggedIndex];
+				if (taggedNode["node"] == parseInt(node)) {
+
+					nodeFound = true;
+					taggedNode["position"] = {
+						"x" : x,
+						"y" : y
+					};
+					break;
+				}
+			}
+		}
 	}
 
-	fs.writeFile('graph.json', JSON.stringify({
-		nodes : nodes,
-		links : links
-	}, null, "\t"), 'utf8');
+	if (!found || !nodeFound) {
 
-	res.end("graph updated");
+		res.end("Document not updated");
+
+	} else {
+
+		fs.writeFile(file, JSON.stringify({
+			data : docs
+		}, null, "\t"), 'utf8');
+
+		res.end(file + " updated");
+	}
 });

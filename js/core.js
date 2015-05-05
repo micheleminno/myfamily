@@ -17,9 +17,10 @@ var container = svg.append("g");
 var force = d3.layout.force().size([ width, height ]).charge(-800)
 		.linkDistance(300).on("tick", tick);
 
-var drag = force.drag().origin(function(d) {
+var nodeDrag = force.drag().origin(function(d) {
 	return d;
-}).on("dragstart", dragstarted).on("drag", dragged).on("dragend", dragended);
+}).on("dragstart", nodeDragstarted).on("drag", nodeDragged).on("dragend",
+		nodeDragended);
 
 var link = container.selectAll(".link");
 var node = container.selectAll(".node");
@@ -54,7 +55,7 @@ $.get(serverUrl + "/graph", function(graphString) {
 
 		currentNode = d3.select(this);
 
-		currentNode.on("click", clickNode).call(drag);
+		currentNode.on("click", clickNode).call(nodeDrag);
 
 		if (d.person) {
 
