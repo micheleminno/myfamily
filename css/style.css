@@ -39,7 +39,7 @@
 }
 
 .navigator-arrow {
-	font-size: 40px;
+	font-size: 60px;
 	font-weight: bold;
 }
 
@@ -63,10 +63,6 @@
 	cursor: move;
 }
 
-.profile-image--selected {
-	
-}
-
 .label--selected {
 	fill: brown;
 	font-size: 15px;
@@ -79,19 +75,7 @@
 	fill: none;
 }
 
-.profile-frame--selected {
-	stroke-width: 4px;
-	stroke: yellow;
-	fill: none;
-}
-
-.profile-frame--invisible {
-	opacity: 0;
-	fill: none;
-}
-
 .closeDocText {
-	
 	font-size: 55px;
 	font-weight: bold;
 	fill: black;

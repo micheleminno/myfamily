@@ -23,7 +23,16 @@ var drag = force.drag().origin(function(d) {
 
 var link = container.selectAll(".link");
 var node = container.selectAll(".node");
-var doc = container.selectAll(".doc");
+
+var streamHeight = 100;
+var streamWidth = width - 200;
+var streamY = 1200;
+var streamX = 100;
+
+var docRowSize = 16;
+var currentPage;
+var maxPage;
+var documents;
 
 $.get(serverUrl + "/graph", function(graphString) {
 
@@ -66,53 +75,80 @@ $.get(serverUrl + "/graph", function(graphString) {
 		}
 	});
 
+	var containerNode = container.append("g");
+
+	containerNode.append("circle").attr("r", 35).attr("cx", streamX - 60).attr(
+			"cy", streamY + 50).attr("class", "navigator");
+
+	containerNode.append("text").attr("class", "navigator-arrow").attr("x",
+			streamX - 78).attr("y", streamY + 65).text("<").on("click",
+			backMain);
+
+	containerNode.append("circle").attr("r", 35).attr("cx",
+			streamX + streamWidth + 65).attr("cy", streamY + 45).attr("class",
+			"navigator");
+
+	containerNode.append("text").attr("class", "navigator-arrow").attr("x",
+			streamX + streamWidth + 50).attr("y", streamY + 60).text(">").on(
+			"click", forwardMain);
+
+	containerNode.append("rect").attr("width", streamWidth).attr("height",
+			streamHeight).attr("x", streamX).attr("y", streamY).attr("class",
+			"data-stream");
+
 	$.get(serverUrl + "/documents", function(documentsString) {
 
-		var documents = JSON.parse(documentsString);
+		documents = JSON.parse(documentsString);
 
-		var streamHeight = 100;
-		var streamWidth = width - 200;
-		var streamY = 1250;
-		var streamX = 100;
+		var documentsSize = documents.data.length;
+		currentPage = Math.floor(documentsSize / docRowSize);
+		maxPage = currentPage;
 
-		var containerNode = container.append("g");
-
-		containerNode.append("circle").attr("r", 35).attr("cx", streamX - 60)
-				.attr("cy", streamY + 50).attr("class", "navigator");
-
-		containerNode.append("text").attr("class", "navigator-arrow").attr("x",
-				streamX - 70).attr("y", streamY + 60).text("<");
-
-		containerNode.append("circle").attr("r", 35).attr("cx",
-				streamX + streamWidth + 55).attr("cy", streamY + 50).attr("class",
-				"navigator");
-
-		containerNode.append("text").attr("class", "navigator-arrow").attr("x",
-				streamX + streamWidth + 50).attr("y", streamY + 60).text(">");
-
-		containerNode.append("rect").attr("width", streamWidth).attr("height",
-				streamHeight).attr("x", streamX).attr("y", streamY).attr(
-				"class", "data-stream");
-
-		doc = doc.data(documents.data).enter();
-
-		doc = doc.append("image").attr("class", "doc").attr("xlink:href",
-				function(d) {
-					return "./img/" + d.file;
-				}).attr("width", 100).attr("height", streamHeight).attr("x",
-				function(d) {
-					return streamX + d.index * 100;
-				}).attr("y", streamY);
-
-		doc.append("rect").attr("width", 100).attr("height", streamHeight)
-				.attr("x", streamX).attr("y", streamY).attr("class",
-						"profile-frame");
-
-		doc.on("mouseover", docMouseovered).on("mouseout", docMouseouted);
-
+		populateThumbnails(currentPage, true);
 	});
 });
 
+function populateThumbnails(currentPage, back) {
+
+	var minIndex = currentPage * docRowSize;
+
+	var currentDocuments = documents.data.filter(function(d) {
+
+		return d.index >= minIndex && d.index < minIndex + docRowSize;
+	});
+
+	var doc = container.selectAll(".doc");
+	var sel = doc.data(currentDocuments, function(d) {
+		return d.index;
+	});
+
+	var oldTarget = back ? streamX + streamWidth : streamX;
+	var newTarget = back ? streamX : streamX + streamWidth;
+
+	var newDelay = function(d) {
+		return back ? (currentDocuments.length - (d.index - minIndex))
+				* (duration / 15) : (d.index - minIndex) * (duration / 10);
+	};
+	var oldDelay = function(d) {
+		return back ? (currentDocuments.length - (d.index - minIndex))
+				* (duration / 15) : (d.index - minIndex) * (duration / 10);
+	};
+
+	var duration = 300;
+
+	sel.enter().append("image").attr("class", "doc").attr("xlink:href",
+			function(d) {
+				return "./img/" + d.file;
+			}).attr("width", 100).attr("height", streamHeight).attr("y",
+			streamY).on("mouseover", docMouseovered).on("mouseout",
+			docMouseouted).attr("x", newTarget).transition().duration(duration)
+			.delay(newDelay).ease("linear").attr("x", function(d) {
+				return streamX + (d.index - minIndex) * 100;
+			});
+
+	sel.exit().transition().duration(duration).delay(oldDelay).ease("linear")
+			.attr("x", oldTarget).remove();
+}
 var diagonal = d3.svg.diagonal().source(function(d) {
 
 	return {
