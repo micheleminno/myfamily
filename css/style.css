@@ -14,14 +14,17 @@
 	opacity: .4;
 }
 
-.label {
+.nodeLabel {
 	fill: brown;
-	font-size: 20px;
+	font-size: 25px;
+	font-family: cursive;
 }
 
 .node--selected {
 	opacity: 1;
 	fill: green;
+	stroke: black;
+	stroke-width: 4px;
 }
 
 .navigator {
@@ -62,8 +65,9 @@
 
 .label--selected {
 	fill: brown;
-	font-size: 30px;
+	font-size: 60px;
 	font-weight: bold;
+	font-family: cursive;
 }
 
 .frame {
@@ -72,16 +76,24 @@
 	fill: white;
 }
 
+.profile-frame {
+	stroke-width: 4px;
+	stroke: black;
+	fill: black;
+}
+
 .docText {
 	font-size: 55px;
 	font-weight: bold;
 	fill: brown;
+	font-family: cursive;
 }
 
 .thumbnailText {
 	font-size: 35px;
 	font-weight: bold;
 	fill: brown;
+	font-family: cursive;
 }
 
 .detail {

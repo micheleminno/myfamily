@@ -5,14 +5,14 @@ function thumbnailMouseovered(d) {
 
 	var doc = selection[0][0];
 
-	doc.width.baseVal.value = 200;
-	doc.height.baseVal.value = 200;
-	doc.x.baseVal.value -= 50;
-	doc.y.baseVal.value -= 50;
-
 	var parent = d3.select(this.parentNode);
 
-	if (!onDetail || doc.attributes.url) {
+	if (!onDetail || doc.attributes.url.nodeValue.substr(-4) === ".pdf") {
+
+		doc.width.baseVal.value = 200;
+		doc.height.baseVal.value = 200;
+		doc.x.baseVal.value -= 50;
+		doc.y.baseVal.value -= 50;
 
 		parent.append("text").attr("class", "thumbnailText").attr("x",
 				doc.x.baseVal.value).attr("y", doc.y.baseVal.value - 30).text(
@@ -49,10 +49,13 @@ function thumbnailMouseouted(d) {
 	var selection = d3.select(this);
 	var doc = selection[0][0];
 
-	doc.width.baseVal.value = 100;
-	doc.height.baseVal.value = 100;
-	doc.x.baseVal.value += 50;
-	doc.y.baseVal.value += 50;
+	if (!onDetail || doc.attributes.url.nodeValue.substr(-4) === ".pdf") {
+
+		doc.width.baseVal.value = 100;
+		doc.height.baseVal.value = 100;
+		doc.x.baseVal.value += 50;
+		doc.y.baseVal.value += 50;
+	}
 
 	node.classed("node--tagged", false);
 };
@@ -62,23 +65,42 @@ function profileMouseovered(d) {
 	var selection = d3.select(this);
 	selection.moveToFront();
 
-	var doc = selection[0][0];
+	var container = selection[0][0];
 
-	doc.width.baseVal.value = 600;
-	doc.height.baseVal.value = 600;
-	doc.x.baseVal.value -= 150;
-	doc.y.baseVal.value -= 50;
+	rect = container.children[0];
+
+	rect.width.baseVal.value = 660;
+	rect.height.baseVal.value = 660;
+	rect.x.baseVal.value -= 170;
+	rect.y.baseVal.value -= 70;
+
+	image = container.children[1];
+
+	image.width.baseVal.value = 600;
+	image.height.baseVal.value = 600;
+	image.x.baseVal.value -= 150;
+	image.y.baseVal.value -= 50;
 };
 
 function profileMouseouted(d) {
 
 	var selection = d3.select(this);
-	var doc = selection[0][0];
 
-	doc.width.baseVal.value = 200;
-	doc.height.baseVal.value = 200;
-	doc.x.baseVal.value += 150;
-	doc.y.baseVal.value += 50;
+	var container = selection[0][0];
+
+	rect = container.children[0];
+
+	rect.width.baseVal.value = 220;
+	rect.height.baseVal.value = 220;
+	rect.x.baseVal.value += 170;
+	rect.y.baseVal.value += 70;
+
+	image = container.children[1];
+
+	image.width.baseVal.value = 200;
+	image.height.baseVal.value = 200;
+	image.x.baseVal.value += 150;
+	image.y.baseVal.value += 50;
 };
 
 function thumbnailClicked(d) {
@@ -164,6 +186,8 @@ function closeDocClicked() {
 	svg.selectAll(".zoomedDoc").remove();
 	svg.selectAll(".frame").remove();
 	svg.selectAll(".docText").remove();
+
+	d3.event.stopPropagation();
 }
 
 function backMain() {
@@ -206,14 +230,23 @@ function clickNode(d) {
 	selectedNode.append("circle").attr('r', 800).attr("cx", centerX).attr("cy",
 			centerY).attr('class', "node--selected");
 
-	selectedNode.append("image").attr("width", 200).attr("height", 200).attr(
-			'class', "profile-image--selected").attr("x", centerX - 140).attr(
-			"y", 0).attr("xlink:href", function(d) {
-		return d.img == "" ? "./docs/default_profile.jpg" : "./docs/" + d.img;
-	}).on("mouseover", profileMouseovered).on("mouseout", profileMouseouted);
+	var profileContaner = selectedNode.append("g").on("mouseover",
+			profileMouseovered).on("mouseout", profileMouseouted);
 
-	selectedNode.append("text").attr('class', "label--selected").attr("y", -30)
-			.attr("x", centerX - 140).text(d.label);
+	profileContaner.append("rect").attr("width", 220).attr("height", 220).attr(
+			'class', "profile-frame").attr("x", centerX - 150).attr("y", -10);
+
+	profileContaner.append("image").attr("width", 200).attr("height", 200)
+			.attr('class', "profile-image--selected").attr("x", centerX - 140)
+			.attr("y", 0).attr(
+					"xlink:href",
+					function(d) {
+						return d.img == "" ? "./docs/default_profile.jpg"
+								: "./docs/" + d.img;
+					});
+
+	selectedNode.append("text").attr('class', "label--selected").attr("y", -50)
+			.attr("x", centerX - 200).text(d.label);
 
 	$
 			.get(

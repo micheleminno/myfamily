@@ -4,7 +4,7 @@ var siteUrl = 'http://localhost/myfamily';
 var width = 1800;
 var height = 1200;
 
-var zoom = d3.behavior.zoom().scaleExtent([ .2, 2 ]).on("zoom", zoomed);
+var zoom = d3.behavior.zoom().scaleExtent([ .5, 4 ]).on("zoom", zoomed);
 
 var svg = d3.select("body").append("svg").attr("width", width).attr("height",
 		height).on("click", clickSvg).append("g").attr("transform",
@@ -69,8 +69,8 @@ $.get(serverUrl + "/graph", function(graphString) {
 								: "./docs/" + d.img;
 					}).attr("width", 40).attr("height", 40);
 
-			currentNode.append("text").attr("class", "label").attr("dy",
-					".40em").text(function(d) {
+			currentNode.append("text").attr("class", "nodeLabel").attr("dy",
+					"1.5em").text(function(d) {
 				return d.label;
 			});
 		} else {
@@ -141,7 +141,7 @@ function populateThumbnails(currentPage, back) {
 
 	var duration = 300;
 
-	sel.enter().append("image").attr("class", "doc").attr(
+	sel.enter().append("image").attr(
 			"xlink:href",
 			function(d) {
 				return d.file.substr(-4) === ".pdf" ? "./docs/default_pdf.png"
@@ -194,7 +194,7 @@ function tick() {
 		return d.y;
 	});
 
-	node.selectAll(".label").attr("x", function(d) {
+	node.selectAll(".nodeLabel").attr("x", function(d) {
 		return d.x - 25;
 	}).attr("y", function(d) {
 		return d.y + 35;
