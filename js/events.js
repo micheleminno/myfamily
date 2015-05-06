@@ -57,6 +57,30 @@ function thumbnailMouseouted(d) {
 	node.classed("node--tagged", false);
 };
 
+function profileMouseovered(d) {
+
+	var selection = d3.select(this);
+	selection.moveToFront();
+
+	var doc = selection[0][0];
+
+	doc.width.baseVal.value = 600;
+	doc.height.baseVal.value = 600;
+	doc.x.baseVal.value -= 150;
+	doc.y.baseVal.value -= 50;
+};
+
+function profileMouseouted(d) {
+
+	var selection = d3.select(this);
+	var doc = selection[0][0];
+
+	doc.width.baseVal.value = 200;
+	doc.height.baseVal.value = 200;
+	doc.x.baseVal.value += 150;
+	doc.y.baseVal.value += 50;
+};
+
 function thumbnailClicked(d) {
 
 	svg.selectAll(".docText").remove();
@@ -183,13 +207,13 @@ function clickNode(d) {
 			centerY).attr('class', "node--selected");
 
 	selectedNode.append("image").attr("width", 200).attr("height", 200).attr(
-			'class', "profile-image--selected").attr("x", centerX - 100).attr(
+			'class', "profile-image--selected").attr("x", centerX - 140).attr(
 			"y", 0).attr("xlink:href", function(d) {
 		return d.img == "" ? "./docs/default_profile.jpg" : "./docs/" + d.img;
-	});
+	}).on("mouseover", profileMouseovered).on("mouseout", profileMouseouted);
 
 	selectedNode.append("text").attr('class', "label--selected").attr("y", -30)
-			.attr("x", centerX - 100).text(d.label);
+			.attr("x", centerX - 140).text(d.label);
 
 	$
 			.get(
