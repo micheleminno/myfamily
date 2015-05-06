@@ -3,6 +3,9 @@
 		{
 			"index": 0,
 			"title": "photo 5",
+			"year": 2003,
+			"month": 2,
+			"day": 23,
 			"file": "photo_mic_rob.jpg",
 			"tagged": [
 				{
@@ -15,8 +18,8 @@
 				{
 					"node": 18,
 					"position": {
-						"x": 690,
-						"y": 388
+						"x": 807,
+						"y": 372
 					}
 				}
 			]
@@ -24,6 +27,9 @@
 		{
 			"index": 1,
 			"title": "photo 1",
+			"year": 2008,
+			"month": 4,
+			"day": 15,
 			"file": "photo_famiglia.jpg",
 			"tagged": [
 				{
@@ -43,8 +49,8 @@
 				{
 					"node": 3,
 					"position": {
-						"x": -135,
-						"y": 369
+						"x": -288,
+						"y": 420
 					}
 				},
 				{
@@ -59,6 +65,9 @@
 		{
 			"index": 2,
 			"title": "photo 2",
+			"year": 2008,
+			"month": 4,
+			"day": 15,
 			"file": "photo_laurea.jpg",
 			"tagged": [
 				{
@@ -71,22 +80,22 @@
 				{
 					"node": 4,
 					"position": {
-						"x": 390,
-						"y": 223
+						"x": 76,
+						"y": 232
 					}
 				},
 				{
 					"node": 18,
 					"position": {
-						"x": 267,
-						"y": 338
+						"x": -297,
+						"y": 512
 					}
 				},
 				{
 					"node": 19,
 					"position": {
-						"x": 23,
-						"y": 350
+						"x": -94,
+						"y": 391
 					}
 				},
 				{
@@ -101,6 +110,9 @@
 			"index": 3,
 			"title": "photo 3",
 			"file": "photo_mic_matt_nonna.jpg",
+			"year": 2008,
+			"month": 4,
+			"day": 15,
 			"tagged": [
 				{
 					"node": 3,
@@ -119,8 +131,8 @@
 				{
 					"node": 5,
 					"position": {
-						"x": 698,
-						"y": 383
+						"x": 620,
+						"y": 379
 					}
 				}
 			]
@@ -128,6 +140,9 @@
 		{
 			"index": 4,
 			"title": "photo 7",
+			"year": 2008,
+			"month": 4,
+			"day": 15,
 			"file": "laurea_2.jpg",
 			"tagged": [
 				{
@@ -140,15 +155,15 @@
 				{
 					"node": 4,
 					"position": {
-						"x": 347,
-						"y": 331
+						"x": -73,
+						"y": 566
 					}
 				},
 				{
 					"node": 18,
 					"position": {
-						"x": 379,
-						"y": 368
+						"x": -95,
+						"y": 470
 					}
 				},
 				{
@@ -159,34 +174,41 @@
 		{
 			"index": 5,
 			"title": "photo 8",
+			"year": 2008,
+			"month": 4,
+			"day": 15,
 			"file": "laurea_3.jpg",
 			"tagged": [
 				{
 					"node": 3,
 					"position": {
-						"x": -149,
-						"y": 495
+						"x": -213,
+						"y": 347
 					}
 				},
 				{
 					"node": 4,
 					"position": {
-						"x": 313,
-						"y": 255
+						"x": -28,
+						"y": 266
 					}
 				},
 				{
 					"node": 18,
 					"position": {
-						"x": 421,
-						"y": 443
+						"x": -190,
+						"y": 245
 					}
 				},
 				{
 					"node": 35
 				},
 				{
-					"node": 40
+					"node": 40,
+					"position": {
+						"x": -290,
+						"y": 327
+					}
 				},
 				{
 					"node": 30
@@ -194,8 +216,8 @@
 				{
 					"node": 19,
 					"position": {
-						"x": 396,
-						"y": 349
+						"x": 409,
+						"y": 427
 					}
 				}
 			]
@@ -203,13 +225,15 @@
 		{
 			"index": 6,
 			"title": "tailandia",
+			"year": 2010,
+			"month": 5,
 			"file": "thai_1.jpg",
 			"tagged": [
 				{
 					"node": 4,
 					"position": {
-						"x": 1277,
-						"y": 402
+						"x": 933,
+						"y": 418
 					}
 				}
 			]
@@ -217,6 +241,8 @@
 		{
 			"index": 7,
 			"title": "tailandia",
+			"year": 2010,
+			"month": 5,
 			"file": "thai_2.jpg",
 			"tagged": [
 				{
@@ -231,13 +257,15 @@
 		{
 			"index": 8,
 			"title": "tailandia",
+			"year": 2010,
+			"month": 5,
 			"file": "thai_3.jpg",
 			"tagged": [
 				{
 					"node": 4,
 					"position": {
-						"x": 1394,
-						"y": 495
+						"x": -55,
+						"y": 425
 					}
 				}
 			]
@@ -245,33 +273,47 @@
 		{
 			"index": 9,
 			"title": "tailandia",
+			"year": 2010,
+			"month": 5,
 			"file": "thai_4.jpg",
 			"tagged": [
 				{
-					"node": 4
+					"node": 4,
+					"position": {
+						"x": 836,
+						"y": 294
+					}
 				}
 			]
 		},
 		{
 			"index": 10,
 			"title": "tailandia",
+			"year": 2010,
+			"month": 5,
 			"file": "thai_5.jpg",
 			"tagged": [
 				{
-					"node": 4
+					"node": 4,
+					"position": {
+						"x": 897,
+						"y": 298
+					}
 				}
 			]
 		},
 		{
 			"index": 11,
 			"title": "tailandia",
+			"year": 2010,
+			"month": 5,
 			"file": "thai_6.jpg",
 			"tagged": [
 				{
 					"node": 4,
 					"position": {
-						"x": 1179,
-						"y": 285
+						"x": 879,
+						"y": 371
 					}
 				}
 			]
@@ -279,13 +321,15 @@
 		{
 			"index": 12,
 			"title": "tailandia",
+			"year": 2010,
+			"month": 5,
 			"file": "thai_7.jpg",
 			"tagged": [
 				{
 					"node": 4,
 					"position": {
-						"x": 1215,
-						"y": 490
+						"x": 976,
+						"y": 482
 					}
 				}
 			]
@@ -293,13 +337,15 @@
 		{
 			"index": 13,
 			"title": "tailandia",
+			"year": 2010,
+			"month": 5,
 			"file": "thai_8.jpg",
 			"tagged": [
 				{
 					"node": 4,
 					"position": {
-						"x": 1155,
-						"y": 424
+						"x": 876,
+						"y": 425
 					}
 				}
 			]
@@ -307,13 +353,15 @@
 		{
 			"index": 14,
 			"title": "tailandia",
+			"year": 2010,
+			"month": 5,
 			"file": "thai_9.jpg",
 			"tagged": [
 				{
 					"node": 4,
 					"position": {
-						"x": 1245,
-						"y": 501
+						"x": 881,
+						"y": 500
 					}
 				}
 			]
@@ -321,13 +369,15 @@
 		{
 			"index": 15,
 			"title": "tailandia",
+			"year": 2010,
+			"month": 5,
 			"file": "thai_10.jpg",
 			"tagged": [
 				{
 					"node": 4,
 					"position": {
-						"x": 1330,
-						"y": 550
+						"x": 824,
+						"y": 464
 					}
 				}
 			]
@@ -335,6 +385,8 @@
 		{
 			"index": 16,
 			"title": "photo 16",
+			"year": 2014,
+			"month": 9,
 			"file": "photo_mic_zia_carla.jpg",
 			"tagged": [
 				{
@@ -347,8 +399,8 @@
 				{
 					"node": 16,
 					"position": {
-						"x": 404,
-						"y": 449
+						"x": 418,
+						"y": 472
 					}
 				}
 			]
@@ -356,6 +408,8 @@
 		{
 			"index": 17,
 			"title": "photo 17",
+			"year": 2014,
+			"month": 10,
 			"file": "photo_mic_matt.jpg",
 			"tagged": [
 				{
@@ -370,6 +424,21 @@
 					"position": {
 						"x": 412,
 						"y": 609
+					}
+				}
+			]
+		},
+		{
+			"index": 18,
+			"title": "Ricette di nonna",
+			"year": 2014,
+			"file": "ricette.pdf",
+			"tagged": [
+				{
+					"node": 5,
+					"position": {
+						"x": -132,
+						"y": 427
 					}
 				}
 			]

@@ -1,4 +1,4 @@
-function docMouseovered(d) {
+function thumbnailMouseovered(d) {
 
 	var selection = d3.select(this);
 	selection.moveToFront();
@@ -9,6 +9,21 @@ function docMouseovered(d) {
 	doc.height.baseVal.value = 200;
 	doc.x.baseVal.value -= 50;
 	doc.y.baseVal.value -= 50;
+
+	var parent = d3.select(this.parentNode);
+
+	if (!onDetail || doc.attributes.url) {
+
+		parent.append("text").attr("class", "thumbnailText").attr("x",
+				doc.x.baseVal.value).attr("y", doc.y.baseVal.value - 30).text(
+				doc.attributes.title.nodeValue);
+
+		if (!onDetail) {
+			parent.append("text").attr("class", "thumbnailText").attr("x",
+					doc.x.baseVal.value).attr("y", doc.y.baseVal.value + 250)
+					.text(doc.attributes.date.nodeValue);
+		}
+	}
 
 	node.classed("node--tagged", function(n) {
 
@@ -27,7 +42,9 @@ function docMouseovered(d) {
 	});
 };
 
-function docMouseouted(d) {
+function thumbnailMouseouted(d) {
+
+	svg.selectAll(".thumbnailText").remove();
 
 	var selection = d3.select(this);
 	var doc = selection[0][0];
@@ -40,31 +57,89 @@ function docMouseouted(d) {
 	node.classed("node--tagged", false);
 };
 
+function thumbnailClicked(d) {
+
+	svg.selectAll(".docText").remove();
+	svg.selectAll(".zoomedDoc").remove();
+
+	var selection = d3.select(this);
+
+	var parent = d3.select(this.parentNode);
+
+	var doc = selection[0][0];
+
+	if (doc.attributes.url.nodeValue.substr(-4) === ".pdf") {
+
+		window.open(siteUrl + doc.attributes.url.nodeValue.substr(1), '_blank');
+
+	} else {
+
+		parent.append("rect").attr("class", "frame").attr("width", 1205).attr(
+				"height", 1204).attr("xlink:href", doc.href.baseVal).attr("x",
+				1197.5).attr("y", -102);
+		parent.append("image").attr("class", "zoomedDoc").moveToFront().attr(
+				"width", 1200).attr("height", 1200).attr("xlink:href",
+				doc.href.baseVal).attr("x", 1200).attr("y", -100);
+
+		parent.append("text").attr("class", "docText").attr("x", 2100).attr(
+				"y", 1200).text(doc.attributes.title.nodeValue);
+
+		parent.append("text").attr("class", "docText").attr("x", 2050).attr(
+				"y", 1300).text(doc.attributes.date.nodeValue);
+
+		parent.append("text").attr("class", "docText").attr("x", 2330).attr(
+				"y", -130).text("[X]").on("click", closeDocClicked);
+	}
+
+};
+
 function docClicked(d) {
 
 	if (d3.event.defaultPrevented) {
 		return;
 	}
 
+	svg.selectAll(".docText").remove();
+	svg.selectAll(".zoomedDoc").remove();
+
 	var selection = d3.select(this);
+
 	var grandParent = d3.select(this.parentNode.parentNode);
 
 	var doc = selection[0][0];
-	
-	grandParent.append("image").attr("class", "zoomedDoc").moveToFront().attr(
-			"width", 1200).attr("height", 1200).attr("xlink:href",
-			doc.href.baseVal).attr("x", 1200).attr("y", -100);
-	grandParent.append("text").attr("class", "closeDocText")
-			.attr("x", 2300).attr("y", 0).text("[X]").on("click",
-					closeDocClicked);
+
+	if (doc.attributes.url.nodeValue.substr(-4) === ".pdf") {
+
+		window.open(siteUrl + doc.attributes.url.nodeValue.substr(1), '_blank');
+
+	} else {
+
+		grandParent.append("rect").attr("class", "frame").attr("width", 1205)
+				.attr("height", 1204).attr("xlink:href", doc.href.baseVal)
+				.attr("x", 1197.5).attr("y", -102);
+		grandParent.append("image").attr("class", "zoomedDoc").moveToFront()
+				.attr("width", 1200).attr("height", 1200).attr("xlink:href",
+						doc.href.baseVal).attr("x", 1200).attr("y", -100);
+
+		grandParent.append("text").attr("class", "docText").attr("x", 2000)
+				.attr("y", 1180).text(doc.attributes.title.nodeValue);
+
+		grandParent.append("text").attr("class", "docText").attr("x", 2000)
+				.attr("y", 1250).text(doc.attributes.date.nodeValue);
+
+		grandParent.append("text").attr("class", "docText").attr("x", 2330)
+				.attr("y", -130).text("[X]").on("click", closeDocClicked);
+
+	}
 
 	d3.event.stopPropagation();
 };
 
 function closeDocClicked() {
 
-	selectedNode.selectAll(".zoomedDoc").remove();
-	selectedNode.selectAll(".closeDocText").remove();
+	svg.selectAll(".zoomedDoc").remove();
+	svg.selectAll(".frame").remove();
+	svg.selectAll(".docText").remove();
 }
 
 function backMain() {
@@ -84,6 +159,7 @@ function forwardMain() {
 }
 
 var selectedNode;
+var onDetail = false;
 
 var docDrag = d3.behavior.drag().on("dragstart", docDragstarted).on("drag",
 		docDragged).on("dragend", docDragended);
@@ -93,6 +169,8 @@ function clickNode(d) {
 	if (d3.event.defaultPrevented) {
 		return;
 	}
+
+	onDetail = true;
 
 	selectedNode = d3.select(this).moveToFront().append("g").attr("class",
 			"selection");
@@ -106,10 +184,12 @@ function clickNode(d) {
 
 	selectedNode.append("image").attr("width", 200).attr("height", 200).attr(
 			'class', "profile-image--selected").attr("x", centerX - 100).attr(
-			"y", 0).attr("xlink:href", "./img/" + d.img);
+			"y", 0).attr("xlink:href", function(d) {
+		return d.img == "" ? "./docs/default_profile.jpg" : "./docs/" + d.img;
+	});
 
 	selectedNode.append("text").attr('class', "label--selected").attr("y", -30)
-			.attr("x", centerX - 50).text(d.label);
+			.attr("x", centerX - 100).text(d.label);
 
 	$
 			.get(
@@ -136,33 +216,38 @@ function clickNode(d) {
 								return n.node == d.index;
 							});
 
+							var x, y;
+
+							if (filtered) {
+
+								x = filtered[0].position ? filtered[0].position.x
+										: defaultX;
+								y = filtered[0].position ? filtered[0].position.y
+										: defaultY;
+
+							} else {
+
+								x = defaultX;
+								y = defaultY;
+							}
+
 							docNode
 									.attr("width", 100)
 									.attr("id", doc.index)
+									.attr("title", doc.title)
+									.attr("url", "./docs/" + doc.file)
+									.attr("date", getDate(doc))
 									.attr("height", 80)
-									.attr("xlink:href", "./img/" + doc.file)
-									.attr("cursor", "move")
 									.attr(
-											"x",
+											"xlink:href",
 											function() {
-												if (filtered) {
-													return filtered[0].position ? filtered[0].position.x
-															: defaultX;
-												} else {
-													return defaultX;
-												}
-											})
-									.attr(
-											"y",
-											function() {
-												if (filtered) {
-													return filtered[0].position ? filtered[0].position.y
-															: defaultY;
-												} else {
-													return defaultY;
-												}
-											}).on("click", docClicked).call(
-											docDrag);
+												return doc.file.substr(-4) === ".pdf" ? "./docs/default_pdf.png"
+														: "./docs/" + doc.file;
+											}).attr("cursor", "move").attr("x",
+											x).attr("y", y).on("mouseover",
+											thumbnailMouseovered).on(
+											"mouseout", thumbnailMouseouted)
+									.on("click", docClicked).call(docDrag);
 
 							offset += 100;
 							if (offset >= 100 * maxRowSize) {
@@ -180,6 +265,7 @@ function clickSvg(d) {
 		return;
 	}
 
+	onDetail = false;
 	var sel = svg.selectAll(".selection");
 	sel.remove();
 };
@@ -192,27 +278,33 @@ function zoomed() {
 
 function nodeDragstarted(d) {
 
-	d3.event.sourceEvent.stopPropagation();
-	d3.select(this).classed("dragging", true);
+	if (!onDetail) {
+		d3.event.sourceEvent.stopPropagation();
+		d3.select(this).classed("dragging", true);
+	}
 }
 
 function nodeDragged(d) {
 
-	d3.select(this).attr("x", d.x = d3.event.x).attr("y", d.y = d3.event.y);
-
+	if (!onDetail) {
+		d3.select(this).attr("x", d.x = d3.event.x).attr("y", d.y = d3.event.y);
+	}
 }
 
 function nodeDragended(d) {
 
-	d3.select(this).classed("dragging", false);
+	if (!onDetail) {
+		d3.select(this).classed("dragging", false);
 
-	$.get(serverUrl + '/updateNode?label=' + d.label + '&x=' + d.x + '&y='
-			+ d.y);
+		$.get(serverUrl + '/updateNode?label=' + d.label + '&x=' + d.x + '&y='
+				+ d.y);
+	}
 }
 
 function docDragstarted(d) {
 
 	d3.event.sourceEvent.stopPropagation();
+	svg.selectAll(".thumbnailText").remove();
 	d3.select(this).classed("dragging", true);
 }
 

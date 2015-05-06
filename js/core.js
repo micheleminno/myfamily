@@ -1,13 +1,14 @@
 var serverUrl = 'http://localhost:8090';
+var siteUrl = 'http://localhost/myfamily';
 
 var width = 1800;
 var height = 1200;
 
-var zoom = d3.behavior.zoom().scaleExtent([ .5, 2 ]).on("zoom", zoomed);
+var zoom = d3.behavior.zoom().scaleExtent([ .2, 2 ]).on("zoom", zoomed);
 
 var svg = d3.select("body").append("svg").attr("width", width).attr("height",
 		height).on("click", clickSvg).append("g").attr("transform",
-		"translate(200, 300)scale(.5)").call(zoom);
+		"translate(800, 200)scale(.4)").call(zoom);
 
 var rect = svg.append("rect").attr("width", width).attr("height", height)
 		.style("fill", "none").style("pointer-events", "all");
@@ -62,8 +63,11 @@ $.get(serverUrl + "/graph", function(graphString) {
 			currentNode.append("circle").attr("class", "node").attr("r", 50);
 
 			currentNode.append("image").attr("class", "profile-image").attr(
-					"xlink:href", "./img/" + d.img).attr("width", 40).attr(
-					"height", 40);
+					"xlink:href",
+					function(d) {
+						return d.img == "" ? "./docs/default_profile.jpg"
+								: "./docs/" + d.img;
+					}).attr("width", 40).attr("height", 40);
 
 			currentNode.append("text").attr("class", "label").attr("dy",
 					".40em").text(function(d) {
@@ -137,13 +141,24 @@ function populateThumbnails(currentPage, back) {
 
 	var duration = 300;
 
-	sel.enter().append("image").attr("class", "doc").attr("xlink:href",
+	sel.enter().append("image").attr("class", "doc").attr(
+			"xlink:href",
 			function(d) {
-				return "./img/" + d.file;
+				return d.file.substr(-4) === ".pdf" ? "./docs/default_pdf.png"
+						: "./docs/" + d.file;
 			}).attr("width", 100).attr("height", streamHeight).attr("y",
-			streamY).on("mouseover", docMouseovered).on("mouseout",
-			docMouseouted).attr("x", newTarget).transition().duration(duration)
-			.delay(newDelay).ease("linear").attr("x", function(d) {
+			streamY).attr("id", function(d) {
+		return d.index;
+	}).attr("title", function(d) {
+		return d.title;
+	}).attr("url", function(d) {
+		return "./docs/" + d.file;
+	}).attr("date", function(d) {
+		return getDate(d);
+	}).on("mouseover", thumbnailMouseovered)
+			.on("mouseout", thumbnailMouseouted).on("click", thumbnailClicked)
+			.attr("x", newTarget).transition().duration(duration).delay(
+					newDelay).ease("linear").attr("x", function(d) {
 				return streamX + (d.index - minIndex) * 100;
 			});
 
