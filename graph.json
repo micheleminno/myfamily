@@ -92,8 +92,8 @@
 		{
 			"index": 10,
 			"label": "Nicola Scippa",
-			"x": -125,
-			"y": 699,
+			"x": -118,
+			"y": 661,
 			"img": "",
 			"person": true,
 			"fixed": true
@@ -191,8 +191,8 @@
 		{
 			"index": 21,
 			"label": "Raffaella Cometti",
-			"x": 631,
-			"y": 164,
+			"x": 611,
+			"y": 156,
 			"img": "raffaella.jpg",
 			"person": true,
 			"fixed": true
@@ -290,8 +290,8 @@
 		{
 			"index": 32,
 			"label": "Giorgio Fagiolo e Martina Morici",
-			"x": 2023,
-			"y": 328,
+			"x": 2035,
+			"y": 325,
 			"img": "",
 			"person": false,
 			"fixed": true
@@ -381,7 +381,7 @@
 			"index": 42,
 			"label": "Niccolò Minno",
 			"x": 1739,
-			"y": -69,
+			"y": -79,
 			"img": "niccolo.jpg",
 			"person": true,
 			"fixed": true
@@ -425,8 +425,8 @@
 		{
 			"index": 47,
 			"label": "Maurizio Ferrara",
-			"x": 1239,
-			"y": 229,
+			"x": 1148,
+			"y": 214,
 			"img": "maurizio.png",
 			"person": true,
 			"fixed": true
