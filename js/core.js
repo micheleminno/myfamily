@@ -1,17 +1,19 @@
 var serverUrl = 'http://localhost:8090';
 var siteUrl = 'http://localhost/myfamily';
 
-var width = 1800;
-var height = 1200;
+var width = 1250;
+var height = 700;
 
 var zoom = d3.behavior.zoom().scaleExtent([ .5, 4 ]).on("zoom", zoomed);
 
 var svg = d3.select("body").append("svg").attr("width", width).attr("height",
-		height).on("click", clickSvg).append("g").attr("transform",
-		"translate(800, 200)scale(.4)").call(zoom);
+		height).append("g").attr("transform",
+		"translate(300, 100)scale(.4)");
 
-var rect = svg.append("rect").attr("width", width).attr("height", height)
-		.style("fill", "none").style("pointer-events", "all");
+svg.on("click", clickSvg);
+
+var lens = svg.append("circle").attr("r", width * 10).attr("class", "lens")
+		.style("pointer-events", "all").call(zoom);
 
 var container = svg.append("g");
 
@@ -27,9 +29,10 @@ var link = container.selectAll(".link");
 var node = container.selectAll(".node");
 
 var streamHeight = 100;
-var streamWidth = width - 200;
-var streamY = 1200;
+var streamWidth = 1600;
+var streamY = 1300;
 var streamX = 100;
+var streamNode;
 
 var docRowSize = 16;
 var currentPage;
@@ -54,7 +57,8 @@ $.get(serverUrl + "/graph", function(graphString) {
 
 	node.each(function(d) {
 
-		currentNode = d3.select(this);
+		currentNode = d3.select(this).append("g").attr("class", "tree-leaf");
+		;
 
 		currentNode.on("click", clickNode).call(nodeDrag);
 
@@ -80,26 +84,26 @@ $.get(serverUrl + "/graph", function(graphString) {
 		}
 	});
 
-	var containerNode = container.append("g");
+	streamNode = svg.append("g");
 
-	containerNode.append("circle").attr("r", 35).attr("cx", streamX - 60).attr(
+	streamNode.append("circle").attr("r", 30).attr("cx", streamX - 67).attr(
 			"cy", streamY + 50).attr("class", "navigator");
 
-	containerNode.append("text").attr("class", "navigator-arrow").attr("x",
-			streamX - 78).attr("y", streamY + 65).text("<").on("click",
+	streamNode.append("text").attr("class", "navigator-arrow").attr("x",
+			streamX - 88).attr("y", streamY + 65).text("<").on("click",
 			backMain);
 
-	containerNode.append("circle").attr("r", 35).attr("cx",
-			streamX + streamWidth + 65).attr("cy", streamY + 45).attr("class",
+	streamNode.append("circle").attr("r", 30).attr("cx",
+			streamX + streamWidth + 66).attr("cy", streamY + 45).attr("class",
 			"navigator");
 
-	containerNode.append("text").attr("class", "navigator-arrow").attr("x",
+	streamNode.append("text").attr("class", "navigator-arrow").attr("x",
 			streamX + streamWidth + 50).attr("y", streamY + 60).text(">").on(
 			"click", forwardMain);
 
-	containerNode.append("rect").attr("width", streamWidth).attr("height",
-			streamHeight).attr("x", streamX).attr("y", streamY).attr("class",
-			"data-stream");
+	streamNode.append("rect").attr("width", streamWidth).attr("height",
+			streamHeight).attr("x", streamX).attr("y", streamY).attr("rx", 20)
+			.attr("ry", 20).attr("class", "data-stream");
 
 	$.get(serverUrl + "/documents", function(documentsString) {
 
@@ -122,13 +126,13 @@ function populateThumbnails(currentPage, back) {
 		return d.index >= minIndex && d.index < minIndex + docRowSize;
 	});
 
-	var doc = container.selectAll(".doc");
+	var doc = streamNode.selectAll(".doc");
 	var sel = doc.data(currentDocuments, function(d) {
 		return d.index;
 	});
 
-	var oldTarget = back ? streamX + streamWidth : streamX;
-	var newTarget = back ? streamX : streamX + streamWidth;
+	var oldTarget = back ? streamWidth : streamX;
+	var newTarget = back ? streamX : streamWidth;
 
 	var newDelay = function(d) {
 		return back ? (currentDocuments.length - (d.index - minIndex))

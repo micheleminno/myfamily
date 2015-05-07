@@ -15,12 +15,12 @@ function thumbnailMouseovered(d) {
 		doc.y.baseVal.value -= 50;
 
 		parent.append("text").attr("class", "thumbnailText").attr("x",
-				doc.x.baseVal.value).attr("y", doc.y.baseVal.value - 30).text(
+				doc.x.baseVal.value).attr("y", doc.y.baseVal.value - 20).text(
 				doc.attributes.title.nodeValue);
 
 		if (!onDetail) {
 			parent.append("text").attr("class", "thumbnailText").attr("x",
-					doc.x.baseVal.value).attr("y", doc.y.baseVal.value + 250)
+					doc.x.baseVal.value).attr("y", doc.y.baseVal.value + 235)
 					.text(doc.attributes.date.nodeValue);
 		}
 	}
@@ -45,6 +45,7 @@ function thumbnailMouseovered(d) {
 function thumbnailMouseouted(d) {
 
 	svg.selectAll(".thumbnailText").remove();
+	svg.selectAll(".thumbnail-frame").remove();
 
 	var selection = d3.select(this);
 	var doc = selection[0][0];
@@ -122,19 +123,20 @@ function thumbnailClicked(d) {
 
 		parent.append("rect").attr("class", "frame").attr("width", 1205).attr(
 				"height", 1204).attr("xlink:href", doc.href.baseVal).attr("x",
-				1197.5).attr("y", -102);
+				997.5).attr("y", -102);
 		parent.append("image").attr("class", "zoomedDoc").moveToFront().attr(
 				"width", 1200).attr("height", 1200).attr("xlink:href",
-				doc.href.baseVal).attr("x", 1200).attr("y", -100);
+				doc.href.baseVal).attr("x", 1000).attr("y", -100);
 
-		parent.append("text").attr("class", "docText").attr("x", 2100).attr(
+		parent.append("text").attr("class", "docText").attr("x", 1800).attr(
 				"y", 1200).text(doc.attributes.title.nodeValue);
 
-		parent.append("text").attr("class", "docText").attr("x", 2050).attr(
+		parent.append("text").attr("class", "docText").attr("x", 1800).attr(
 				"y", 1300).text(doc.attributes.date.nodeValue);
 
-		parent.append("text").attr("class", "docText").attr("x", 2330).attr(
-				"y", -130).text("[X]").on("click", closeDocClicked);
+		parent.append("text").attr("class", "docText").attr("x", 2080).attr(
+				"y", -130).text("[close]").attr("cursor", "pointer").on(
+				"click", closeDocClicked);
 	}
 
 };
@@ -162,19 +164,20 @@ function docClicked(d) {
 
 		grandParent.append("rect").attr("class", "frame").attr("width", 1205)
 				.attr("height", 1204).attr("xlink:href", doc.href.baseVal)
-				.attr("x", 1197.5).attr("y", -102);
+				.attr("x", 997.5).attr("y", -102);
 		grandParent.append("image").attr("class", "zoomedDoc").moveToFront()
 				.attr("width", 1200).attr("height", 1200).attr("xlink:href",
-						doc.href.baseVal).attr("x", 1200).attr("y", -100);
+						doc.href.baseVal).attr("x", 1000).attr("y", -100);
 
-		grandParent.append("text").attr("class", "docText").attr("x", 2000)
+		grandParent.append("text").attr("class", "docText").attr("x", 1800)
 				.attr("y", 1180).text(doc.attributes.title.nodeValue);
 
-		grandParent.append("text").attr("class", "docText").attr("x", 2000)
+		grandParent.append("text").attr("class", "docText").attr("x", 1800)
 				.attr("y", 1250).text(doc.attributes.date.nodeValue);
 
-		grandParent.append("text").attr("class", "docText").attr("x", 2330)
-				.attr("y", -130).text("[X]").on("click", closeDocClicked);
+		grandParent.append("text").attr("class", "docText").attr("x", 2080)
+				.attr("y", -130).text("[close]").attr("cursor", "pointer").on(
+						"click", closeDocClicked);
 
 	}
 
@@ -187,6 +190,11 @@ function closeDocClicked() {
 	svg.selectAll(".frame").remove();
 	svg.selectAll(".docText").remove();
 
+	d3.event.stopPropagation();
+}
+
+function profileNodeClicked(d) {
+	
 	d3.event.stopPropagation();
 }
 
@@ -220,24 +228,24 @@ function clickNode(d) {
 
 	onDetail = true;
 
-	selectedNode = d3.select(this).moveToFront().append("g").attr("class",
-			"selection");
+	selectedNode = d3.select(this.parentNode).moveToFront().append("g").attr(
+			"class", "selection").style("pointer-events", "click");
 
-	var centerX = width / 5;
-	var centerY = height / 2;
+	var centerX = width / 10;
+	var centerY = height / 1.3;
 	var maxRowSize = 10;
 
-	selectedNode.append("circle").attr('r', 800).attr("cx", centerX).attr("cy",
-			centerY).attr('class', "node--selected");
+	selectedNode.append("circle").attr('r', 700).attr("cx", centerX).attr("cy",
+			centerY).attr('class', "node--selected").on("click", profileNodeClicked);
 
 	var profileContaner = selectedNode.append("g").on("mouseover",
 			profileMouseovered).on("mouseout", profileMouseouted);
 
 	profileContaner.append("rect").attr("width", 220).attr("height", 220).attr(
-			'class', "profile-frame").attr("x", centerX - 150).attr("y", -10);
+			'class', "profile-frame").attr("x", centerX - 120).attr("y", -10);
 
 	profileContaner.append("image").attr("width", 200).attr("height", 200)
-			.attr('class', "profile-image--selected").attr("x", centerX - 140)
+			.attr('class', "profile-image--selected").attr("x", centerX - 110)
 			.attr("y", 0).attr(
 					"xlink:href",
 					function(d) {
@@ -325,6 +333,8 @@ function clickSvg(d) {
 	onDetail = false;
 	var sel = svg.selectAll(".selection");
 	sel.remove();
+
+	svg.selectAll(".tree-leaf").style("pointer-events", "all");
 };
 
 function zoomed() {
