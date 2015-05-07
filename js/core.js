@@ -141,7 +141,7 @@ function populateThumbnails(currentPage, back) {
 
 	var duration = 300;
 
-	sel.enter().append("image").attr(
+	sel.enter().append("image").attr("class", "doc").attr(
 			"xlink:href",
 			function(d) {
 				return d.file.substr(-4) === ".pdf" ? "./docs/default_pdf.png"

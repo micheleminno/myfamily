@@ -29,8 +29,8 @@
 		{
 			"index": 3,
 			"label": "Michele Minno",
-			"x": 886,
-			"y": 404,
+			"x": 876,
+			"y": 379,
 			"img": "michele.jpg",
 			"person": true,
 			"fixed": true
