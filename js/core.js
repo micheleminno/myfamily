@@ -1,5 +1,8 @@
-var serverUrl = 'http://localhost:8090';
-var siteUrl = 'http://localhost/myfamily';
+//var serverUrl = 'http://localhost:8090';
+//var siteUrl = 'http://localhost/myfamily';
+
+var serverUrl = 'http://ec2-52-17-163-27.eu-west-1.compute.amazonaws.com:8090';
+var siteUrl = 'http://ec2-52-17-163-27.eu-west-1.compute.amazonaws.com/familygraph.me';
 
 var width = 1250;
 var height = 700;
@@ -7,8 +10,7 @@ var height = 700;
 var zoom = d3.behavior.zoom().scaleExtent([ .5, 4 ]).on("zoom", zoomed);
 
 var svg = d3.select("body").append("svg").attr("width", width).attr("height",
-		height).append("g").attr("transform",
-		"translate(300, 100)scale(.4)");
+		height).append("g").attr("transform", "translate(300, 100)scale(.4)");
 
 svg.on("click", clickSvg);
 
@@ -58,7 +60,6 @@ $.get(serverUrl + "/graph", function(graphString) {
 	node.each(function(d) {
 
 		currentNode = d3.select(this).append("g").attr("class", "tree-leaf");
-		;
 
 		currentNode.on("click", clickNode).call(nodeDrag);
 

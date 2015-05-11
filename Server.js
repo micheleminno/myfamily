@@ -55,6 +55,31 @@ app.get('/graph', function(req, res) {
 	res.end(JSON.stringify(graph));
 });
 
+app.get('/graph/:nodeIndex', function(req, res) {
+
+	var nodeIndex = req.param('nodeIndex');
+	var viewIndex = req.query.view;
+
+	var graph = JSON.parse(fs.readFileSync('graph.json', 'utf8'));
+	var profile = JSON.parse(fs.readFileSync('node_' + nodeIndex + '.json',
+			'utf8'));
+
+	var graphView = {
+		nodes : [],
+		links : []
+	};
+
+	var view = profile.views[viewIndex];
+
+	for (nodeIndex in view.nodes) {
+
+		var node = views.nodes[nodeIndex];
+		graphView.nodes.push(node);
+	}
+
+	res.end(JSON.stringify(graphView));
+});
+
 app.get('/updateNode', function(req, res) {
 
 	var label = req.query.label;
