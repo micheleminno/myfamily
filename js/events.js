@@ -123,25 +123,25 @@ function thumbnailClicked(d) {
 	} else {
 
 		parent = parent.append("g").attr("class", "selection");
-		
+
 		parent.append("rect").attr("class", "frame").attr("width", 1205).attr(
-				"height", 1204).attr("xlink:href", doc.href.baseVal).attr("x",
+				"height", 1014).attr("xlink:href", doc.href.baseVal).attr("x",
 				997.5).attr("y", -102);
 		parent.append("image").attr("class", "zoomedDoc").moveToFront().attr(
-				"width", 1200).attr("height", 1200).attr("xlink:href",
+				"width", 1200).attr("height", 1000).attr("xlink:href",
 				doc.href.baseVal).attr("x", 1000).attr("y", -100);
 
 		parent.append("text").attr("class", "docText").attr("x", 1850).attr(
-				"y", 1200).text(doc.attributes.title.nodeValue);
+				"y", 1000).text(doc.attributes.title.nodeValue);
 
 		parent.append("text").attr("class", "docText").attr("x", 1850).attr(
-				"y", 1300).text(doc.attributes.date.nodeValue);
+				"y", 1100).text(doc.attributes.date.nodeValue);
 
-		parent.append("text").attr("class", "docText").attr("x", 2080).attr(
+		parent.append("text").attr("class", "closeDoc").attr("x", 2125).attr(
 				"y", -130).text("[close]").attr("cursor", "pointer").on(
 				"click", closeDocClicked);
 	}
-	
+
 	d3.event.stopPropagation();
 };
 
@@ -168,19 +168,22 @@ function docClicked(d) {
 
 		grandParent.append("rect").attr("class", "frame").attr("width", 1205)
 				.attr("height", 1204).attr("xlink:href", doc.href.baseVal)
-				.attr("x", 997.5).attr("y", -102);
+				.attr("x", 997.5).attr("y", -202).on("click", zoomedDocClicked)
+				.attr("cursor", "auto");
+
 		grandParent.append("image").attr("class", "zoomedDoc").moveToFront()
 				.attr("width", 1200).attr("height", 1200).attr("xlink:href",
-						doc.href.baseVal).attr("x", 1000).attr("y", -100);
+						doc.href.baseVal).attr("x", 1000).attr("y", -200).on(
+						"click", zoomedDocClicked).attr("cursor", "auto");
+
+		grandParent.append("text").attr("class", "docText").attr("x", 1850)
+				.attr("y", 1120).text(doc.attributes.title.nodeValue);
 
 		grandParent.append("text").attr("class", "docText").attr("x", 1800)
-				.attr("y", 1180).text(doc.attributes.title.nodeValue);
+				.attr("y", 1050).text(doc.attributes.date.nodeValue);
 
-		grandParent.append("text").attr("class", "docText").attr("x", 1800)
-				.attr("y", 1250).text(doc.attributes.date.nodeValue);
-
-		grandParent.append("text").attr("class", "docText").attr("x", 2080)
-				.attr("y", -130).text("[close]").attr("cursor", "pointer").on(
+		grandParent.append("text").attr("class", "closeDoc").attr("x", 2125)
+				.attr("y", -220).text("[close]").attr("cursor", "pointer").on(
 						"click", closeDocClicked);
 
 	}
@@ -202,13 +205,18 @@ function profileNodeClicked(d) {
 	d3.event.stopPropagation();
 }
 
+function zoomedDocClicked(d) {
+
+	d3.event.stopPropagation();
+}
+
 function backMain() {
 
 	if (currentPage > 0) {
 		currentPage--;
 		populateThumbnails(currentPage, true);
 	}
-	
+
 	d3.event.stopPropagation();
 }
 
@@ -218,7 +226,7 @@ function forwardMain() {
 		currentPage++;
 		populateThumbnails(currentPage, false);
 	}
-	
+
 	d3.event.stopPropagation();
 }
 
@@ -240,12 +248,12 @@ function clickNode(d) {
 			"class", "selection").style("pointer-events", "click");
 
 	var centerX = width / 10;
-	var centerY = height / 1.3;
+	var centerY = height / 1.7;
 	var maxRowSize = 10;
 
-	selectedNode.append("circle").attr('r', 700).attr("cx", centerX).attr("cy",
+	selectedNode.append("circle").attr('r', 650).attr("cx", centerX).attr("cy",
 			centerY).attr('class', "node--selected").on("click",
-			profileNodeClicked);
+			profileNodeClicked).attr("cursor", "auto");
 
 	var profileContaner = selectedNode.append("g").on("mouseover",
 			profileMouseovered).on("mouseout", profileMouseouted);
@@ -260,7 +268,7 @@ function clickNode(d) {
 					function(d) {
 						return d.img == "" ? "./docs/default_profile.jpg"
 								: "./docs/" + d.img;
-					}).on("click", profileNodeClicked);
+					}).on("click", profileNodeClicked).attr("cursor", "auto");
 
 	selectedNode.append("text").attr('class', "label--selected").attr("y", -50)
 			.attr("x", centerX - 230).text(d.label);
@@ -317,7 +325,8 @@ function clickNode(d) {
 											function() {
 												return doc.file.substr(-4) === ".pdf" ? "./docs/default_pdf.png"
 														: "./docs/" + doc.file;
-											}).attr("cursor", "move").attr("x",
+											}).attr("class",
+											"myCursor-pointer-move").attr("x",
 											x).attr("y", y).on("mouseover",
 											thumbnailMouseovered).on(
 											"mouseout", thumbnailMouseouted)

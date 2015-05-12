@@ -1,8 +1,8 @@
 //var serverUrl = 'http://localhost:8090';
 //var siteUrl = 'http://localhost/myfamily';
 
-var serverUrl = 'http://ec2-52-17-163-27.eu-west-1.compute.amazonaws.com:8090';
-var siteUrl = 'http://ec2-52-17-163-27.eu-west-1.compute.amazonaws.com/familygraph.me';
+var serverUrl = 'http://ec2-54-72-121-42.eu-west-1.compute.amazonaws.com:8090';
+var siteUrl = 'http://ec2-54-72-121-42.eu-west-1.compute.amazonaws.com/familygraph.me';
 
 var width = 1250;
 var height = 700;
@@ -10,7 +10,8 @@ var height = 700;
 var zoom = d3.behavior.zoom().scaleExtent([ .5, 4 ]).on("zoom", zoomed);
 
 var svg = d3.select("body").append("svg").attr("width", width).attr("height",
-		height).append("g").attr("transform", "translate(300, 100)scale(.4)");
+		height).append("g").attr("transform", "translate(300, 100)scale(.4)")
+		.attr("class", "myCursor-zoom-move");
 
 svg.on("click", clickSvg);
 
@@ -32,7 +33,7 @@ var node = container.selectAll(".node");
 
 var streamHeight = 100;
 var streamWidth = 1600;
-var streamY = 1300;
+var streamY = 1130;
 var streamX = 100;
 var streamNode;
 
@@ -65,7 +66,13 @@ $.get(serverUrl + "/graph", function(graphString) {
 
 		if (d.person) {
 
-			currentNode.append("circle").attr("class", "node").attr("r", 50);
+			currentNode.append("circle").attr("class", function(d) {
+				if (d.label == "Michele Minno") {
+					return "my-node";
+				} else {
+					return "node";
+				}
+			}).attr("r", 50);
 
 			currentNode.append("image").attr("class", "profile-image").attr(
 					"xlink:href",
@@ -74,25 +81,30 @@ $.get(serverUrl + "/graph", function(graphString) {
 								: "./docs/" + d.img;
 					}).attr("width", 40).attr("height", 40);
 
-			currentNode.append("text").attr("class", "nodeLabel").attr("dy",
-					"1.5em").text(function(d) {
+			currentNode.append("text").attr("class", function(d) {
+				if (d.label == "Michele Minno") {
+					return "my-nodeLabel";
+				} else {
+					return "nodeLabel";
+				}
+			}).attr("dy", "1.5em").text(function(d) {
 				return d.label;
 			});
 		} else {
 
 			currentNode.append("ellipse").attr("rx", 20).attr("ry", 10).attr(
-					"fill", "brown").attr("cursor", "move");
+					"fill", "brown").attr("class", "myCursor-pointer-move");
 		}
 	});
 
-	streamNode = svg.append("g");
+	streamNode = svg.append("g").attr("cursor", "auto");
 
 	streamNode.append("circle").attr("r", 30).attr("cx", streamX - 67).attr(
 			"cy", streamY + 50).attr("class", "navigator");
 
 	streamNode.append("text").attr("class", "navigator-arrow").attr("x",
 			streamX - 88).attr("y", streamY + 65).text("<").on("click",
-			backMain);
+			backMain).attr("cursor", "pointer");
 
 	streamNode.append("circle").attr("r", 30).attr("cx",
 			streamX + streamWidth + 66).attr("cy", streamY + 45).attr("class",
@@ -100,7 +112,7 @@ $.get(serverUrl + "/graph", function(graphString) {
 
 	streamNode.append("text").attr("class", "navigator-arrow").attr("x",
 			streamX + streamWidth + 50).attr("y", streamY + 60).text(">").on(
-			"click", forwardMain);
+			"click", forwardMain).attr("cursor", "pointer");
 
 	streamNode.append("rect").attr("width", streamWidth).attr("height",
 			streamHeight).attr("x", streamX).attr("y", streamY).attr("rx", 20)
@@ -162,10 +174,11 @@ function populateThumbnails(currentPage, back) {
 		return getDate(d);
 	}).on("mouseover", thumbnailMouseovered)
 			.on("mouseout", thumbnailMouseouted).on("click", thumbnailClicked)
-			.attr("x", newTarget).transition().duration(duration).delay(
-					newDelay).ease("linear").attr("x", function(d) {
-				return streamX + (d.index - minIndex) * 100;
-			});
+			.attr("cursor", "pointer").attr("x", newTarget).transition()
+			.duration(duration).delay(newDelay).ease("linear").attr("x",
+					function(d) {
+						return streamX + (d.index - minIndex) * 100;
+					});
 
 	sel.exit().transition().duration(duration).delay(oldDelay).ease("linear")
 			.attr("x", oldTarget).remove();
@@ -199,8 +212,20 @@ function tick() {
 		return d.y;
 	});
 
+	node.selectAll(".my-node").attr("cx", function(d) {
+		return d.x;
+	}).attr("cy", function(d) {
+		return d.y;
+	});
+
 	node.selectAll(".nodeLabel").attr("x", function(d) {
 		return d.x - 25;
+	}).attr("y", function(d) {
+		return d.y + 35;
+	});
+
+	node.selectAll(".my-nodeLabel").attr("x", function(d) {
+		return d.x - 45;
 	}).attr("y", function(d) {
 		return d.y + 35;
 	});
