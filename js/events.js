@@ -196,6 +196,7 @@ function closeDocClicked() {
 	svg.selectAll(".zoomedDoc").remove();
 	svg.selectAll(".frame").remove();
 	svg.selectAll(".docText").remove();
+	svg.selectAll(".closeDoc").remove();
 
 	d3.event.stopPropagation();
 }
