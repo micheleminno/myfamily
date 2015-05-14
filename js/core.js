@@ -1,8 +1,10 @@
-//var serverUrl = 'http://localhost:8090';
-//var siteUrl = 'http://localhost/myfamily';
+var serverUrl = 'http://localhost:8090';
+var siteUrl = 'http://localhost/myfamily';
 
-var serverUrl = 'http://ec2-54-72-121-42.eu-west-1.compute.amazonaws.com:8090';
-var siteUrl = 'http://ec2-54-72-121-42.eu-west-1.compute.amazonaws.com/familygraph.me';
+// var serverUrl =
+// 'http://ec2-54-72-121-42.eu-west-1.compute.amazonaws.com:8090';
+// var siteUrl =
+// 'http://ec2-54-72-121-42.eu-west-1.compute.amazonaws.com/familygraph.me';
 
 var width = 1250;
 var height = 700;
@@ -61,10 +63,11 @@ $.get(serverUrl + "/graph", function(graphString) {
 	node.each(function(d) {
 
 		currentNode = d3.select(this).append("g").attr("class", "tree-leaf");
-
-		currentNode.on("click", clickNode).call(nodeDrag);
+		currentNode.call(nodeDrag);
 
 		if (d.person) {
+
+			currentNode.on("click", clickNode);
 
 			currentNode.append("circle").attr("class", function(d) {
 				if (d.label == "Michele Minno") {
@@ -93,7 +96,7 @@ $.get(serverUrl + "/graph", function(graphString) {
 		} else {
 
 			currentNode.append("ellipse").attr("rx", 20).attr("ry", 10).attr(
-					"fill", "brown").attr("class", "myCursor-pointer-move");
+					"fill", "brown").attr("class", "myCursor-move");
 		}
 	});
 

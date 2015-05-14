@@ -292,7 +292,7 @@ function clickNode(d) {
 							var docNode = container.append("image");
 
 							var defaultX = centerX / 2 + offset;
-							var defaultY = centerY / 2 + 100
+							var defaultY = centerY + 100
 									* Math.floor(docIndex / maxRowSize);
 
 							var filtered = doc.tagged.filter(function(n) {

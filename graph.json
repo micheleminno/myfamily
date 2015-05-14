@@ -119,8 +119,8 @@
 		{
 			"index": 13,
 			"label": "Simone Sbariggi",
-			"x": 303,
-			"y": 147,
+			"x": 250,
+			"y": 89,
 			"img": "simone.jpg",
 			"person": true,
 			"fixed": true
@@ -191,8 +191,8 @@
 		{
 			"index": 21,
 			"label": "Raffaella Cometti",
-			"x": 678,
-			"y": 100,
+			"x": 673,
+			"y": 115,
 			"img": "raffaella.jpg",
 			"person": true,
 			"fixed": true
@@ -200,8 +200,8 @@
 		{
 			"index": 22,
 			"label": "Angela Scippa e Walter Cometti",
-			"x": 647,
-			"y": 292,
+			"x": 634,
+			"y": 297,
 			"img": "",
 			"person": false,
 			"fixed": true
@@ -344,8 +344,8 @@
 		{
 			"index": 38,
 			"label": "Mirko Caravaggi e Raffaella Cometti",
-			"x": 767,
-			"y": -11,
+			"x": 737,
+			"y": -18,
 			"img": "",
 			"person": false,
 			"fixed": true
@@ -353,8 +353,8 @@
 		{
 			"index": 39,
 			"label": "Daniele Caravaggi",
-			"x": 864,
-			"y": -159,
+			"x": 679,
+			"y": -191,
 			"img": "",
 			"person": true,
 			"fixed": true
@@ -380,8 +380,8 @@
 		{
 			"index": 42,
 			"label": "Niccolò Minno",
-			"x": 1739,
-			"y": -79,
+			"x": 1834,
+			"y": -84,
 			"img": "niccolo.jpg",
 			"person": true,
 			"fixed": true
@@ -398,8 +398,8 @@
 		{
 			"index": 44,
 			"label": "Simona e Simone Sbariggi",
-			"x": 150,
-			"y": 13,
+			"x": 152,
+			"y": 10,
 			"img": "",
 			"person": false,
 			"fixed": true

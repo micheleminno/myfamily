@@ -137,6 +137,10 @@
 	border-top: 10px solid !important;
 }
 
+.myCursor-move {
+   cursor: url(../img/Cursor-Move.png) 16 16, ns-resize;
+}
+
 .myCursor-zoom-move {
    cursor: url(../img/move_zoom.png) 16 16, ns-resize;
 }
