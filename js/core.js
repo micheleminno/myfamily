@@ -31,7 +31,7 @@ var docRowSize, currentPage, documents;
 function init() {
 
 	d3.select("svg").remove();
-	
+
 	width = 1250;
 	height = 700;
 
@@ -76,7 +76,7 @@ function drawTree(view) {
 
 	viewIndex = view;
 	init();
-	
+
 	$
 			.get(
 					serverUrl + "/graph/3?view=" + view,
@@ -131,7 +131,9 @@ function drawTree(view) {
 																	: "./docs/"
 																			+ d.img;
 														}).attr("width", 40)
-												.attr("height", 40);
+												.attr("height", 40).on(
+														"mouseover",
+														nodeMouseovered);
 
 										currentNode
 												.append("text")
@@ -146,7 +148,7 @@ function drawTree(view) {
 														}).attr("dy", "1.5em")
 												.text(function(d) {
 													return d.label;
-												});
+												}).call(makeEditable);
 									} else {
 
 										currentNode.append("ellipse").attr(

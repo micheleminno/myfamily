@@ -24,16 +24,19 @@
 	stroke-width: 6px;
 	opacity: .8;
 }
+
 .nodeLabel {
 	fill: brown;
 	font-size: 25px;
 	font-family: cursive;
+	cursor: pointer;
 }
 
 .my-nodeLabel {
 	fill: brown;
 	font-size: 40px;
 	font-family: cursive;
+	cursor: pointer;
 }
 
 .node--selected {
@@ -81,11 +84,23 @@
 	cursor: url(../img/click-drag.png) 17.5 5, pointer;
 }
 
+.profile-image--selected {
+	cursor: pointer;
+}
+
+.action {
+	font-size: 30px;
+	font-weight: bold;
+	fill: brown;
+	cursor: pointer;
+}
+
 .label--selected {
 	fill: brown;
 	font-size: 60px;
 	font-weight: bold;
 	font-family: cursive;
+	cursor: auto;
 }
 
 .frame {
@@ -138,13 +153,13 @@
 }
 
 .myCursor-move {
-   cursor: url(../img/Cursor-Move.png) 16 16, ns-resize;
+	cursor: url(../img/Cursor-Move.png) 16 16, ns-resize;
 }
 
 .myCursor-zoom-move {
-   cursor: url(../img/move_zoom.png) 16 16, ns-resize;
+	cursor: url(../img/move_zoom.png) 16 16, ns-resize;
 }
 
 .myCursor-pointer-move {
-   cursor: url(../img/click-drag.png) 17.5 5, pointer;
+	cursor: url(../img/click-drag.png) 17.5 5, pointer;
 }

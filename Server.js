@@ -71,15 +71,15 @@ app.get('/graph/:nodeIndex', function(req, res) {
 
 	var view = profile.views[viewIndex];
 	var nodeIndexesMap = {};
-	
+
 	for (nodeIndex in view.nodes) {
 
 		var node = view.nodes[nodeIndex];
-		
+
 		node.originalIndex = graph.nodes[node.index].index;
 		node.index = parseInt(nodeIndex);
 		nodeIndexesMap[node.originalIndex] = nodeIndex;
-		
+
 		node.label = graph.nodes[node.originalIndex].label;
 		node.person = graph.nodes[node.originalIndex].person;
 		node.img = graph.nodes[node.originalIndex].img;
@@ -120,12 +120,83 @@ app.get('/graph/:nodeIndex', function(req, res) {
 
 			link.source = parseInt(nodeIndexesMap[link.source]);
 			link.target = parseInt(nodeIndexesMap[link.target]);
-			
+
 			graphView.links.push(link);
 		}
 	}
 
 	res.end(JSON.stringify(graphView));
+});
+
+app.get('/addNode', function(req, res) {
+
+	var type = req.query.type;
+	var sourceIndex = parseInt(req.query.source);
+	var targetIndex = parseInt(req.query.target);
+
+	var file = 'graph.json';
+
+	var graph = JSON.parse(fs.readFileSync(file, 'utf8'));
+
+	var nextNodeIndex = graph.nodes.length;
+	
+	if (type == "family" && sourceIndex) {
+
+		graph.nodes.push({
+			index : nextNodeIndex,
+			label : "",
+			img : "",
+			person : false
+		});
+		graph.links.push({
+			source : sourceIndex,
+			target : nextNodeIndex
+		});
+	}
+
+	fs.writeFile(file, JSON.stringify(graph, null, "\t"), 'utf8');
+
+	res.end(file + " updated");
+
+	// TODO
+	// add to the right views (family, pedigree, extended) too - of all users.
+	// A view of user U must be updated with new node N if N must be in that view of U. 
+	// Es.: N is a brother of U and the vuew is family.
+
+});
+
+app.get('/updateNode/:nodeIndex', function(req, res) {
+
+	var nodeIndex = parseInt(req.param('nodeIndex'));
+	var label = req.query.label;
+
+	var file = 'graph.json';
+
+	var graph = JSON.parse(fs.readFileSync(file, 'utf8'));
+
+	var found = false;
+	for (nodesIndex in graph.nodes) {
+
+		var currentNode = graph.nodes[nodesIndex];
+		if (currentNode.index == nodeIndex) {
+
+			found = true;
+			currentNode.label = label;
+
+			break;
+		}
+	}
+
+	if (!found) {
+
+		res.end("Node not found");
+
+	} else {
+
+		fs.writeFile(file, JSON.stringify(graph, null, "\t"), 'utf8');
+
+		res.end(file + " updated");
+	}
 });
 
 app.get('/:viewIndex/updateNode', function(req, res) {
