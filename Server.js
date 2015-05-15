@@ -70,34 +70,83 @@ app.get('/graph/:nodeIndex', function(req, res) {
 	};
 
 	var view = profile.views[viewIndex];
-
+	var nodeIndexesMap = {};
+	
 	for (nodeIndex in view.nodes) {
 
-		var node = views.nodes[nodeIndex];
+		var node = view.nodes[nodeIndex];
+		
+		node.originalIndex = graph.nodes[node.index].index;
+		node.index = parseInt(nodeIndex);
+		nodeIndexesMap[node.originalIndex] = nodeIndex;
+		
+		node.label = graph.nodes[node.originalIndex].label;
+		node.person = graph.nodes[node.originalIndex].person;
+		node.img = graph.nodes[node.originalIndex].img;
+		node.fixed = true;
+
 		graphView.nodes.push(node);
+	}
+
+	for (linkIndex in graph.links) {
+
+		var link = graph.links[linkIndex];
+		var sourceIndex = link.source;
+		var targetIndex = link.target;
+
+		var sourceIncluded = false;
+		for (nodeIndex in graphView.nodes) {
+
+			var node = view.nodes[nodeIndex];
+			if (node.originalIndex == sourceIndex) {
+
+				sourceIncluded = true;
+				break;
+			}
+		}
+
+		var targetIncluded = false;
+		for (nodeIndex in graphView.nodes) {
+
+			var node = view.nodes[nodeIndex];
+			if (node.originalIndex == targetIndex) {
+
+				targetIncluded = true;
+				break;
+			}
+		}
+
+		if (sourceIncluded && targetIncluded) {
+
+			link.source = parseInt(nodeIndexesMap[link.source]);
+			link.target = parseInt(nodeIndexesMap[link.target]);
+			
+			graphView.links.push(link);
+		}
 	}
 
 	res.end(JSON.stringify(graphView));
 });
 
-app.get('/updateNode', function(req, res) {
+app.get('/:viewIndex/updateNode', function(req, res) {
 
-	var label = req.query.label;
+	var viewIndex = parseInt(req.param('viewIndex'));
+	var nodeIndex = parseInt(req.query.nodeIndex);
 	var x = parseInt(req.query.x);
 	var y = parseInt(req.query.y);
 
-	var file = 'graph.json';
+	var file = 'node_3.json';
 
 	var graph = JSON.parse(fs.readFileSync(file, 'utf8'));
 
-	var links = graph.links;
-	var nodes = graph.nodes;
+	var graphView = graph.views[viewIndex];
+	var nodes = graphView.nodes;
 
 	var found = false;
-	for (nodeIndex in nodes) {
+	for (nodesIndex in nodes) {
 
-		var currentNode = nodes[nodeIndex];
-		if (currentNode.label == label) {
+		var currentNode = nodes[nodesIndex];
+		if (currentNode.index == nodeIndex) {
 
 			found = true;
 			currentNode.x = x;
@@ -113,10 +162,7 @@ app.get('/updateNode', function(req, res) {
 
 	} else {
 
-		fs.writeFile(file, JSON.stringify({
-			nodes : nodes,
-			links : links
-		}, null, "\t"), 'utf8');
+		fs.writeFile(file, JSON.stringify(graph, null, "\t"), 'utf8');
 
 		res.end(file + " updated");
 	}

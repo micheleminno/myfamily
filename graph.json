@@ -3,460 +3,307 @@
 		{
 			"index": 0,
 			"label": "Graziella Scippa",
-			"x": 863,
-			"y": 729,
 			"img": "graziella.png",
-			"person": true,
-			"fixed": true
+			"person": true
 		},
 		{
 			"index": 1,
 			"label": "Francesco Minno",
-			"x": 1192,
-			"y": 761,
 			"img": "francesco_minno.png",
-			"person": true,
-			"fixed": true
+			"person": true
 		},
 		{
 			"index": 2,
 			"label": "Graziella Scippa e Francesco Minno",
-			"x": 1001,
-			"y": 637,
-			"person": false,
-			"fixed": true
+			"person": false
 		},
 		{
 			"index": 3,
 			"label": "Michele Minno",
-			"x": 966,
-			"y": 388,
 			"img": "michele.jpg",
-			"person": true,
-			"fixed": true
+			"person": true
 		},
 		{
 			"index": 4,
 			"label": "Matteo Minno",
-			"x": 1171,
-			"y": 562,
 			"img": "matteo.jpg",
-			"person": true,
-			"fixed": true
+			"person": true
 		},
 		{
 			"index": 5,
 			"label": "Francesca Pazzaglia",
-			"x": 491,
-			"y": 911,
 			"img": "francesca_pazzaglia.png",
-			"person": true,
-			"fixed": true
+			"person": true
 		},
 		{
 			"index": 6,
 			"label": "Gennaro Scippa",
-			"x": 177,
-			"y": 898,
 			"img": "",
-			"person": true,
-			"fixed": true
+			"person": true
 		},
 		{
 			"index": 7,
 			"label": "Francesca Pazzaglia e Gennaro Scippa",
-			"x": 367,
-			"y": 795,
 			"img": "",
-			"person": false,
-			"fixed": true
+			"person": false
 		},
 		{
 			"index": 8,
 			"label": "Angela Scippa",
-			"x": 588,
-			"y": 510,
 			"img": "",
-			"person": true,
-			"fixed": true
+			"person": true
 		},
 		{
 			"index": 9,
 			"label": "Rosetta Scippa",
-			"x": 136,
-			"y": 604,
 			"img": "",
-			"person": true,
-			"fixed": true
+			"person": true
 		},
 		{
 			"index": 10,
 			"label": "Nicola Scippa",
-			"x": -90,
-			"y": 661,
 			"img": "",
-			"person": true,
-			"fixed": true
+			"person": true
 		},
 		{
 			"index": 11,
 			"label": "Angelo Sbariggi",
-			"x": 351,
-			"y": 569,
 			"img": "",
-			"person": true,
-			"fixed": true
+			"person": true
 		},
 		{
 			"index": 12,
 			"label": "Rosetta Scippa e Angelo Sbariggi",
-			"x": 248,
-			"y": 465,
 			"img": "",
-			"person": false,
-			"fixed": true
+			"person": false
 		},
 		{
 			"index": 13,
 			"label": "Simone Sbariggi",
-			"x": 250,
-			"y": 89,
 			"img": "simone.jpg",
-			"person": true,
-			"fixed": true
+			"person": true
 		},
 		{
 			"index": 14,
 			"label": "Carlo Sbariggi",
-			"x": 115,
-			"y": 308,
 			"img": "",
-			"person": true,
-			"fixed": true
+			"person": true
 		},
 		{
 			"index": 15,
 			"label": "Stefano Sbariggi",
-			"x": 425,
-			"y": 339,
 			"img": "stefano.jpg",
-			"person": true,
-			"fixed": true
+			"person": true
 		},
 		{
 			"index": 16,
 			"label": "Carla Lupi",
-			"x": -388,
-			"y": 664,
 			"img": "carla.png",
-			"person": true,
-			"fixed": true
+			"person": true
 		},
 		{
 			"index": 17,
 			"label": "Carla Lupi e Nicola Scippa",
-			"x": -237,
-			"y": 505,
 			"img": "",
-			"person": false,
-			"fixed": true
+			"person": false
 		},
 		{
 			"index": 18,
 			"label": "Roberto Scippa",
-			"x": -95,
-			"y": 339,
 			"img": "roberto.jpg",
-			"person": true,
-			"fixed": true
+			"person": true
 		},
 		{
 			"index": 19,
 			"label": "Silvia Scippa",
-			"x": -334,
-			"y": 325,
 			"img": "silvia.jpg",
-			"person": true,
-			"fixed": true
+			"person": true
 		},
 		{
 			"index": 20,
 			"label": "Walter Cometti",
-			"x": 753,
-			"y": 459,
 			"img": "",
-			"person": true,
-			"fixed": true
+			"person": true
 		},
 		{
 			"index": 21,
 			"label": "Raffaella Cometti",
-			"x": 673,
-			"y": 115,
 			"img": "raffaella.jpg",
-			"person": true,
-			"fixed": true
+			"person": true
 		},
 		{
 			"index": 22,
 			"label": "Angela Scippa e Walter Cometti",
-			"x": 634,
-			"y": 297,
 			"img": "",
-			"person": false,
-			"fixed": true
+			"person": false
 		},
 		{
 			"index": 23,
 			"label": "Maria Candida Manzo",
-			"x": 1415,
-			"y": 918,
 			"img": "",
-			"person": true,
-			"fixed": true
+			"person": true
 		},
 		{
 			"index": 24,
 			"label": "Armando Minno",
-			"x": 1725,
-			"y": 924,
 			"img": "",
-			"person": true,
-			"fixed": true
+			"person": true
 		},
 		{
 			"index": 25,
 			"label": "Maria Candida Manzo e Armando Minno",
-			"x": 1508,
-			"y": 810,
 			"img": "",
-			"person": false,
-			"fixed": true
+			"person": false
 		},
 		{
 			"index": 26,
 			"label": "Alberto Minno",
-			"x": 1460,
-			"y": 634,
 			"img": "",
-			"person": true,
-			"fixed": true
+			"person": true
 		},
 		{
 			"index": 27,
 			"label": "Anna Minno",
-			"x": 1810,
-			"y": 719,
 			"img": "",
-			"person": true,
-			"fixed": true
+			"person": true
 		},
 		{
 			"index": 28,
 			"label": "Alfonso Fagiolo",
-			"x": 2034,
-			"y": 688,
 			"img": "",
-			"person": true,
-			"fixed": true
+			"person": true
 		},
 		{
 			"index": 29,
 			"label": "Alfonso Fagiolo e Anna Minno",
-			"x": 1919,
-			"y": 537,
 			"img": "",
-			"person": false,
-			"fixed": true
+			"person": false
 		},
 		{
 			"index": 30,
 			"label": "Giorgio Fagiolo",
-			"x": 1952,
-			"y": 347,
 			"img": "giorgio.jpg",
-			"person": true,
-			"fixed": true
+			"person": true
 		},
 		{
 			"index": 31,
 			"label": "Martina Morici",
-			"x": 2215,
-			"y": 426,
 			"img": "martina.jpg",
-			"person": true,
-			"fixed": true
+			"person": true
 		},
 		{
 			"index": 32,
 			"label": "Giorgio Fagiolo e Martina Morici",
-			"x": 2122,
-			"y": 305,
 			"img": "",
-			"person": false,
-			"fixed": true
+			"person": false
 		},
 		{
 			"index": 33,
 			"label": "Fiorella Bianchi",
-			"x": 1698,
-			"y": 499,
 			"img": "fiorella.png",
-			"person": true,
-			"fixed": true
+			"person": true
 		},
 		{
 			"index": 34,
 			"label": "Alberto Minno e Fiorella Bianchi",
-			"x": 1561,
-			"y": 395,
 			"img": "",
-			"person": false,
-			"fixed": true
+			"person": false
 		},
 		{
 			"index": 35,
 			"label": "Lorenzo Minno",
-			"x": 1685,
-			"y": 172,
 			"img": "lorenzo.jpg",
-			"person": true,
-			"fixed": true
+			"person": true
 		},
 		{
 			"index": 36,
 			"label": "Alessandra Minno",
-			"x": 1381,
-			"y": 204,
 			"img": "alessandra.jpg",
-			"person": true,
-			"fixed": true
+			"person": true
 		},
 		{
 			"index": 37,
 			"label": "Mirko Caravaggi",
-			"x": 890,
-			"y": 84,
 			"img": "",
-			"person": true,
-			"fixed": true
+			"person": true
 		},
 		{
 			"index": 38,
 			"label": "Mirko Caravaggi e Raffaella Cometti",
-			"x": 737,
-			"y": -18,
 			"img": "",
-			"person": false,
-			"fixed": true
+			"person": false
 		},
 		{
 			"index": 39,
 			"label": "Daniele Caravaggi",
-			"x": 679,
-			"y": -191,
 			"img": "",
-			"person": true,
-			"fixed": true
+			"person": true
 		},
 		{
 			"index": 40,
 			"label": "Laura Marini",
-			"x": 2017,
-			"y": 143,
 			"img": "laura.jpg",
-			"person": true,
-			"fixed": true
+			"person": true
 		},
 		{
 			"index": 41,
 			"label": "Laura Marini e Lorenzo Minno",
-			"x": 1781,
-			"y": 65,
 			"img": "",
-			"person": false,
-			"fixed": true
+			"person": false
 		},
 		{
 			"index": 42,
 			"label": "Niccolò Minno",
-			"x": 1834,
-			"y": -84,
 			"img": "niccolo.jpg",
-			"person": true,
-			"fixed": true
+			"person": true
 		},
 		{
 			"index": 43,
 			"label": "Simona Ferraro",
-			"x": -46,
-			"y": 53,
 			"img": "",
-			"person": true,
-			"fixed": true
+			"person": true
 		},
 		{
 			"index": 44,
 			"label": "Simona e Simone Sbariggi",
-			"x": 152,
-			"y": 10,
 			"img": "",
-			"person": false,
-			"fixed": true
+			"person": false
 		},
 		{
 			"index": 45,
 			"label": "Lorenzo Sbariggi",
-			"x": 377,
-			"y": -112,
 			"img": "",
-			"person": true,
-			"fixed": true
+			"person": true
 		},
 		{
 			"index": 46,
 			"label": "Matteo Sbariggi",
-			"x": -28,
-			"y": -143,
 			"img": "",
-			"person": true,
-			"fixed": true
+			"person": true
 		},
 		{
 			"index": 47,
 			"label": "Maurizio Ferrara",
-			"x": 1154,
-			"y": 227,
 			"img": "maurizio.png",
-			"person": true,
-			"fixed": true
+			"person": true
 		},
 		{
 			"index": 48,
 			"label": "Martina Ferrara",
-			"x": 1117,
-			"y": -144,
 			"img": "martina_ferrara.png",
-			"person": true,
-			"fixed": true
+			"person": true
 		},
 		{
 			"index": 49,
 			"label": "Francesco Ferrara",
-			"x": 1377,
-			"y": -71,
 			"img": "francesco_ferrara.png",
-			"person": true,
-			"fixed": true
+			"person": true
 		},
 		{
 			"index": 50,
 			"label": "Alessandra Minno e Maurizio Ferrara",
-			"x": 1236,
-			"y": 118,
 			"img": "",
-			"person": false,
-			"fixed": true
+			"person": false
 		}
 	],
 	"links": [

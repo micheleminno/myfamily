@@ -382,8 +382,8 @@ function nodeDragended(d) {
 	if (!onDetail) {
 		d3.select(this).classed("dragging", false);
 
-		$.get(serverUrl + '/updateNode?label=' + d.label + '&x=' + d.x + '&y='
-				+ d.y);
+		$.get(serverUrl + '/' + viewIndex + '/updateNode?nodeIndex='
+				+ d.originalIndex + '&x=' + d.x + '&y=' + d.y);
 	}
 }
 
