@@ -76,7 +76,17 @@ app.get('/graph/:nodeIndex', function(req, res) {
 
 		var node = view.nodes[nodeIndex];
 
-		node.originalIndex = graph.nodes[node.index].index;
+		for (graphNodeIndex in graph.nodes) {
+
+			var graphNode = graph.nodes[graphNodeIndex];
+
+			if (graphNode.index == node.index) {
+
+				node.originalIndex = graphNodeIndex;
+				break;
+			}
+		}
+
 		node.index = parseInt(nodeIndex);
 		nodeIndexesMap[node.originalIndex] = nodeIndex;
 
@@ -134,36 +144,180 @@ app.get('/addNode', function(req, res) {
 	var sourceIndex = parseInt(req.query.source);
 	var targetIndex = parseInt(req.query.target);
 
-	var file = 'graph.json';
-
-	var graph = JSON.parse(fs.readFileSync(file, 'utf8'));
+	var graphFile = 'graph.json';
+	var graph = JSON.parse(fs.readFileSync(graphFile, 'utf8'));
 
 	var nextNodeIndex = graph.nodes.length;
-	
-	if (type == "family" && sourceIndex) {
+	var isPerson = type == "person" ? true : false;
+	var label = "";
 
-		graph.nodes.push({
-			index : nextNodeIndex,
-			label : "",
-			img : "",
-			person : false
-		});
+	if (isPerson) {
+
+		if (sourceIndex) {
+
+			label = "New child";
+		} else if (targetIndex) {
+
+			label = "New parent";
+		}
+	} else {
+
+		label = "New family node";
+	}
+
+	graph.nodes.push({
+		index : nextNodeIndex,
+		label : label,
+		img : "",
+		person : isPerson
+	});
+
+	if (sourceIndex) {
+
 		graph.links.push({
 			source : sourceIndex,
 			target : nextNodeIndex
 		});
+	} else if (targetIndex) {
+
+		graph.links.push({
+			source : nextNodeIndex,
+			target : targetIndex
+		});
 	}
 
-	fs.writeFile(file, JSON.stringify(graph, null, "\t"), 'utf8');
-
-	res.end(file + " updated");
+	fs.writeFile(graphFile, JSON.stringify(graph, null, "\t"), 'utf8');
 
 	// TODO
-	// add to the right views (family, pedigree, extended) too - of all users.
-	// A view of user U must be updated with new node N if N must be in that view of U. 
-	// Es.: N is a brother of U and the vuew is family.
+	// add to the right views (family, pedigree, extended) too - of all
+	// users.
+	// A view of user U must be updated with new node N if N must be in
+	// that
+	// view of U.
+	// Es.: N is a brother of U and the view is family.
+	// Now added always to the extended family view
 
+	var graphViewFile = 'node_3.json';
+	var graphView = JSON.parse(fs.readFileSync(graphViewFile, 'utf8'));
+
+	var nextNodeIndex = graphView.views[2].nodes.length;
+
+	var linkedNodeIndex = sourceIndex ? sourceIndex : targetIndex;
+	var x = graphView.views[2].nodes[linkedNodeIndex]["x"];
+	var y = graphView.views[2].nodes[linkedNodeIndex]["y"];
+
+	var randomOffset = Math.random() * 100 - 50;
+
+	var newNodeX = x + randomOffset;
+
+	var newNodeY = sourceIndex ? y - randomOffset : y + randomOffset;
+
+	graphView.views[2].nodes.push({
+		index : nextNodeIndex,
+		x : newNodeX,
+		y : newNodeY
+	});
+
+	fs.writeFile(graphViewFile, JSON.stringify(graphView, null, "\t"), 'utf8');
+
+	res.end(graphFile + " and " + graphViewFile + " updated");
 });
+
+app
+		.get(
+				'/removeNode/:nodeIndex',
+				function(req, res) {
+
+					var nodeIndex = parseInt(req.param('nodeIndex'));
+
+					var graphFile = 'graph.json';
+					var graph = JSON.parse(fs.readFileSync(graphFile, 'utf8'));
+					var nodeIndexesToDecrement = [];
+
+					var found = false;
+
+					var clonedNodes = graph.nodes.slice();
+
+					for (currentNodeIndex in clonedNodes) {
+
+						var currentNode = clonedNodes[currentNodeIndex];
+
+						if (found) {
+
+							nodeIndexesToDecrement.push(currentNode.index);
+							graph.nodes[currentNodeIndex - 1]["index"]--;
+						
+						} else if (currentNode.index == nodeIndex) {
+
+							graph.nodes.splice(currentNodeIndex, 1);
+							found = true;
+						}
+					}
+
+					console.log(nodeIndexesToDecrement);
+
+					var clonedLinks = graph.links.slice();
+
+					var decrement = 0;
+
+					for (currentLinkIndex in clonedLinks) {
+
+						var currentLink = clonedLinks[currentLinkIndex];
+
+						if (currentLink.source == nodeIndex
+								|| currentLink.target == nodeIndex) {
+
+							graph.links.splice(currentLinkIndex - decrement, 1);
+							decrement++;
+
+						} else {
+
+							if (nodeIndexesToDecrement
+									.indexOf(currentLink.source) > -1) {
+
+								graph.links[currentLinkIndex - decrement]["source"]--;
+							}
+							if (nodeIndexesToDecrement
+									.indexOf(currentLink.target) > -1) {
+
+								graph.links[currentLinkIndex - decrement]["target"]--;
+							}
+						}
+					}
+
+					fs.writeFile(graphFile, JSON.stringify(graph, null, "\t"),
+							'utf8');
+
+					// Now removed always from the extended family view
+
+					var graphViewFile = 'node_3.json';
+					var graphView = JSON.parse(fs.readFileSync(graphViewFile,
+							'utf8'));
+
+					var found = false;
+
+					var clonedViewNodes = graphView.views[2].nodes.slice();
+
+					for (currentViewNodeIndex in clonedViewNodes) {
+
+						var currentNode = clonedViewNodes[currentViewNodeIndex];
+
+						if (found) {
+
+							graphView.views[2].nodes[currentViewNodeIndex - 1]["index"]--;
+						} else if (currentNode.index == nodeIndex) {
+
+							graphView.views[2].nodes.splice(
+									currentViewNodeIndex, 1);
+							found = true;
+						}
+					}
+
+					fs.writeFile(graphViewFile, JSON.stringify(graphView, null,
+							"\t"), 'utf8');
+
+					res.end(graphFile + " and " + graphViewFile + " updated");
+				});
 
 app.get('/updateNode/:nodeIndex', function(req, res) {
 

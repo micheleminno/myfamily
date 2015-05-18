@@ -304,12 +304,6 @@
 			"label": "Alessandra Minno e Maurizio Ferrara",
 			"img": "",
 			"person": false
-		},
-		{
-			"index": 51,
-			"label": "",
-			"img": "",
-			"person": false
 		}
 	],
 	"links": [
@@ -512,10 +506,6 @@
 		{
 			"source": 50,
 			"target": 49
-		},
-		{
-			"source": 3,
-			"target": 51
 		}
 	]
 }

@@ -1,21 +1,3 @@
-function nodeMouseovered(d) {
-
-	var selection = d3.select(this);
-
-	var profileImage = selection[0][0];
-
-	var parent = d3.select(this.parentNode);
-	parent.append("text").attr("x", profileImage.x.baseVal.value - 150).attr(
-			"y", profileImage.y.baseVal.value - 40).text(
-			"Add a family node as a parent").attr("class", "action").on(
-			"click", addFamilyAsParent);
-}
-
-function addFamilyAsParent(d) {
-
-	$.get(serverUrl + '/addNode?type=family&source=' + d.originalIndex);
-}
-
 function makeEditable(d) {
 
 	this.on("mouseover", function() {
