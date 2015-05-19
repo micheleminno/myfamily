@@ -35,7 +35,7 @@ function init() {
 	d3.select("svg").remove();
 
 	width = 1250;
-	height = 700;
+	height = 630;
 
 	zoom = d3.behavior.zoom().scaleExtent([ .5, 4 ]).on("zoom", zoomed);
 

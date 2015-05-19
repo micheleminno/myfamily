@@ -276,7 +276,7 @@ function clickNode(d) {
 	var centerY = height / 1.7;
 	var maxRowSize = 10;
 
-	selectedNode.append("circle").attr('r', 650).attr("cx", centerX).attr("cy",
+	selectedNode.append("circle").attr('r', 615).attr("cx", centerX).attr("cy",
 			centerY).attr('class', "node--selected").on("click",
 			profileNodeClicked).attr("cursor", "auto");
 
