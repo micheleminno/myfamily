@@ -227,6 +227,7 @@ function closeDocClicked() {
 
 function profileNodeClicked(d) {
 
+	// TODO - upload new profile image
 	d3.event.stopPropagation();
 }
 

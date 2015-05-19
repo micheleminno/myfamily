@@ -87,6 +87,8 @@ function drawTree(view) {
 
 						var graphView = JSON.parse(graphViewString);
 
+						graphView = assignLevels(graphView);
+
 						if (view != 2) {
 
 							svg.on('contextmenu', null);
@@ -101,7 +103,11 @@ function drawTree(view) {
 						link.each(function(d) {
 
 							currentLink = d3.select(this);
-							currentLink.attr("class", "link");
+							currentLink.attr("class", "link").attr(
+									"stroke-width", function(d) {
+
+										return 30 / d.level + "px";
+									});
 						});
 
 						node = node.data(graphView.nodes).enter().append("g");
@@ -109,8 +115,7 @@ function drawTree(view) {
 						node
 								.each(function(d) {
 
-									currentNode = d3.select(this).append("g")
-											.attr("class", "tree-leaf");
+									currentNode = d3.select(this).append("g");
 
 									currentNode.call(nodeDrag);
 
@@ -131,10 +136,18 @@ function drawTree(view) {
 														function(d) {
 															if (d.label == "Michele Minno") {
 																return "my-node";
+															} else if (d.acquired) {
+																return "node acquired";
+															} else if (d.leaf) {
+																return "node leaf";
 															} else {
 																return "node";
 															}
-														}).attr("r", 50);
+														})
+												.attr("r", function(d) {
+
+													return 125 / d.level;
+												});
 
 										currentNode
 												.append("image")
@@ -171,8 +184,13 @@ function drawTree(view) {
 										}
 
 										currentNode.append("ellipse").attr(
-												"rx", 20).attr("ry", 10).attr(
-												"fill", "brown").attr("class",
+												"rx", function(d) {
+
+													return 100 / d.level;
+												}).attr("ry", function(d) {
+
+											return 50 / d.level;
+										}).attr("fill", "brown").attr("class",
 												"myCursor-move");
 									}
 								});

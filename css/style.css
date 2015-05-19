@@ -3,7 +3,6 @@
 }
 
 .link {
-	stroke-width: 5px;
 	stroke: brown;
 	fill: none;
 	opacity: .6;
@@ -12,9 +11,25 @@
 .node {
 	cursor: url(../img/click-drag.png) 17.5 5, pointer;
 	stroke: brown;
-	fill: green;
+	fill: brown;
 	stroke-width: 1.5px;
 	opacity: .4;
+}
+
+.leaf {
+	cursor: url(../img/click-drag.png) 17.5 5, pointer;
+	stroke: brown;
+	fill: green;
+	stroke-width: 1.5px;
+	opacity: .7;
+}
+
+.acquired {
+	cursor: url(../img/click-drag.png) 17.5 5, pointer;
+	stroke: brown;
+	fill: green;
+	stroke-width: 1.5px;
+	opacity: .2;
 }
 
 .my-node {
