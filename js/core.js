@@ -66,11 +66,8 @@ function init() {
 	streamWidth = 1600;
 	streamY = 1130;
 	streamX = 100;
-	streamNode;
 
 	docRowSize = 16;
-	currentPage;
-	documents;
 }
 
 var viewIndex;
@@ -223,18 +220,20 @@ function drawTree(view) {
 										"rx", 20).attr("ry", 20).attr("class",
 										"data-stream");
 
-						$.get(serverUrl + "/documents", function(
-								documentsString) {
+						$.get(
+								serverUrl + "/documents/3?view="
+										+ selectedViewId, function(
+										documentsString) {
 
-							documents = JSON.parse(documentsString);
+									documents = JSON.parse(documentsString);
 
-							var documentsSize = documents.data.length;
-							currentPage = Math
-									.floor(documentsSize / docRowSize);
-							maxPage = currentPage;
+									var documentsSize = documents.length;
+									currentPage = Math.floor(documentsSize
+											/ docRowSize);
+									maxPage = currentPage;
 
-							populateThumbnails(currentPage, true);
-						});
+									populateThumbnails(currentPage, true);
+								});
 					});
 }
 
@@ -244,9 +243,16 @@ function populateThumbnails(currentPage, back) {
 
 	var minIndex = currentPage * docRowSize;
 
-	var currentDocuments = documents.data.filter(function(d) {
+	for (docIndex in documents) {
 
-		return d.index >= minIndex && d.index < minIndex + docRowSize;
+		var doc = documents[docIndex];
+		doc.index = docIndex;
+	}
+
+	var currentDocuments = documents.filter(function(d) {
+
+		return d.index >= minIndex
+				&& d.index < minIndex + docRowSize;
 	});
 
 	var doc = streamNode.selectAll(".doc");

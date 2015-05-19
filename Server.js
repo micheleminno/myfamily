@@ -22,7 +22,7 @@ app.get('/documents', function(req, res) {
 	res.end(JSON.stringify(documents));
 });
 
-app.get('/documents/:nodeIndex', function(req, res) {
+app.get('/documents/tagged/:nodeIndex', function(req, res) {
 
 	var nodeIndex = req.param('nodeIndex');
 
@@ -36,6 +36,47 @@ app.get('/documents/:nodeIndex', function(req, res) {
 
 			var taggedNode = d.tagged[taggedIndex];
 			if (taggedNode["node"] == parseInt(nodeIndex)) {
+				found = true;
+				break;
+			}
+		}
+
+		if (found) {
+			nodeDocuments.push(d);
+		}
+	});
+
+	res.end(JSON.stringify(nodeDocuments));
+});
+
+app.get('/documents/:nodeIndex', function(req, res) {
+
+	var nodeIndex = req.param('nodeIndex');
+	var viewIndex = req.query.view;
+
+	var documents = JSON.parse(fs.readFileSync('documents.json', 'utf8'));
+	var profile = JSON.parse(fs.readFileSync('node_' + nodeIndex + '.json',
+			'utf8'));
+	
+	var view = profile.views[viewIndex];
+	var viewNodeIds = [];
+	
+	for (nodeIndex in view.nodes) {
+
+		var node = view.nodes[nodeIndex];
+		viewNodeIds.push(node.index);
+	}
+	
+	var nodeDocuments = [];
+
+	documents["data"].forEach(function(d) {
+
+		var found = false;
+		for (taggedIndex in d.tagged) {
+
+			var taggedNode = d.tagged[taggedIndex];
+			if (viewNodeIds.indexOf(taggedNode["node"]) > -1) {
+				
 				found = true;
 				break;
 			}
@@ -246,7 +287,7 @@ app
 
 							nodeIndexesToDecrement.push(currentNode.index);
 							graph.nodes[currentNodeIndex - 1]["index"]--;
-						
+
 						} else if (currentNode.index == nodeIndex) {
 
 							graph.nodes.splice(currentNodeIndex, 1);

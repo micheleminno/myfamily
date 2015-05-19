@@ -56,7 +56,7 @@
 
 .node--selected {
 	opacity: 1;
-	fill: green;
+	fill: DeepSkyBlue;
 	stroke: black;
 	stroke-width: 4px;
 }

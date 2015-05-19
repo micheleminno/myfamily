@@ -227,7 +227,6 @@ function closeDocClicked() {
 
 function profileNodeClicked(d) {
 
-	// TODO - upload new profile image
 	d3.event.stopPropagation();
 }
 
@@ -301,7 +300,7 @@ function clickNode(d) {
 
 	$
 			.get(
-					serverUrl + "/documents/" + d.index,
+					serverUrl + "/documents/tagged/" + d.index,
 					function(documentsString) {
 
 						var documents = JSON.parse(documentsString);
