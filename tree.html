@@ -74,7 +74,18 @@
 		</div>
 	</nav>
 
+
+
 	<div id="tree"></div>
+
+	<iframe id="upload_target" name="upload_target" src="#"
+		style="display: none;"></iframe>
+
+	<form target="upload_target" style="display: none" id="uploadForm"
+		enctype="multipart/form-data" method="post">
+		<input type="file" id="file-upload" name="userProfileImage" />
+	</form>
+
 </body>
 
 <script src="lib/jquery.js"></script>
@@ -84,6 +95,5 @@
 <script src="js/events.js" charset="utf-8"></script>
 <script src="js/utils.js" charset="utf-8"></script>
 <script src="js/core.js" charset="utf-8"></script>
-
 
 </html>

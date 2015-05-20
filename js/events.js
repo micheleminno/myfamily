@@ -230,6 +230,43 @@ function profileNodeClicked(d) {
 	d3.event.stopPropagation();
 }
 
+var nodeIdToUpdate;
+var fileName;
+
+$('#file-upload').change(
+		function() {
+
+			$('#uploadForm').attr('action',
+					serverUrl + '/profileImage/' + nodeIdToUpdate);
+			$('#uploadForm').submit();
+
+			var filePath = $(this).val();
+			fileName = filePath.substring(filePath.lastIndexOf("\\") + 1);
+
+			setTimeout(continueExecution, 500);
+		});
+
+function continueExecution() {
+
+	svg.selectAll(".profile-image").filter(function(d) {
+		
+		return d.index == nodeIdToUpdate;
+	
+	}).attr("xlink:href", "./docs/" + fileName);
+
+	svg.selectAll(".profile-image--selected").attr("xlink:href",
+			"./docs/" + fileName);
+};
+
+function profileImageClicked(d) {
+
+	nodeIdToUpdate = d.index;
+
+	$('#file-upload').val(null);
+	$('#file-upload').click();
+	d3.event.stopPropagation();
+}
+
 function zoomedDocClicked(d) {
 
 	d3.event.stopPropagation();
@@ -280,20 +317,23 @@ function clickNode(d) {
 			centerY).attr('class', "node--selected").on("click",
 			profileNodeClicked).attr("cursor", "auto");
 
-	var profileContaner = selectedNode.append("g").on("mouseover",
-			profileMouseovered).on("mouseout", profileMouseouted);
+	var profileContainer = selectedNode.append("g").on("mouseover",
+			profileMouseovered).on("mouseout", profileMouseouted).on("click",
+			profileNodeClicked);
 
-	profileContaner.append("rect").attr("width", 220).attr("height", 220).attr(
-			'class', "profile-frame").attr("x", centerX - 155).attr("y", -10);
+	profileContainer.append("rect").attr("width", 220).attr("height", 220)
+			.attr('class', "profile-frame").attr("x", centerX - 155).attr("y",
+					-10);
 
-	profileContaner.append("image").attr("width", 200).attr("height", 200)
+	profileContainer.append("image").attr("width", 200).attr("height", 200)
 			.attr('class', "profile-image--selected").attr("x", centerX - 145)
 			.attr("y", 0).attr(
 					"xlink:href",
 					function(d) {
 						return d.img == "" ? "./docs/default_profile.jpg"
 								: "./docs/" + d.img;
-					}).on("click", profileNodeClicked).attr("cursor", "auto");
+					}).on("click", profileImageClicked).attr("cursor", "auto")
+			.append("title").text("Click to upload a new profile image");
 
 	selectedNode.append("text").attr('class', "label--selected").attr("y", -50)
 			.attr("x", centerX - 230).text(d.label);

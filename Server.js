@@ -1,9 +1,32 @@
 var express = require("express");
+var multer = require("multer");
 var cors = require("cors");
 var fs = require('fs');
 
 var app = express();
 app.use(cors());
+
+var done = false;
+app.use(multer({
+
+	dest : './docs/',
+
+	rename : function(fieldname, filename) {
+
+		return filename;
+	},
+
+	onFileUploadStart : function(file) {
+
+		console.log(file.originalname + ' is starting ...');
+	},
+
+	onFileUploadComplete : function(file) {
+
+		console.log(file.fieldname + ' uploaded to ' + file.path);
+		done = true;
+	}
+}));
 
 /* Start the Server */
 
@@ -14,6 +37,41 @@ app.listen(8090, function() {
 app.get('/', function(req, res) {
 
 	res.sendfile('myfamily/index.html');
+});
+
+app.post('/profileImage/:nodeIndex', function(req, res) {
+
+	console.log("uploading profile image...");
+
+	var nodeIndex = req.param('nodeIndex');
+
+	if (done == true) {
+
+		console.log(req.files);
+		var graphFile = 'graph.json';
+
+		var graph = JSON.parse(fs.readFileSync(graphFile, 'utf8'));
+
+		var nodes = graph.nodes;
+		for (currentNodeIndex in nodes) {
+
+			var node = nodes[currentNodeIndex];
+			if (node.index == nodeIndex) {
+
+				if (node.img && node.img != "") {
+
+					// Remove the current profile image
+					fs.unlinkSync(__dirname + "/docs/" + node.img);
+				}
+
+				node.img = req.files.userProfileImage.originalname;
+			}
+		}
+
+		fs.writeFile(graphFile, JSON.stringify(graph, null, "\t"), 'utf8');
+
+		res.end("Profile image uploaded.");
+	}
 });
 
 app.get('/documents', function(req, res) {
@@ -57,16 +115,16 @@ app.get('/documents/:nodeIndex', function(req, res) {
 	var documents = JSON.parse(fs.readFileSync('documents.json', 'utf8'));
 	var profile = JSON.parse(fs.readFileSync('node_' + nodeIndex + '.json',
 			'utf8'));
-	
+
 	var view = profile.views[viewIndex];
 	var viewNodeIds = [];
-	
+
 	for (nodeIndex in view.nodes) {
 
 		var node = view.nodes[nodeIndex];
 		viewNodeIds.push(node.index);
 	}
-	
+
 	var nodeDocuments = [];
 
 	documents["data"].forEach(function(d) {
@@ -76,7 +134,7 @@ app.get('/documents/:nodeIndex', function(req, res) {
 
 			var taggedNode = d.tagged[taggedIndex];
 			if (viewNodeIds.indexOf(taggedNode["node"]) > -1) {
-				
+
 				found = true;
 				break;
 			}
