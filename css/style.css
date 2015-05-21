@@ -2,6 +2,16 @@
 	fill: white;
 }
 
+.ground {
+	fill: orange;
+	opacity: .6;
+}
+
+.ground--selected {
+	fill: orange;
+	opacity: 1;
+}
+
 .link {
 	stroke: brown;
 	fill: none;

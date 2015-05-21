@@ -7,12 +7,13 @@
 			"month": 2,
 			"day": 23,
 			"file": "photo_mic_rob.jpg",
+			"owner": 3,
 			"tagged": [
 				{
 					"node": 3,
 					"position": {
-						"x": 512,
-						"y": 300
+						"x": 477,
+						"y": 207
 					}
 				},
 				{
@@ -31,12 +32,13 @@
 			"month": 4,
 			"day": 15,
 			"file": "photo_famiglia.jpg",
+			"owner": 3,
 			"tagged": [
 				{
 					"node": 0,
 					"position": {
-						"x": 443,
-						"y": 436
+						"x": 472,
+						"y": 315
 					}
 				},
 				{
@@ -69,6 +71,7 @@
 			"month": 4,
 			"day": 15,
 			"file": "photo_laurea.jpg",
+			"owner": 3,
 			"tagged": [
 				{
 					"node": 3,
@@ -113,6 +116,7 @@
 			"year": 2008,
 			"month": 4,
 			"day": 15,
+			"owner": 3,
 			"tagged": [
 				{
 					"node": 3,
@@ -131,8 +135,8 @@
 				{
 					"node": 5,
 					"position": {
-						"x": 527,
-						"y": 425
+						"x": 397,
+						"y": 477
 					}
 				}
 			]
@@ -144,6 +148,7 @@
 			"month": 4,
 			"day": 15,
 			"file": "laurea_2.jpg",
+			"owner": 3,
 			"tagged": [
 				{
 					"node": 3,
@@ -178,6 +183,7 @@
 			"month": 4,
 			"day": 15,
 			"file": "laurea_3.jpg",
+			"owner": 3,
 			"tagged": [
 				{
 					"node": 3,
@@ -228,6 +234,7 @@
 			"year": 2010,
 			"month": 5,
 			"file": "thai_1.jpg",
+			"owner": 3,
 			"tagged": [
 				{
 					"node": 4,
@@ -244,6 +251,7 @@
 			"year": 2010,
 			"month": 5,
 			"file": "thai_2.jpg",
+			"owner": 3,
 			"tagged": [
 				{
 					"node": 4,
@@ -260,6 +268,7 @@
 			"year": 2010,
 			"month": 5,
 			"file": "thai_3.jpg",
+			"owner": 3,
 			"tagged": [
 				{
 					"node": 4,
@@ -276,6 +285,7 @@
 			"year": 2010,
 			"month": 5,
 			"file": "thai_4.jpg",
+			"owner": 3,
 			"tagged": [
 				{
 					"node": 4,
@@ -292,6 +302,7 @@
 			"year": 2010,
 			"month": 5,
 			"file": "thai_5.jpg",
+			"owner": 3,
 			"tagged": [
 				{
 					"node": 4,
@@ -308,6 +319,7 @@
 			"year": 2010,
 			"month": 5,
 			"file": "thai_6.jpg",
+			"owner": 3,
 			"tagged": [
 				{
 					"node": 4,
@@ -324,6 +336,7 @@
 			"year": 2010,
 			"month": 5,
 			"file": "thai_7.jpg",
+			"owner": 3,
 			"tagged": [
 				{
 					"node": 4,
@@ -340,6 +353,7 @@
 			"year": 2010,
 			"month": 5,
 			"file": "thai_8.jpg",
+			"owner": 3,
 			"tagged": [
 				{
 					"node": 4,
@@ -356,6 +370,7 @@
 			"year": 2010,
 			"month": 5,
 			"file": "thai_9.jpg",
+			"owner": 3,
 			"tagged": [
 				{
 					"node": 4,
@@ -372,6 +387,7 @@
 			"year": 2010,
 			"month": 5,
 			"file": "thai_10.jpg",
+			"owner": 3,
 			"tagged": [
 				{
 					"node": 4,
@@ -388,6 +404,7 @@
 			"year": 2014,
 			"month": 9,
 			"file": "photo_mic_zia_carla.jpg",
+			"owner": 3,
 			"tagged": [
 				{
 					"node": 3,
@@ -411,12 +428,13 @@
 			"year": 2014,
 			"month": 10,
 			"file": "photo_mic_matt.jpg",
+			"owner": 3,
 			"tagged": [
 				{
 					"node": 3,
 					"position": {
-						"x": 540,
-						"y": 477
+						"x": 480,
+						"y": 467
 					}
 				},
 				{
@@ -433,6 +451,7 @@
 			"title": "Ricette di nonna",
 			"year": 2014,
 			"file": "ricette.pdf",
+			"owner": 3,
 			"tagged": [
 				{
 					"node": 5,
@@ -449,6 +468,7 @@
 			"year": 2014,
 			"month": 11,
 			"file": "famiglia_ferrara.jpg",
+			"owner": 3,
 			"tagged": [
 				{
 					"node": 36,
@@ -479,6 +499,14 @@
 					}
 				}
 			]
+		},
+		{
+			"index": 20,
+			"title": "Chi è?",
+			"year": 1890,
+			"file": "old.jpg",
+			"owner": 3,
+			"tagged": []
 		}
 	]
 }

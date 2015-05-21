@@ -80,6 +80,25 @@ app.get('/documents', function(req, res) {
 	res.end(JSON.stringify(documents));
 });
 
+app.get('/documents/owner/:nodeIndex', function(req, res) {
+
+	var nodeIndex = req.param('nodeIndex');
+
+	var documents = JSON.parse(fs.readFileSync('documents.json', 'utf8'));
+	var resultDocuments = [];
+
+	for (docIndex in documents) {
+
+		var doc = documents[docIndex];
+		if (doc.owner == nodeIndex) {
+
+			resultDocuments.push(doc);
+		}
+	}
+
+	res.end(JSON.stringify(resultDocuments));
+});
+
 app.get('/documents/tagged/:nodeIndex', function(req, res) {
 
 	var nodeIndex = req.param('nodeIndex');
@@ -87,22 +106,35 @@ app.get('/documents/tagged/:nodeIndex', function(req, res) {
 	var documents = JSON.parse(fs.readFileSync('documents.json', 'utf8'));
 	var nodeDocuments = [];
 
-	documents["data"].forEach(function(d) {
+	if (nodeIndex == -1) {
 
-		var found = false;
-		for (taggedIndex in d.tagged) {
+		documents["data"].forEach(function(d) {
 
-			var taggedNode = d.tagged[taggedIndex];
-			if (taggedNode["node"] == parseInt(nodeIndex)) {
-				found = true;
-				break;
+			if (d.tagged.length == 0) {
+
+				nodeDocuments.push(d);
 			}
-		}
+		});
 
-		if (found) {
-			nodeDocuments.push(d);
-		}
-	});
+	} else {
+
+		documents["data"].forEach(function(d) {
+
+			var found = false;
+			for (taggedIndex in d.tagged) {
+
+				var taggedNode = d.tagged[taggedIndex];
+				if (taggedNode["node"] == parseInt(nodeIndex)) {
+					found = true;
+					break;
+				}
+			}
+
+			if (found) {
+				nodeDocuments.push(d);
+			}
+		});
+	}
 
 	res.end(JSON.stringify(nodeDocuments));
 });

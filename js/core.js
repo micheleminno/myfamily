@@ -49,6 +49,20 @@ function init() {
 	svg.append("circle").attr("r", width * 10).attr("class", "lens").style(
 			"pointer-events", "all").call(zoom);
 
+	svg.append("rect").attr("class", "ground").attr("width", 600).attr(
+			"height", 200).attr("x", -700).attr("y", 1100).on("click",
+			groundClicked).attr("cursor", "pointer");
+
+	svg.append("text").attr('class', "nodeLabel").attr("y", 1080).attr("x",
+			-650).text("Heritage");
+
+	svg.append("rect").attr("class", "ground").attr("width", 500).attr(
+			"height", 200).attr("x", 1900).attr("y", 1100).on("click",
+			groundClicked).attr("cursor", "pointer");
+
+	svg.append("text").attr('class', "nodeLabel").attr("y", 1080).attr("x",
+			2150).text("Heritage");
+
 	container = svg.append("g");
 
 	force = d3.layout.force().size([ width, height ]).charge(-800)
@@ -251,8 +265,7 @@ function populateThumbnails(currentPage, back) {
 
 	var currentDocuments = documents.filter(function(d) {
 
-		return d.index >= minIndex
-				&& d.index < minIndex + docRowSize;
+		return d.index >= minIndex && d.index < minIndex + docRowSize;
 	});
 
 	var doc = streamNode.selectAll(".doc");

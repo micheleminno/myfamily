@@ -15,6 +15,11 @@ function makeEditable(d) {
 			var label = selection[0][0];
 			label.textContent = result;
 
+			var node = d3.select(this.parentNode.parentNode);
+			var selection = node.selectAll(".nodeLabel");
+			var label = selection[0][0];
+			label.textContent = result;
+
 			$.get(serverUrl + '/updateNode/' + d.index + '?label=' + result);
 		}
 
@@ -43,27 +48,28 @@ function thumbnailMouseovered(d) {
 				doc.attributes.title.nodeValue);
 
 		if (!onDetail) {
+
 			parent.append("text").attr("class", "thumbnailText").attr("x",
 					doc.x.baseVal.value).attr("y", doc.y.baseVal.value + 235)
 					.text(doc.attributes.date.nodeValue);
+
+			node.classed("node--tagged", function(n) {
+
+				if (d.tagged) {
+
+					for (taggedIndex in d.tagged) {
+
+						var taggedNode = d.tagged[taggedIndex];
+						if (taggedNode["node"] == parseInt(n.index)) {
+							return true;
+						}
+					}
+				}
+
+				return false;
+			});
 		}
 	}
-
-	node.classed("node--tagged", function(n) {
-
-		if (d.tagged) {
-
-			for (taggedIndex in d.tagged) {
-
-				var taggedNode = d.tagged[taggedIndex];
-				if (taggedNode["node"] == parseInt(n.index)) {
-					return true;
-				}
-			}
-		}
-
-		return false;
-	});
 };
 
 function thumbnailMouseouted(d) {
@@ -249,9 +255,9 @@ $('#file-upload').change(
 function continueExecution() {
 
 	svg.selectAll(".profile-image").filter(function(d) {
-		
+
 		return d.index == nodeIdToUpdate;
-	
+
 	}).attr("xlink:href", "./docs/" + fileName);
 
 	svg.selectAll(".profile-image--selected").attr("xlink:href",
@@ -292,11 +298,118 @@ function forwardMain() {
 	d3.event.stopPropagation();
 }
 
-var selectedNode;
 var onDetail = false;
 
 var docDrag = d3.behavior.drag().on("dragstart", docDragstarted).on("drag",
 		docDragged).on("dragend", docDragended);
+
+function placeDocuments(serviceUrl, selectedNode, nodeIndex, centerX, centerY,
+		maxRowSize, isHeritage) {
+
+	$
+			.get(
+					serviceUrl + nodeIndex,
+					function(documentsString) {
+
+						var documents = JSON.parse(documentsString);
+
+						var container = selectedNode.append("g");
+
+						var offset = 0;
+
+						for (docIndex in documents) {
+
+							var doc = documents[docIndex];
+
+							var docNode = container.append("image");
+
+							var defaultX = centerX / 2 + offset;
+							var defaultY = centerY + 100
+									* Math.floor(docIndex / maxRowSize);
+
+							var x = defaultX;
+							var y = defaultY;
+
+							if (!isHeritage) {
+
+								var filtered = doc.tagged.filter(function(n) {
+									return n.node == nodeIndex;
+								});
+
+								if (filtered) {
+									x = filtered[0].position ? filtered[0].position.x
+											: defaultX;
+									y = filtered[0].position ? filtered[0].position.y
+											: defaultY;
+								}
+							} else if (doc.position) {
+
+								x = doc.position.x;
+								y = doc.position.y;
+							}
+
+							docNode
+									.attr("width", 100)
+									.attr("id", doc.index)
+									.attr("title", doc.title)
+									.attr("url", "./docs/" + doc.file)
+									.attr("date", getDate(doc))
+									.attr("height", 80)
+									.attr(
+											"xlink:href",
+											function() {
+												return doc.file.substr(-4) === ".pdf" ? "./docs/default_pdf.png"
+														: "./docs/" + doc.file;
+											}).attr("class", function() {
+										if (!isHeritage) {
+
+											return "myCursor-pointer-move";
+										}
+									}).attr("cursor", function() {
+										if (isHeritage) {
+
+											return "pointer";
+										}
+									}).attr("x", x).attr("y", y).on("click",
+											docClicked).filter(function() {
+										return !isHeritage;
+									}).on("mouseover", thumbnailMouseovered)
+									.on("mouseout", thumbnailMouseouted).call(
+											docDrag);
+
+							offset += 100;
+							if (offset >= 100 * maxRowSize) {
+
+								offset = 0;
+							}
+						}
+					});
+};
+
+function groundClicked(d) {
+
+	var selectedNode = d3.select(this.parentNode).moveToFront().append("g")
+			.attr("class", "selection").style("pointer-events", "click");
+
+	selectedNode.append("rect").attr("class", "ground--selected").attr("width",
+			3100).attr("height", 350).attr("x", -700).attr("y", 1050).attr(
+			"cursor", "auto").on('contextmenu',
+			d3.contextMenu(onSelectedNodeMenu));
+
+	selectedNode.append("text").attr('class', "label--selected")
+			.attr("y", 1130).attr("x", -650).text("Heritage");
+
+	onDetail = true;
+
+	var centerX = -200;
+	var centerY = 1100;
+	var maxRowSize = 40;
+
+	placeDocuments(serverUrl + "/documents/tagged/", selectedNode, -1, centerX,
+			centerY, maxRowSize, true);
+
+	d3.event.stopPropagation();
+};
 
 function clickNode(d) {
 
@@ -306,8 +419,8 @@ function clickNode(d) {
 
 	onDetail = true;
 
-	selectedNode = d3.select(this.parentNode).moveToFront().append("g").attr(
-			"class", "selection").style("pointer-events", "click");
+	var selectedNode = d3.select(this.parentNode).moveToFront().append("g")
+			.attr("class", "selection").style("pointer-events", "click");
 
 	var centerX = width / 10;
 	var centerY = height / 1.7;
@@ -315,7 +428,8 @@ function clickNode(d) {
 
 	selectedNode.append("circle").attr('r', 615).attr("cx", centerX).attr("cy",
 			centerY).attr('class', "node--selected").on("click",
-			profileNodeClicked).attr("cursor", "auto");
+			profileNodeClicked).attr("cursor", "auto").on('contextmenu',
+			d3.contextMenu(onSelectedNodeMenu));
 
 	var profileContainer = selectedNode.append("g").on("mouseover",
 			profileMouseovered).on("mouseout", profileMouseouted).on("click",
@@ -336,73 +450,10 @@ function clickNode(d) {
 			.append("title").text("Click to upload a new profile image");
 
 	selectedNode.append("text").attr('class', "label--selected").attr("y", -50)
-			.attr("x", centerX - 230).text(d.label);
+			.attr("x", centerX - 230).text(d.label).call(makeEditable);
 
-	$
-			.get(
-					serverUrl + "/documents/tagged/" + d.index,
-					function(documentsString) {
-
-						var documents = JSON.parse(documentsString);
-
-						var container = selectedNode.append("g");
-
-						var offset = 0;
-
-						for (docIndex in documents) {
-
-							var doc = documents[docIndex];
-
-							var docNode = container.append("image");
-
-							var defaultX = centerX / 2 + offset;
-							var defaultY = centerY + 100
-									* Math.floor(docIndex / maxRowSize);
-
-							var filtered = doc.tagged.filter(function(n) {
-								return n.node == d.index;
-							});
-
-							var x, y;
-
-							if (filtered) {
-
-								x = filtered[0].position ? filtered[0].position.x
-										: defaultX;
-								y = filtered[0].position ? filtered[0].position.y
-										: defaultY;
-
-							} else {
-
-								x = defaultX;
-								y = defaultY;
-							}
-
-							docNode
-									.attr("width", 100)
-									.attr("id", doc.index)
-									.attr("title", doc.title)
-									.attr("url", "./docs/" + doc.file)
-									.attr("date", getDate(doc))
-									.attr("height", 80)
-									.attr(
-											"xlink:href",
-											function() {
-												return doc.file.substr(-4) === ".pdf" ? "./docs/default_pdf.png"
-														: "./docs/" + doc.file;
-											}).attr("class",
-											"myCursor-pointer-move").attr("x",
-											x).attr("y", y).on("mouseover",
-											thumbnailMouseovered).on(
-											"mouseout", thumbnailMouseouted)
-									.on("click", docClicked).call(docDrag);
-
-							offset += 100;
-							if (offset >= 100 * maxRowSize) {
-								offset = 0;
-							}
-						}
-					});
+	placeDocuments(serverUrl + "/documents/tagged/", selectedNode, d.index,
+			centerX, centerY, maxRowSize, false);
 
 	d3.event.stopPropagation();
 };
@@ -421,13 +472,13 @@ function clickSvg(d) {
 	actions.remove();
 
 	svg.selectAll(".tree-leaf").style("pointer-events", "all");
-}
+};
 
 function zoomed() {
 
 	container.attr("transform", "translate(" + d3.event.translate + ")scale("
 			+ d3.event.scale + ")");
-}
+};
 
 function nodeDragstarted(d) {
 
@@ -438,7 +489,7 @@ function nodeDragstarted(d) {
 
 	var actions = svg.selectAll(".action");
 	actions.remove();
-}
+};
 
 function nodeDragged(d) {
 
@@ -455,21 +506,21 @@ function nodeDragended(d) {
 		$.get(serverUrl + '/' + viewIndex + '/updateNode?nodeIndex='
 				+ d.originalIndex + '&x=' + d.x + '&y=' + d.y);
 	}
-}
+};
 
 function docDragstarted(d) {
 
 	d3.event.sourceEvent.stopPropagation();
 	svg.selectAll(".thumbnailText").remove();
 	d3.select(this).classed("dragging", true);
-}
+};
 
 function docDragged(d) {
 
 	var sel = d3.select(this);
 	sel.attr("x", d.x = d3.event.x - parseInt(sel.attr("width")) / 2).attr("y",
 			d.y = d3.event.y - parseInt(sel.attr("height")) / 2);
-}
+};
 
 function docDragended(d) {
 
@@ -483,4 +534,13 @@ function docDragended(d) {
 
 	$.get(serverUrl + '/updateDoc?node=' + d.index + '&index=' + id + '&x=' + x
 			+ '&y=' + y);
-}
+};
+
+var onSelectedNodeMenu = [ {
+	title : 'Add document',
+	action : function(elm, d, i) {
+
+		$.get(serverUrl + '/addDocument?owner=3&tagged=[' + d.index + ']');
+		drawTree(selectedViewId);
+	}
+} ];
