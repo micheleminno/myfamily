@@ -61,7 +61,7 @@ function init() {
 			groundClicked).attr("cursor", "pointer");
 
 	svg.append("text").attr('class', "nodeLabel").attr("y", 1080).attr("x",
-			2150).text("Heritage");
+			2220).text("Heritage");
 
 	container = svg.append("g");
 
