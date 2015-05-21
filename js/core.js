@@ -1,5 +1,5 @@
 var serverUrl = 'http://localhost:8090';
-var siteUrl = 'http://localhost/myfamily';
+var siteUrl = 'http://localhost/myfamily-engineered';
 
 // var serverUrl =
 // 'http://ec2-54-72-121-42.eu-west-1.compute.amazonaws.com:8090';
@@ -61,7 +61,7 @@ function init() {
 			groundClicked).attr("cursor", "pointer");
 
 	svg.append("text").attr('class', "nodeLabel").attr("y", 1080).attr("x",
-			2150).text("Heritage");
+			2220).text("Heritage");
 
 	container = svg.append("g");
 
