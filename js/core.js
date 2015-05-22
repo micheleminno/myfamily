@@ -1,4 +1,4 @@
-var serverUrl = 'http://localhost:8090';
+var serverUrl = 'http://localhost:8091';
 var siteUrl = 'http://localhost/myfamily-engineered';
 
 // var serverUrl =
@@ -93,12 +93,8 @@ function drawTree(view) {
 
 	$
 			.get(
-					serverUrl + "/graph/3?view=" + view,
-					function(graphViewString) {
-
-						var graphView = JSON.parse(graphViewString);
-
-						graphView = assignLevels(graphView);
+					serverUrl + "/graph/view/3?view=" + view,
+					function(graphView) {
 
 						if (view != 2) {
 

@@ -1,11 +1,28 @@
 var express = require("express");
+var connection = require('express-myconnection');
 var mysql = require('mysql');
 var multer = require("multer");
 var cors = require("cors");
 var fs = require('fs');
 
+var document = require('./document.js');
+var graph = require('./graph.js');
+var view = require('./view.js');
+
 var app = express();
 app.use(cors());
+
+var connectionConfig = {
+
+	host : "localhost",
+	user : "root",
+	password : "password",
+	database : "my-family"
+};
+
+var connection = connection(mysql, connectionConfig, 'request');
+
+app.use(connection);
 
 var done = false;
 
@@ -32,8 +49,8 @@ app.use(multer({
 
 /* Start the Server */
 
-app.listen(8090, function() {
-	console.log("It's Started on PORT 8090");
+app.listen(8091, function() {
+	console.log("It's Started on PORT 8091");
 });
 
 app.get('/', function(req, res) {
@@ -79,18 +96,18 @@ app.post('/profileImage/:nodeIndex', function(req, res) {
 // Documents
 app.get('/documents', document.list);
 
-app.get('/documents/:nodeIndex', document.view);
+app.get('/documents/:node', document.view);
 
-app.get('/documents/updateDocument', document.update);
+app.get('/documents/update', document.update);
 
 // Graph
-app.get('/graph/:nodeIndex', graph.view);
+app.get('/graph/view/:node', graph.view);
 
-app.get('graph/addNode', graph.addNode);
+app.get('/graph/add', graph.addNode);
 
-app.get('graph/removeNode/:nodeIndex', graph.removeNode);
+app.get('/graph/remove/:node', graph.removeNode);
 
-app.get('graph/updateNode/:nodeIndex', graph.updateNode);
+app.get('/graph/update/:node', graph.updateNode);
 
 // Views
-app.get('view/:viewIndex/updateNode', view.updateNode);
+app.get('/view/:view/update', view.updateNode);
