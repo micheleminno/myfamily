@@ -3,8 +3,6 @@ exports.getPosition = function(user, view, node, req, callback) {
 	var selectPosition = 'SELECT * FROM views WHERE user = ' + user
 			+ ' AND view = ' + view + ' AND node = ' + node;
 
-	console.log(selectPosition);
-
 	req.getConnection(function(err, connection) {
 
 		connection.query(selectPosition, function(err, rows) {
@@ -20,11 +18,11 @@ exports.getPosition = function(user, view, node, req, callback) {
 					var x = rows[0]['x'];
 					var y= rows[0]['y'];
 					
-					callback([x, y]);
+					callback([node, [x, y]]);
 					
 				} else {
 
-					callback(-1);
+					callback([node, -1]);
 				}
 			}
 		});

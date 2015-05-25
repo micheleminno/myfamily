@@ -3,65 +3,134 @@ var view = require('./view.js');
 var OK = 200;
 var NOK = 400;
 
-function getFamilyMembers(familyIndex, viewIndex, req, callback) {
+function finalise(graph, viewIndex, user, req, callback) {
+
+	var graphViewWithLevels = assignLevels(graph);
+
+	assignPositions(graphViewWithLevels, viewIndex, user, req, function(
+			graphViewWithPositions) {
+
+		callback(graphViewWithPositions);
+	});
+};
+
+function getNode(nodeIndex, req, callback) {
+
+	var selectNode = 'SELECT * FROM nodes WHERE id = ' + nodeIndex;
 
 	var graphView = {
 		nodes : [],
 		links : []
 	};
 
-	var selectFamilyMembers = 'SELECT * FROM links as l JOIN nodes as n'
-			+ ' ON l.source = n.id OR l.target = n.id' + ' WHERE l.source = '
-			+ familyIndex + ' or l.target = ' + familyIndex + ' GROUP BY n.id';
-
-	console.log(selectFamilyMembers);
-
 	req.getConnection(function(err, connection) {
 
-		connection.query(selectFamilyMembers,
-				function(err, rows) {
+		connection.query(selectNode, function(err, rows) {
 
-					if (err) {
+			if (err) {
 
-						console.log("Error Selecting : %s ", err);
+				console.log("Error Selecting : %s ", err);
 
-					} else {
+			} else {
 
-						for (rowIndex in rows) {
+				if (rows.length > 0) {
 
-							var row = rows[rowIndex];
+					var node = rows[0];
+					callback(node);
+				}
+			}
 
-							var isPerson = row['person'];
+			callback(-1);
+		});
+	});
+};
 
-							if (isPerson) {
+function getFamilyMembers(familyIndex, nodeIndex, viewIndex, memberType, req,
+		callback) {
 
-								var link = {
-									source : row['source'],
-									target : row['target']
-								};
+	var graphView = {
+		nodes : [],
+		links : []
+	};
 
-								graphView.links.push(link);
-							}
+	if (familyIndex == -1) {
 
-							var nodeIndex = row['id'];
+		getNode(nodeIndex, req, function(node) {
 
-							var node = {
+			if (node != -1) {
 
-								id : nodeIndex,
-								label : row['label'],
-								img : row['img'],
-								person : isPerson,
-								fixed : true
+				graphView.nodes.push(node);
+				finalise(graphView, viewIndex, 3, req, callback);
+			}
+		});
+
+	} else {
+
+		var whereClause = ' WHERE ';
+
+		if (memberType == 'child') {
+
+			whereClause += 'l.source = ' + familyIndex;
+		} else if (memberType == 'parent') {
+
+			whereClause += 'l.target = ' + familyIndex;
+
+		} else if (memberType == 'any') {
+
+			whereClause += 'l.source = ' + familyIndex + ' or l.target = '
+					+ familyIndex;
+		}
+
+		var selectFamilyMembers = 'SELECT * FROM links as l JOIN nodes as n'
+				+ ' ON l.source = n.id OR l.target = n.id' + whereClause
+				+ ' GROUP BY n.id';
+
+		req.getConnection(function(err, connection) {
+
+			connection.query(selectFamilyMembers, function(err, rows) {
+
+				if (err) {
+
+					console.log("Error Selecting : %s ", err);
+
+				} else {
+
+					for (rowIndex in rows) {
+
+						var row = rows[rowIndex];
+
+						var isPerson = row['person'];
+
+						if (isPerson) {
+
+							var link = {
+								source : row['source'],
+								target : row['target']
 							};
 
-							graphView.nodes.push(node);
+							graphView.links.push(link);
 						}
 
-						callback(assignPositions(assignLevels(graphView),
-								viewIndex, 3, req));
+						var nodeIndex = row['id'];
+
+						var node = {
+
+							id : nodeIndex,
+							label : row['label'],
+							img : row['img'],
+							person : isPerson,
+							fixed : true
+						};
+
+						graphView.nodes.push(node);
 					}
-				});
-	});
+
+					finalise(graphView, viewIndex, 3, req, callback);
+				}
+			});
+		});
+	}
+
 };
 
 function getFamilyIndexAsChild(nodeIndex, req, callback) {
@@ -121,6 +190,44 @@ function getFamilyIndexAsParent(nodeIndex, req, callback) {
 	});
 };
 
+function getPedigree(nodeIndex, req, callback) {
+
+	var graph = {
+		nodes : [],
+		links : []
+	};
+
+	getNode(nodeIndex, req, function(node) {
+
+		if (node != -1) {
+
+			graph.nodes.push(node);
+		}
+	});
+	
+	getFamilyIndexAsChild(nodeIndex, req, function(familyIndex) {
+
+		getFamilyMembers(familyIndex, nodeIndex, 2, 'parent', req, function(
+				graphView) {
+
+			graphView.nodes.forEach(function(node) {
+				graph.nodes.push(node);
+			});
+
+			graphView.links.forEach(function(link) {
+				graph.links.push(link);
+			});
+
+			callback(graph);
+		});
+	});
+};
+
+function getExtendedFamily(nodeIndex, req, callback) {
+
+	// TODO
+};
+
 /*
  * Get the subgraph representing the selected view of the specific user.
  */
@@ -133,27 +240,34 @@ exports.view = function(req, res) {
 
 		getFamilyIndexAsChild(nodeIndex, req, function(familyIndex) {
 
-			getFamilyMembers(familyIndex, viewIndex, req, function(graphView) {
+			getFamilyMembers(familyIndex, nodeIndex, viewIndex, 'any', req,
+					function(graphView) {
 
-				res.status(OK).json('graph', graphView);
-			});
+						res.status(OK).json('graph', graphView);
+					});
 		});
 	} else if (viewIndex == 1) {
 
 		getFamilyIndexAsParent(nodeIndex, req, function(familyIndex) {
 
-			getFamilyMembers(familyIndex, viewIndex, req, function(graphView) {
+			getFamilyMembers(familyIndex, nodeIndex, viewIndex, 'any', req,
+					function(graphView) {
 
-				res.status(OK).json('graph', graphView);
-			});
+						res.status(OK).json('graph', graphView);
+					});
 		});
 	} else if (viewIndex == 2) {
 
-		// TODO
+		getPedigree(nodeIndex, req, function(graphView) {
 
+			res.status(OK).json('graph', graphView);
+		});
 	} else if (viewIndex == 3) {
 
-		// TODO
+		getExtendedFamily(nodeIndex, req, function(graphView) {
+
+			res.status(OK).json('graph', graphView);
+		});
 	}
 };
 
@@ -656,35 +770,61 @@ function assignOtherLevels() {
 	}
 };
 
-function assignPositions(graph, viewIndex, user, req) {
+function assignPositions(graph, viewIndex, user, req, callback) {
 
 	var requests = 0;
 
+	var positions = {};
+
+	var offset = 300;
+	var height = 600;
+
 	for (nodeIndex in graph.nodes) {
 
-		var node = graph.nodes[nodeIndex];
-
 		requests++;
-		
+
 		view.getPosition(user, viewIndex, nodeIndex, req, function(
-				existingPosition) {
+				existingNodePosition) {
 
 			requests--;
+
+			var currentNodeIndex = existingNodePosition[0];
+
+			var node = graph.nodes[currentNodeIndex];
 
 			var x = null;
 			var y = null;
 
-			if (existingPosition != -1) {
+			var nodePosition = existingNodePosition[1];
 
-				x = existingPosition[0];
-				y = existingPosition[1];
+			if (nodePosition != -1) {
+
+				x = nodePosition[0];
+				y = nodePosition[1];
 
 			} else {
 
-				var level = parseInt(node.level);
+				var level = parseFloat(node.level);
 
-				x = 100 * nodeIndex;
-				y = 100 * level;
+				if (!positions[level]) {
+
+					positions[level] = [];
+				}
+
+				if (!node.person) {
+
+					if (positions[level - 0.5]) {
+
+						x = positions[level - 0.5][0][0] + offset / 2;
+					}
+				} else {
+
+					x = offset * positions[level].length;
+				}
+
+				y = height - (offset * level);
+
+				positions[level].push([ x, y ]);
 			}
 
 			node.x = x;
@@ -692,8 +832,7 @@ function assignPositions(graph, viewIndex, user, req) {
 
 			if (requests == 0) {
 
-				console.log(graph);
-				return graph;
+				return callback(graph);
 			}
 		});
 	}
