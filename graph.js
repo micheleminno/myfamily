@@ -3,25 +3,44 @@ var view = require('./view.js');
 var OK = 200;
 var NOK = 400;
 
-function finalise(graph, viewIndex, user, req, callback) {
+function reassignLinks(graph) {
 
-	var graphViewWithLevels = assignLevels(graph);
+	var nodes = graph.nodes;
+	var links = graph.links;
+
+	var nodeMap = {};
+
+	for (nodeIndex in nodes) {
+
+		var node = nodes[nodeIndex];
+		nodeMap[node.id] = nodeIndex;
+		node.id = nodeIndex;
+	}
+
+	for (linkIndex in links) {
+
+		var link = links[linkIndex];
+		link.source = parseInt(nodeMap[link.source]);
+		link.target = parseInt(nodeMap[link.target]);
+	}
+
+	return graph;
+};
+
+function finalise(graph, viewIndex, user, req, res, callback) {
+
+	var graphViewWithLevels = assignLevels(reassignLinks(graph));
 
 	assignPositions(graphViewWithLevels, viewIndex, user, req, function(
 			graphViewWithPositions) {
 
-		callback(graphViewWithPositions);
+		callback(graphViewWithPositions, res);
 	});
 };
 
 function getNode(nodeIndex, req, callback) {
 
 	var selectNode = 'SELECT * FROM nodes WHERE id = ' + nodeIndex;
-
-	var graphView = {
-		nodes : [],
-		links : []
-	};
 
 	req.getConnection(function(err, connection) {
 
@@ -36,6 +55,8 @@ function getNode(nodeIndex, req, callback) {
 				if (rows.length > 0) {
 
 					var node = rows[0];
+					node.fixed = true;
+
 					callback(node);
 				}
 			}
@@ -60,7 +81,7 @@ function getFamilyMembers(familyIndex, nodeIndex, viewIndex, memberType, req,
 			if (node != -1) {
 
 				graphView.nodes.push(node);
-				finalise(graphView, viewIndex, 3, req, callback);
+				callback(graphView);
 			}
 		});
 
@@ -125,12 +146,11 @@ function getFamilyMembers(familyIndex, nodeIndex, viewIndex, memberType, req,
 						graphView.nodes.push(node);
 					}
 
-					finalise(graphView, viewIndex, 3, req, callback);
+					callback(graphView);
 				}
 			});
 		});
 	}
-
 };
 
 function getFamilyIndexAsChild(nodeIndex, req, callback) {
@@ -192,7 +212,7 @@ function getFamilyIndexAsParent(nodeIndex, req, callback) {
 
 function getPedigree(nodeIndex, req, callback) {
 
-	var graph = {
+	graph = {
 		nodes : [],
 		links : []
 	};
@@ -204,28 +224,90 @@ function getPedigree(nodeIndex, req, callback) {
 			graph.nodes.push(node);
 		}
 	});
-	
-	getFamilyIndexAsChild(nodeIndex, req, function(familyIndex) {
 
-		getFamilyMembers(familyIndex, nodeIndex, 2, 'parent', req, function(
-				graphView) {
+	addPedigreeLevel(nodeIndex, req, function(pedigreeLevel) {
 
-			graphView.nodes.forEach(function(node) {
-				graph.nodes.push(node);
-			});
+		if (pedigreeLevel.nodes.length > 0) {
 
-			graphView.links.forEach(function(link) {
+			pedigreeLevel.links.forEach(function(link) {
+
 				graph.links.push(link);
 			});
 
+			pedigreeLevel.nodes.forEach(function(node) {
+
+				graph.nodes.push(node);
+			});
+		} else {
+
 			callback(graph);
-		});
+		}
+	});
+};
+
+function addPedigreeLevel(nodeIndex, req, callback) {
+
+	var pedigreeLevel = {
+		nodes : [],
+		links : []
+	};
+
+	getFamilyIndexAsChild(nodeIndex, req, function(familyIndex) {
+
+		if (familyIndex != -1) {
+
+			getFamilyMembers(familyIndex, nodeIndex, 2, 'parent', req,
+					function(graphView) {
+
+						pedigreeLevel.links.push({
+							source : familyIndex,
+							target : nodeIndex
+						});
+
+						graphView.links.forEach(function(link) {
+
+							pedigreeLevel.links.push(link);
+						});
+
+						var personFound = false;
+						
+						graphView.nodes.forEach(function(node) {
+
+							pedigreeLevel.nodes.push(node);
+
+							if (node.person) {
+
+								personFound = true;
+								console.log("call get pedigree: " + node.id
+										+ " with pedigreeLevel: "
+										+ JSON.stringify(pedigreeLevel));
+
+								addPedigreeLevel(node.id, req, callback);
+							}
+						});
+						
+						if(!personFound) {
+							
+							callback(pedigreeLevel);
+						}
+					});
+		}
+
+		else {
+
+			callback(pedigreeLevel);
+		}
 	});
 };
 
 function getExtendedFamily(nodeIndex, req, callback) {
 
 	// TODO
+};
+
+function output(graph, res) {
+
+	res.status(OK).json('graph', graph);
 };
 
 /*
@@ -243,7 +325,7 @@ exports.view = function(req, res) {
 			getFamilyMembers(familyIndex, nodeIndex, viewIndex, 'any', req,
 					function(graphView) {
 
-						res.status(OK).json('graph', graphView);
+						finalise(graphView, viewIndex, 3, req, res, output);
 					});
 		});
 	} else if (viewIndex == 1) {
@@ -253,20 +335,22 @@ exports.view = function(req, res) {
 			getFamilyMembers(familyIndex, nodeIndex, viewIndex, 'any', req,
 					function(graphView) {
 
-						res.status(OK).json('graph', graphView);
+						finalise(graphView, viewIndex, 3, req, res, output);
 					});
 		});
 	} else if (viewIndex == 2) {
 
 		getPedigree(nodeIndex, req, function(graphView) {
 
-			res.status(OK).json('graph', graphView);
+			console.log("Before finalise: " + JSON.stringify(graphView));
+
+			finalise(graphView, viewIndex, 3, req, res, output);
 		});
 	} else if (viewIndex == 3) {
 
 		getExtendedFamily(nodeIndex, req, function(graphView) {
 
-			res.status(OK).json('graph', graphView);
+			finalise(graphView, viewIndex, 3, req, res, output);
 		});
 	}
 };
