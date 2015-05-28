@@ -6,15 +6,51 @@ var siteUrl = 'http://localhost/myfamily-engineered';
 // var siteUrl =
 // 'http://ec2-54-72-121-42.eu-west-1.compute.amazonaws.com/familygraph.me';
 
-var selectedViewId = 2;
+var selectedViewId = 3;
+var selectedViewLabel = 'Extended family';
+
+// Default for testing purposes
+var userId = 3;
+var userLabel = "Michele Minno";
 
 $('#view li').on('click', function() {
 
 	$(this).siblings().removeClass("active");
 	$(this).addClass("active");
 	selectedViewId = $(this).attr('id');
-	drawTree(selectedViewId);
+	selectedViewLabel = $(this).text();
+	drawTree(userId, userLabel, selectedViewId, selectedViewLabel);
 });
+
+$('#persons-expandable').on(
+		'click',
+		function() {
+
+			$.get(serverUrl + "/graph/view/" + userId + "?view="
+					+ selectedViewId, function(graphView) {
+
+				for (nodeIndex in graphView.nodes) {
+
+					var node = graphView.nodes[nodeIndex];
+					if (node.person) {
+						$('#persons').append(
+								'<li id="' + node.originalId + '"><a href="#">'
+										+ node.label + '</a></li>');
+					}
+				}
+
+				$('#persons li').on(
+						'click',
+						function() {
+
+							userId = $(this).attr('id');
+							userLabel = $(this).find('a').text();
+							$('#persons').html("");
+							drawTree(userId, userLabel, selectedViewId,
+									selectedViewLabel);
+						});
+			});
+		});
 
 var width, height;
 
@@ -86,17 +122,20 @@ function init() {
 
 var viewIndex;
 
-function drawTree(view) {
+function drawTree(userId, userLabel, viewId, viewLabel) {
+
+	$('#logged-user').html(userLabel + '<span class="caret myCaret"></span>');
+	$('#view-mode').html(viewLabel + '<span class="caret myCaret"></span>');
 
 	viewIndex = view;
 	init();
 
 	$
 			.get(
-					serverUrl + "/graph/view/3?view=" + view,
+					serverUrl + "/graph/view/" + userId + "?view=" + viewId,
 					function(graphView) {
 
-						if (view != 2) {
+						if (viewId != 2) {
 
 							svg.on('contextmenu', null);
 						}
@@ -136,25 +175,21 @@ function drawTree(view) {
 													.contextMenu(onPersonMenu));
 										}
 
-										currentNode
-												.append("circle")
-												.attr(
-														"class",
-														function(d) {
-															if (d.label == "Michele Minno") {
-																return "my-node";
-															} else if (d.acquired) {
-																return "node acquired";
-															} else if (d.leaf) {
-																return "node leaf";
-															} else {
-																return "node";
-															}
-														})
-												.attr("r", function(d) {
+										currentNode.append("circle").attr(
+												"class", function(d) {
+													if (d.label == userLabel) {
+														return "my-node";
+													} else if (d.acquired) {
+														return "node acquired";
+													} else if (d.leaf) {
+														return "node leaf";
+													} else {
+														return "node";
+													}
+												}).attr("r", function(d) {
 
-													return 125 / d.level;
-												});
+											return 125 / d.level;
+										});
 
 										currentNode
 												.append("image")
@@ -168,23 +203,20 @@ function drawTree(view) {
 														}).attr("width", 40)
 												.attr("height", 40);
 
-										currentNode
-												.append("text")
-												.attr(
-														"class",
-														function(d) {
-															if (d.label == "Michele Minno") {
-																return "my-nodeLabel";
-															} else {
-																return "nodeLabel";
-															}
-														}).attr("dy", "1.5em")
-												.text(function(d) {
+										currentNode.append("text").attr(
+												"class", function(d) {
+													if (d.label == userLabel) {
+														return "my-nodeLabel";
+													} else {
+														return "nodeLabel";
+													}
+												}).attr("dy", "1.5em").text(
+												function(d) {
 													return d.label;
 												}).call(makeEditable);
 									} else {
 
-										if (view == 2) {
+										if (viewId == 3) {
 
 											currentNode.on('contextmenu', d3
 													.contextMenu(onFamilyMenu));
@@ -230,24 +262,22 @@ function drawTree(view) {
 										"rx", 20).attr("ry", 20).attr("class",
 										"data-stream");
 
-						$.get(
-								serverUrl + "/documents/3?view="
-										+ selectedViewId, function(
-										documentsString) {
+						$.get(serverUrl + "/documents/" + userId + "?view="
+								+ selectedViewId, function(documentsString) {
 
-									documents = JSON.parse(documentsString);
+							documents = JSON.parse(documentsString);
 
-									var documentsSize = documents.length;
-									currentPage = Math.floor(documentsSize
-											/ docRowSize);
-									maxPage = currentPage;
+							var documentsSize = documents.length;
+							currentPage = Math
+									.floor(documentsSize / docRowSize);
+							maxPage = currentPage;
 
-									populateThumbnails(currentPage, true);
-								});
+							populateThumbnails(currentPage, true);
+						});
 					});
 }
 
-drawTree(selectedViewId);
+drawTree(userId, userLabel, selectedViewId, selectedViewLabel);
 
 function populateThumbnails(currentPage, back) {
 
@@ -373,21 +403,21 @@ var onPersonMenu = [ {
 	action : function(elm, d, i) {
 
 		$.get(serverUrl + '/addNode?type=family&source=' + d.originalIndex);
-		drawTree(selectedViewId);
+		drawTree(userId, userLabel, selectedViewId, selectedViewLabel);
 	}
 }, {
 	title : 'Add family as a child',
 	action : function(elm, d, i) {
 
 		$.get(serverUrl + '/addNode?type=family&target=' + d.originalIndex);
-		drawTree(selectedViewId);
+		drawTree(userId, userLabel, selectedViewId, selectedViewLabel);
 	}
 }, {
 	title : 'Remove',
 	action : function(elm, d, i) {
 
 		$.get(serverUrl + '/removeNode/' + d.originalIndex);
-		drawTree(selectedViewId);
+		drawTree(userId, userLabel, selectedViewId, selectedViewLabel);
 	}
 } ];
 
@@ -396,21 +426,21 @@ var onFamilyMenu = [ {
 	action : function(elm, d, i) {
 
 		$.get(serverUrl + '/addNode?type=person&target=' + d.originalIndex);
-		drawTree(selectedViewId);
+		drawTree(userId, userLabel, selectedViewId, selectedViewLabel);
 	}
 }, {
 	title : 'Add child',
 	action : function(elm, d, i) {
 
 		$.get(serverUrl + '/addNode?type=person&source=' + d.originalIndex);
-		drawTree(selectedViewId);
+		drawTree(userId, userLabel, selectedViewId, selectedViewLabel);
 	}
 }, {
 	title : 'Remove',
 	action : function(elm, d, i) {
 
 		$.get(serverUrl + '/removeNode/' + d.originalIndex);
-		drawTree(selectedViewId);
+		drawTree(userId, userLabel, selectedViewId, selectedViewLabel);
 	}
 } ];
 
@@ -419,6 +449,6 @@ var onBackgroundMenu = [ {
 	action : function(elm, d, i) {
 
 		$.get(serverUrl + '/addNode?type=person');
-		drawTree(selectedViewId);
+		drawTree(userId, userLabel, selectedViewId, selectedViewLabel);
 	}
 } ];

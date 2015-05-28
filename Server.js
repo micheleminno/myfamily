@@ -101,6 +101,7 @@ app.get('/documents/:node', document.view);
 app.get('/documents/update', document.update);
 
 // Graph
+
 app.get('/graph/view/:node', graph.view);
 
 app.get('/graph/add', graph.addNode);

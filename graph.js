@@ -13,6 +13,7 @@ function reassignLinks(graph) {
 	for (nodeIndex in nodes) {
 
 		var node = nodes[nodeIndex];
+		node.originalId = node.id;
 		nodeMap[node.id] = nodeIndex;
 		node.id = nodeIndex;
 	}
@@ -167,38 +168,10 @@ function getFamilyMembers(familyIndex, nodeIndex, viewIndex, memberType, req,
 	}
 };
 
-function getFamilyIndexAsChild(nodeIndex, req, callback) {
+function getFamilyIndex(nodeIndex, asChild, req, callback) {
 
-	var selectFamily = "SELECT * FROM links WHERE target = " + nodeIndex;
-
-	req.getConnection(function(err, connection) {
-
-		connection.query(selectFamily, function(err, rows) {
-
-			if (err) {
-
-				console.log("Error Selecting : %s ", err);
-
-			} else {
-
-				if (rows.length > 0) {
-
-					var familyIndex = rows[0]['source'];
-
-					callback(familyIndex);
-
-				} else {
-
-					callback(-1);
-				}
-			}
-		});
-	});
-};
-
-function getFamilyIndexAsParent(nodeIndex, req, callback) {
-
-	var selectFamily = "SELECT * FROM links WHERE source = " + nodeIndex;
+	var selectFamily = asChild ? "SELECT * FROM links WHERE target = "
+			+ nodeIndex : "SELECT * FROM links WHERE source = " + nodeIndex;
 
 	req.getConnection(function(err, connection) {
 
@@ -212,9 +185,11 @@ function getFamilyIndexAsParent(nodeIndex, req, callback) {
 
 				if (rows.length > 0) {
 
-					var familyIndex = rows[0]['target'];
+					var familyIndex = asChild ? rows[0]['source']
+							: rows[0]['target'];
 
 					callback(familyIndex);
+
 				} else {
 
 					callback(-1);
@@ -270,7 +245,6 @@ function addPedigreeLevel(nodeIndex, graph, req, callback) {
 		newStartingNodes.forEach(function(startingNodeIndex) {
 
 			requests++;
-			console.log("Requests++: " + requests);
 
 			console.log("calling addPedigreeLevel with starting node: "
 					+ startingNodeIndex);
@@ -299,7 +273,7 @@ function getPedigreeLevel(nodeIndex, req, callback) {
 		links : []
 	};
 
-	getFamilyIndexAsChild(nodeIndex, req, function(familyIndex) {
+	getFamilyIndex(nodeIndex, true, req, function(familyIndex) {
 
 		var newStartingNodes = [];
 
@@ -350,7 +324,133 @@ function getPedigreeLevel(nodeIndex, req, callback) {
 
 function getExtendedFamily(nodeIndex, req, callback) {
 
-	// TODO
+	graph = {
+		nodes : [],
+		links : []
+	};
+
+	getNode(nodeIndex, req, function(node) {
+
+		if (node != -1) {
+
+			graph.nodes.push(node);
+
+			console.log("graph: " + JSON.stringify(graph));
+
+			addExtendedFamilyLevel(nodeIndex, true, graph, req,
+					function(graph) {
+
+						addExtendedFamilyLevel(nodeIndex, false, graph, req,
+								function(graph) {
+
+									console.log("Final graph: "
+											+ JSON.stringify(graph));
+									callback(graph);
+								});
+					});
+		}
+	});
+};
+
+function addExtendedFamilyLevel(nodeIndex, descendant, graph, req, callback) {
+
+	getExtendedFamilyLevel(nodeIndex, descendant, req, function(
+			extendedFamilyLevel, newStartingNodes) {
+
+		extendedFamilyLevel.links.forEach(function(link) {
+
+			graph.links.push(link);
+		});
+
+		extendedFamilyLevel.nodes.forEach(function(node) {
+
+			graph.nodes.push(node);
+		});
+
+		console.log("graph after getExtendedFamilyLevel of node " + nodeIndex);
+
+		var requests = 0;
+
+		newStartingNodes.forEach(function(startingNodeIndex) {
+
+			requests++;
+
+			console.log("calling addExtendedFamilyLevel with starting node: "
+					+ startingNodeIndex);
+			addExtendedFamilyLevel(startingNodeIndex, descendant, graph, req,
+					function(graph) {
+
+						requests--;
+
+						if (requests == 0) {
+
+							callback(graph);
+						}
+					});
+		});
+
+		if (newStartingNodes.length == 0) {
+
+			callback(graph);
+		}
+	});
+};
+
+function getExtendedFamilyLevel(nodeIndex, descendant, req, callback) {
+
+	var extendedFamilyLevel = {
+		nodes : [],
+		links : []
+	};
+
+	getFamilyIndex(nodeIndex, descendant, req, function(familyIndex) {
+
+		var newStartingNodes = [];
+
+		if (familyIndex != -1) {
+
+			var memberType = descendant ? 'parent' : 'child';
+
+			getFamilyMembers(familyIndex, nodeIndex, 3, memberType, req,
+					function(graphView) {
+
+						extendedFamilyLevel.links.push({
+							source : familyIndex,
+							target : nodeIndex
+						});
+						graphView.links.forEach(function(link) {
+
+							extendedFamilyLevel.links.push(link);
+						});
+
+						graphView.nodes.forEach(function(node) {
+
+							extendedFamilyLevel.nodes.push(node);
+
+							if (node.person && node.id != nodeIndex) {
+
+								console.log("adding " + node.id
+										+ " to starting nodes");
+
+								newStartingNodes.push(node.id);
+							}
+						});
+
+						console.log("extended family level of node "
+								+ nodeIndex);
+
+						console.log("callback with new starting nodes: "
+								+ JSON.stringify(newStartingNodes));
+
+						callback(extendedFamilyLevel, newStartingNodes);
+					});
+		}
+
+		else {
+
+			callback(extendedFamilyLevel, newStartingNodes);
+		}
+	});
 };
 
 function output(graph, res) {
@@ -368,7 +468,7 @@ exports.view = function(req, res) {
 
 	if (viewIndex == 0) {
 
-		getFamilyIndexAsChild(nodeIndex, req, function(familyIndex) {
+		getFamilyIndex(nodeIndex, true, req, function(familyIndex) {
 
 			getFamilyMembers(familyIndex, nodeIndex, viewIndex, 'any', req,
 					function(graphView) {
@@ -378,7 +478,7 @@ exports.view = function(req, res) {
 		});
 	} else if (viewIndex == 1) {
 
-		getFamilyIndexAsParent(nodeIndex, req, function(familyIndex) {
+		getFamilyIndex(nodeIndex, false, req, function(familyIndex) {
 
 			getFamilyMembers(familyIndex, nodeIndex, viewIndex, 'any', req,
 					function(graphView) {
@@ -389,8 +489,6 @@ exports.view = function(req, res) {
 	} else if (viewIndex == 2) {
 
 		getPedigree(nodeIndex, req, function(graphView) {
-
-			console.log("Before finalise: " + JSON.stringify(graphView));
 
 			finalise(graphView, viewIndex, 3, req, res, output);
 		});
