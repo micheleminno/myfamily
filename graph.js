@@ -45,7 +45,7 @@ function finalise(graph, viewIndex, user, req, res, callback) {
 
 		console.log("After assigning positions: "
 				+ JSON.stringify(graphViewWithPositions));
-		
+
 		callback(graphViewWithPositions, res);
 	});
 };
@@ -239,7 +239,11 @@ function getPedigree(nodeIndex, req, callback) {
 
 			console.log("graph: " + JSON.stringify(graph));
 
-			addPedigreeLevel(nodeIndex, graph, req, callback);
+			addPedigreeLevel(nodeIndex, graph, req, function(graph) {
+
+				console.log("Final graph: " + JSON.stringify(graph));
+				callback(graph);
+			});
 		}
 	});
 };
@@ -261,15 +265,30 @@ function addPedigreeLevel(nodeIndex, graph, req, callback) {
 		console.log("graph after getPedigreeLevel of node " + nodeIndex + ": "
 				+ JSON.stringify(graph));
 
+		var requests = 0;
+
 		newStartingNodes.forEach(function(startingNodeIndex) {
+
+			requests++;
+			console.log("Requests++: " + requests);
 
 			console.log("calling addPedigreeLevel with starting node: "
 					+ startingNodeIndex);
-			addPedigreeLevel(startingNodeIndex, graph, req, callback);
+			addPedigreeLevel(startingNodeIndex, graph, req, function(graph) {
+
+				requests--;
+
+				if (requests == 0) {
+
+					callback(graph);
+				}
+			});
 		});
 
-		console.log("Final graph: " + JSON.stringify(graph));
-		callback(graph);
+		if (newStartingNodes.length == 0) {
+
+			callback(graph);
+		}
 	});
 };
 
@@ -924,15 +943,18 @@ function assignPositions(graph, viewIndex, user, req, callback) {
 					positions[level] = [];
 				}
 
+				var currentX = offset * positions[level].length;
+
 				if (!node.person) {
 
 					if (positions[level - 0.5]) {
 
-						x = positions[level - 0.5][0][0] + offset / 2;
+						x = currentX + positions[level - 0.5][0][0] + offset
+								/ 2;
 					}
 				} else {
 
-					x = offset * positions[level].length;
+					x = currentX;
 				}
 
 				y = height - (offset * level);
