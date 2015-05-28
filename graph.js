@@ -29,11 +29,23 @@ function reassignLinks(graph) {
 
 function finalise(graph, viewIndex, user, req, res, callback) {
 
-	var graphViewWithLevels = assignLevels(reassignLinks(graph));
+	console.log("Finalising graph: " + JSON.stringify(graph));
+
+	graph = reassignLinks(graph);
+
+	console.log("After reassigning links: " + JSON.stringify(graph));
+
+	var graphViewWithLevels = assignLevels(graph);
+
+	console.log("After assigning levels: "
+			+ JSON.stringify(graphViewWithLevels));
 
 	assignPositions(graphViewWithLevels, viewIndex, user, req, function(
 			graphViewWithPositions) {
 
+		console.log("After assigning positions: "
+				+ JSON.stringify(graphViewWithPositions));
+		
 		callback(graphViewWithPositions, res);
 	});
 };
@@ -119,31 +131,33 @@ function getFamilyMembers(familyIndex, nodeIndex, viewIndex, memberType, req,
 					for (rowIndex in rows) {
 
 						var row = rows[rowIndex];
+						if (row.id != null) {
 
-						var isPerson = row['person'];
+							var isPerson = row['person'];
 
-						if (isPerson) {
+							if (isPerson) {
 
-							var link = {
-								source : row['source'],
-								target : row['target']
+								var link = {
+									source : row['source'],
+									target : row['target']
+								};
+
+								graphView.links.push(link);
+							}
+
+							var nodeIndex = row['id'];
+
+							var node = {
+
+								id : nodeIndex,
+								label : row['label'],
+								img : row['img'],
+								person : isPerson,
+								fixed : true
 							};
 
-							graphView.links.push(link);
+							graphView.nodes.push(node);
 						}
-
-						var nodeIndex = row['id'];
-
-						var node = {
-
-							id : nodeIndex,
-							label : row['label'],
-							img : row['img'],
-							person : isPerson,
-							fixed : true
-						};
-
-						graphView.nodes.push(node);
 					}
 
 					callback(graphView);
@@ -222,30 +236,44 @@ function getPedigree(nodeIndex, req, callback) {
 		if (node != -1) {
 
 			graph.nodes.push(node);
-		}
-	});
 
-	addPedigreeLevel(nodeIndex, req, function(pedigreeLevel) {
+			console.log("graph: " + JSON.stringify(graph));
 
-		if (pedigreeLevel.nodes.length > 0) {
-
-			pedigreeLevel.links.forEach(function(link) {
-
-				graph.links.push(link);
-			});
-
-			pedigreeLevel.nodes.forEach(function(node) {
-
-				graph.nodes.push(node);
-			});
-		} else {
-
-			callback(graph);
+			addPedigreeLevel(nodeIndex, graph, req, callback);
 		}
 	});
 };
 
-function addPedigreeLevel(nodeIndex, req, callback) {
+function addPedigreeLevel(nodeIndex, graph, req, callback) {
+
+	getPedigreeLevel(nodeIndex, req, function(pedigreeLevel, newStartingNodes) {
+
+		pedigreeLevel.links.forEach(function(link) {
+
+			graph.links.push(link);
+		});
+
+		pedigreeLevel.nodes.forEach(function(node) {
+
+			graph.nodes.push(node);
+		});
+
+		console.log("graph after getPedigreeLevel of node " + nodeIndex + ": "
+				+ JSON.stringify(graph));
+
+		newStartingNodes.forEach(function(startingNodeIndex) {
+
+			console.log("calling addPedigreeLevel with starting node: "
+					+ startingNodeIndex);
+			addPedigreeLevel(startingNodeIndex, graph, req, callback);
+		});
+
+		console.log("Final graph: " + JSON.stringify(graph));
+		callback(graph);
+	});
+};
+
+function getPedigreeLevel(nodeIndex, req, callback) {
 
 	var pedigreeLevel = {
 		nodes : [],
@@ -253,6 +281,8 @@ function addPedigreeLevel(nodeIndex, req, callback) {
 	};
 
 	getFamilyIndexAsChild(nodeIndex, req, function(familyIndex) {
+
+		var newStartingNodes = [];
 
 		if (familyIndex != -1) {
 
@@ -269,33 +299,32 @@ function addPedigreeLevel(nodeIndex, req, callback) {
 							pedigreeLevel.links.push(link);
 						});
 
-						var personFound = false;
-						
 						graphView.nodes.forEach(function(node) {
 
 							pedigreeLevel.nodes.push(node);
 
 							if (node.person) {
 
-								personFound = true;
-								console.log("call get pedigree: " + node.id
-										+ " with pedigreeLevel: "
-										+ JSON.stringify(pedigreeLevel));
+								console.log("adding " + node.id
+										+ " to starting nodes");
 
-								addPedigreeLevel(node.id, req, callback);
+								newStartingNodes.push(node.id);
 							}
 						});
-						
-						if(!personFound) {
-							
-							callback(pedigreeLevel);
-						}
+
+						console.log("pedigree level of node " + nodeIndex
+								+ ": " + JSON.stringify(pedigreeLevel));
+
+						console.log("callback with new starting nodes: "
+								+ JSON.stringify(newStartingNodes));
+
+						callback(pedigreeLevel, newStartingNodes);
 					});
 		}
 
 		else {
 
-			callback(pedigreeLevel);
+			callback(pedigreeLevel, newStartingNodes);
 		}
 	});
 };
