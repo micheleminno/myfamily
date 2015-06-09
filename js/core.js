@@ -6,7 +6,7 @@ var siteUrl = 'http://localhost/myfamily-engineered';
 // var siteUrl =
 // 'http://ec2-54-72-121-42.eu-west-1.compute.amazonaws.com/familygraph.me';
 
-var selectedViewId = 3;
+var selectedViewId = 4;
 var selectedViewLabel = 'Extended family';
 
 // Default for testing purposes
@@ -135,7 +135,7 @@ function drawTree(userId, userLabel, viewId, viewLabel) {
 					serverUrl + "/graph/view/" + userId + "?view=" + viewId,
 					function(graphView) {
 
-						if (viewId != 2) {
+						if (viewId != 4) {
 
 							svg.on('contextmenu', null);
 						}
@@ -169,7 +169,7 @@ function drawTree(userId, userLabel, viewId, viewLabel) {
 
 										currentNode.on("click", clickNode);
 
-										if (view == 2) {
+										if (view == 4) {
 
 											currentNode.on('contextmenu', d3
 													.contextMenu(onPersonMenu));
@@ -216,7 +216,7 @@ function drawTree(userId, userLabel, viewId, viewLabel) {
 												}).call(makeEditable);
 									} else {
 
-										if (viewId == 3) {
+										if (viewId == 4) {
 
 											currentNode.on('contextmenu', d3
 													.contextMenu(onFamilyMenu));
