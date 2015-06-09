@@ -30,22 +30,13 @@ function reassignLinks(graph) {
 
 function finalise(graph, viewIndex, user, req, res, callback) {
 
-	console.log("Finalising graph: " + JSON.stringify(graph));
+	console.log("Finalising graph");
 
 	graph = reassignLinks(graph);
-
-	console.log("After reassigning links: " + JSON.stringify(graph));
-
 	var graphViewWithLevels = assignLevels(graph);
-
-	console.log("After assigning levels: "
-			+ JSON.stringify(graphViewWithLevels));
 
 	assignPositions(graphViewWithLevels, viewIndex, user, req, function(
 			graphViewWithPositions) {
-
-		console.log("After assigning positions: "
-				+ JSON.stringify(graphViewWithPositions));
 
 		callback(graphViewWithPositions, res);
 	});
@@ -125,7 +116,7 @@ function getFamilyMembers(familyIndex, nodeIndex, viewIndex, memberType, req,
 
 				if (err) {
 
-					console.log("Error Selecting : %s ", err);
+					console.log("Error selecting family members: %s ", err);
 
 				} else {
 
@@ -168,10 +159,24 @@ function getFamilyMembers(familyIndex, nodeIndex, viewIndex, memberType, req,
 	}
 };
 
-function getFamilyIndex(nodeIndex, asChild, req, callback) {
+function getFamilyIndexes(nodeIndex, familyType, req, callback) {
 
-	var selectFamily = asChild ? "SELECT * FROM links WHERE target = "
-			+ nodeIndex : "SELECT * FROM links WHERE source = " + nodeIndex;
+	var whereClause = 'WHERE ';
+
+	if (familyType == 'asChild') {
+
+		whereClause += 'target = ' + nodeIndex;
+
+	} else if (familyType == 'asParent') {
+
+		whereClause += 'source = ' + nodeIndex;
+
+	} else if (familyType == 'any') {
+
+		whereClause += 'source = ' + nodeIndex + ' OR target = ' + nodeIndex;
+	}
+
+	var selectFamily = "SELECT * FROM links " + whereClause;
 
 	req.getConnection(function(err, connection) {
 
@@ -179,16 +184,26 @@ function getFamilyIndex(nodeIndex, asChild, req, callback) {
 
 			if (err) {
 
-				console.log("Error Selecting : %s ", err);
+				console.log("Error selecting family: %s ", err);
 
 			} else {
 
 				if (rows.length > 0) {
 
-					var familyIndex = asChild ? rows[0]['source']
-							: rows[0]['target'];
+					var familyIndexes = [];
 
-					callback(familyIndex);
+					if (familyType == 'asChild' || familyType == 'any') {
+
+						familyIndexes.push(rows[0]['source']);
+
+					}
+
+					if (familyType == 'asParent' || familyType == 'any') {
+
+						familyIndexes.push(rows[0]['target']);
+					}
+
+					callback(familyIndexes);
 
 				} else {
 
@@ -206,22 +221,13 @@ function getExtendedFamily(nodeIndex, viewIndex, req, callback) {
 		links : []
 	};
 
-	var upward = false;
-
-	if (viewIndex == 2) {
-
-		upward = true;
-	}
-
 	getNode(nodeIndex, req, function(node) {
 
 		if (node != -1) {
 
 			graph.nodes.push(node);
 
-			console.log("graph: " + JSON.stringify(graph));
-
-			addExtendedFamilyLevel(nodeIndex, upward, graph, req, function(
+			addExtendedFamilyLevel(nodeIndex, viewIndex, graph, req, function(
 					graph) {
 
 				console.log("Final graph: " + JSON.stringify(graph));
@@ -231,117 +237,216 @@ function getExtendedFamily(nodeIndex, viewIndex, req, callback) {
 	});
 };
 
-function addExtendedFamilyLevel(nodeIndex, descendant, graph, req, callback) {
+var startingNodes = [];
 
-	getExtendedFamilyLevel(nodeIndex, descendant, req, function(
+function addExtendedFamilyLevel(nodeIndex, viewIndex, graph, req, callback) {
+
+	console.log("startingNodes before: " + JSON.stringify(startingNodes));
+
+	getExtendedFamilyLevel(nodeIndex, viewIndex, req, function(
 			extendedFamilyLevel, newStartingNodes) {
-
-		extendedFamilyLevel.links.forEach(function(link) {
-
-			graph.links.push(link);
-		});
-
-		extendedFamilyLevel.nodes.forEach(function(node) {
-
-			graph.nodes.push(node);
-		});
-
-		console.log("graph after getExtendedFamilyLevel of node " + nodeIndex);
-
-		var requests = 0;
-
-		newStartingNodes.forEach(function(startingNodeIndex) {
-
-			requests++;
-
-			console.log("calling addExtendedFamilyLevel with starting node: "
-					+ startingNodeIndex);
-			addExtendedFamilyLevel(startingNodeIndex, descendant, graph, req,
-					function(graph) {
-
-						requests--;
-
-						if (requests == 0) {
-
-							callback(graph);
-						}
-					});
-		});
 
 		if (newStartingNodes.length == 0) {
 
 			callback(graph);
+
+		} else {
+
+			extendedFamilyLevel.links.forEach(function(link) {
+
+				console.log("Link " + JSON.stringify(link) + " added");
+
+				var linkFound = false;
+				for (linkIndex in graph.links) {
+
+					var currentLink = graph.links[linkIndex];
+					if (currentLink == link) {
+
+						linkFound = true;
+						break;
+					}
+				}
+
+				if (!linkFound) {
+					graph.links.push(link);
+				}
+			});
+
+			extendedFamilyLevel.nodes.forEach(function(node) {
+
+				console.log("Node " + JSON.stringify(node) + " added");
+
+				var nodeFound = false;
+				for (nodeIndex in graph.nodes) {
+
+					var currentNode = graph.nodes[nodeIndex];
+					if (currentNode == node) {
+
+						nodeFound = true;
+						break;
+					}
+				}
+
+				if (!nodeFound) {
+					graph.nodes.push(node);
+				}
+			});
+
+			var requests = 0;
+
+			newStartingNodes.forEach(function(startingNodeIndex) {
+
+				requests++;
+
+				addExtendedFamilyLevel(startingNodeIndex, viewIndex, graph,
+						req, function(graph) {
+
+							requests--;
+
+							if (requests == 0) {
+
+								callback(graph);
+							}
+						});
+			});
+			
+			return graph;
 		}
 	});
 };
 
-function getExtendedFamilyLevel(nodeIndex, descendant, req, callback) {
+function getMemberType(viewIndex) {
 
-	var extendedFamilyLevel = {
-		nodes : [],
-		links : []
-	};
+	var memberType = 'any';
 
-	getFamilyIndex(nodeIndex, descendant, req, function(familyIndex) {
+	if (viewIndex == 2) {
 
-		var newStartingNodes = [];
+		memberType = 'parent';
 
-		if (familyIndex != -1) {
+	} else if (viewIndex == 3) {
 
-			var memberType = descendant ? 'parent' : 'child';
+		memberType = 'child';
+	}
+
+	return memberType;
+};
+
+function getFamilyType(viewIndex) {
+
+	var mode;
+
+	if (viewIndex == 2) {
+
+		mode = "asChild";
+
+	} else if (viewIndex == 3) {
+
+		mode = "asParent";
+
+	} else {
+
+		mode = "any";
+	}
+
+	return mode;
+};
+
+function addEntities(nodeIndex, familyIndex, memberType, level, startingNodes,
+		graphView) {
+
+	if (memberType == 'parent') {
+
+		level.links.push({
+			source : familyIndex,
+			target : nodeIndex
+		});
+
+	} else {
+
+		level.links.push({
+			source : nodeIndex,
+			target : familyIndex
+		});
+	}
+
+	graphView.links.forEach(function(link) {
+
+		level.links.push(link);
+	});
+
+	graphView.nodes.forEach(function(node) {
+
+		level.nodes.push(node);
+
+		if (node.person && node.id != nodeIndex) {
+
+			startingNodes.push(node.id);
+		}
+	});
+
+	return [ level, startingNodes ];
+};
+
+function getExtendedFamilyLevel(nodeIndex, viewIndex, req, callback) {
+
+	console.log("getExtendedFamilyLevel with nodeIndex: " + nodeIndex);
+
+	var mode = getFamilyType(viewIndex);
+
+	getFamilyIndexes(nodeIndex, mode, req, function(familyIndexes) {
+
+		console.log("Family indexes " + JSON.stringify(familyIndexes)
+				+ " found");
+
+		var level = {
+			nodes : [],
+			links : []
+		};
+
+		var startingNodes = [];
+
+		if (familyIndexes == -1) {
+
+			callback(level, startingNodes);
+
+		} else {
+
+			var familyIndex = familyIndexes[0];
+
+			var memberType = getMemberType(viewIndex);
 
 			getFamilyMembers(familyIndex, nodeIndex, 3, memberType, req,
 					function(graphView) {
 
-						console.log("Result of getFamilyMembers " + memberType
-								+ " of " + familyIndex + ": "
-								+ JSON.stringify(graphView));
+						var levelAndStartingNodes = addEntities(nodeIndex,
+								familyIndex, memberType, level, startingNodes,
+								graphView);
 
-						if (descendant) {
+						familyIndex = familyIndexes[1];
 
-							extendedFamilyLevel.links.push({
-								source : familyIndex,
-								target : nodeIndex
-							});
+						if (familyIndex) {
+
+							memberType = getMemberType(viewIndex);
+
+							getFamilyMembers(familyIndex, nodeIndex, 3,
+									memberType, req, function(graphView) {
+
+										levelAndStartingNodes = addEntities(
+												nodeIndex, familyIndex,
+												memberType,
+												levelAndStartingNodes[0],
+												levelAndStartingNodes[1],
+												graphView);
+
+										callback(levelAndStartingNodes[0],
+												levelAndStartingNodes[1]);
+									});
 						} else {
 
-							extendedFamilyLevel.links.push({
-								source : nodeIndex,
-								target : familyIndex
-							});
+							callback(levelAndStartingNodes[0],
+									levelAndStartingNodes[1]);
 						}
-
-						graphView.links.forEach(function(link) {
-
-							extendedFamilyLevel.links.push(link);
-						});
-
-						graphView.nodes.forEach(function(node) {
-
-							extendedFamilyLevel.nodes.push(node);
-
-							if (node.person && node.id != nodeIndex) {
-
-								console.log("adding " + node.id
-										+ " to starting nodes");
-
-								newStartingNodes.push(node.id);
-							}
-						});
-
-						console.log("extended family level of node "
-								+ nodeIndex);
-
-						console.log("callback with new starting nodes: "
-								+ JSON.stringify(newStartingNodes));
-
-						callback(extendedFamilyLevel, newStartingNodes);
 					});
-		}
-
-		else {
-
-			callback(extendedFamilyLevel, newStartingNodes);
 		}
 	});
 };
@@ -353,6 +458,10 @@ function output(graph, res) {
 
 /*
  * Get the subgraph representing the selected view of the specific user.
+ * 
+ * 0 : my family as a child 1 : my family as a parent 2 : my pedigree 3 : my
+ * descendants 4 : my extended family
+ * 
  */
 exports.view = function(req, res) {
 
@@ -361,7 +470,9 @@ exports.view = function(req, res) {
 
 	if (viewIndex == 0) {
 
-		getFamilyIndex(nodeIndex, true, req, function(familyIndex) {
+		getFamilyIndexes(nodeIndex, 'asChild', req, function(familyIndexes) {
+
+			var familyIndex = familyIndexes != -1 ? familyIndexes[0] : -1;
 
 			getFamilyMembers(familyIndex, nodeIndex, viewIndex, 'any', req,
 					function(graphView) {
@@ -371,7 +482,9 @@ exports.view = function(req, res) {
 		});
 	} else if (viewIndex == 1) {
 
-		getFamilyIndex(nodeIndex, false, req, function(familyIndex) {
+		getFamilyIndexes(nodeIndex, 'asParent', req, function(familyIndexes) {
+
+			var familyIndex = familyIndexes != -1 ? familyIndexes[0] : -1;
 
 			getFamilyMembers(familyIndex, nodeIndex, viewIndex, 'any', req,
 					function(graphView) {
