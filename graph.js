@@ -1004,70 +1004,98 @@ function assignPositions(graph, viewIndex, user, req, callback) {
 
 	var requests = 0;
 
-	var positions = {};
+	var width = 1800;
+	var height = 1100;
+	var offset = 400;
 
-	var offset = 300;
-	var height = 600;
+	var levelOrders = {};
+
+	var currentLevel = parseFloat(graph.nodes[0].level);
+
+	for (nodeIndex in graph.nodes) {
+
+		var node = graph.nodes[nodeIndex];
+		var level = parseFloat(node.level);
+
+		var currentOrder = 1;
+		if (!levelOrders[level]) {
+
+			levelOrders[level] = [];
+		} else {
+			var lastInsertedOrder = levelOrders[level][levelOrders[level].length - 1][1];
+			currentOrder = lastInsertedOrder + 1;
+		}
+
+		levelOrders[level].push([ nodeIndex, currentOrder ]);
+
+		if (level == currentLevel) {
+
+			currentOrder++;
+		} else {
+
+			currentOrder = 1;
+			currentLevel = level;
+		}
+	}
 
 	for (nodeIndex in graph.nodes) {
 
 		requests++;
 
-		view.getPosition(user, viewIndex, nodeIndex, req, function(
-				existingNodePosition) {
+		view
+				.getPosition(
+						user,
+						viewIndex,
+						nodeIndex,
+						req,
+						function(existingNodePosition) {
 
-			requests--;
+							requests--;
 
-			var currentNodeIndex = existingNodePosition[0];
+							var currentNodeIndex = existingNodePosition[0];
 
-			var node = graph.nodes[currentNodeIndex];
+							var node = graph.nodes[currentNodeIndex];
 
-			var x = null;
-			var y = null;
+							var x = null;
+							var y = null;
 
-			var nodePosition = existingNodePosition[1];
+							var nodePosition = existingNodePosition[1];
 
-			if (nodePosition != -1) {
+							if (nodePosition != -1) {
 
-				x = nodePosition[0];
-				y = nodePosition[1];
+								x = nodePosition[0];
+								y = nodePosition[1];
 
-			} else {
+							} else {
 
-				var level = parseFloat(node.level);
+								var level = parseFloat(node.level);
 
-				if (!positions[level]) {
+								var levelSize = levelOrders[level].length;
 
-					positions[level] = [];
-				}
+								var order = null;
 
-				var currentX = offset * positions[level].length;
+								for (levelOrdersIndex in levelOrders[level]) {
 
-				if (!node.person) {
+									var currentLevelOrders = levelOrders[level][levelOrdersIndex];
 
-					if (positions[level - 0.5]) {
+									if (currentLevelOrders[0] == currentNodeIndex) {
 
-						x = currentX + positions[level - 0.5][0][0] + offset
-								/ 2;
-					}
-				} else {
+										order = currentLevelOrders[1];
+									}
+								}
 
-					x = currentX;
-				}
+								x = (width / (1 + levelSize)) * order;
+								y = height - (offset * level);
+							}
 
-				y = height - (offset * level);
+							node.x = x;
+							node.y = y;
 
-				positions[level].push([ x, y ]);
-			}
+							if (requests == 0) {
 
-			node.x = x;
-			node.y = y;
-
-			if (requests == 0) {
-
-				return callback(graph);
-			}
-		});
+								return callback(graph);
+							}
+						});
 	}
 };
 

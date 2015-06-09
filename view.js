@@ -16,13 +16,13 @@ exports.getPosition = function(user, view, node, req, callback) {
 				if (rows.length > 0) {
 
 					var x = rows[0]['x'];
-					var y= rows[0]['y'];
-					
-					callback([node, [x, y]]);
-					
+					var y = rows[0]['y'];
+
+					callback([ node, [ x, y ] ]);
+
 				} else {
 
-					callback([node, -1]);
+					callback([ node, -1 ]);
 				}
 			}
 		});
