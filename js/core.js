@@ -6,8 +6,8 @@ var siteUrl = 'http://localhost/myfamily-engineered';
 // var siteUrl =
 // 'http://ec2-54-72-121-42.eu-west-1.compute.amazonaws.com/familygraph.me';
 
-var selectedViewId = 0;
-var selectedViewLabel = 'Family as a child';
+var selectedViewId = 4;
+var selectedViewLabel = 'Extended family';
 
 // Default for testing purposes
 var userId = 3;
