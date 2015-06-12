@@ -1,3 +1,6 @@
+var OK = 200;
+var NOK = 400;
+
 exports.getPosition = function(user, view, node, req, callback) {
 
 	var selectPosition = 'SELECT * FROM views WHERE user = ' + user
@@ -18,7 +21,10 @@ exports.getPosition = function(user, view, node, req, callback) {
 					var x = rows[0]['x'];
 					var y = rows[0]['y'];
 
-					callback([ node, [ x, y ] ]);
+					var position = [ x, y ];
+
+					console.log("Position of node " + node + ": " + position);
+					callback([ node, position ]);
 
 				} else {
 
@@ -31,55 +37,45 @@ exports.getPosition = function(user, view, node, req, callback) {
 
 exports.updateNode = function(req, res) {
 
-	var viewIndex = null;
-	if (req.param('view')) {
-		viewIndex = parseInt(req.param('view'));
-	}
+	var viewIndex = parseInt(req.param('view'));
+	var user = parseInt(req.param('user'));
+	var nodeIndex = parseInt(req.query.node);
+	var x = parseInt(req.query.x);
+	var y = parseInt(req.query.y);
 
-	var nodeIndex = null;
-	if (req.query.node) {
-		viewIndex = parseInt(req.query.node);
-	}
+	var updateNodeQuery = "INSERT INTO views VALUES(" + user + ", " + viewIndex
+			+ ", " + nodeIndex + ", " + x + ", " + y
+			+ ") ON DUPLICATE KEY UPDATE x = " + x + ", y = " + y;
 
-	var x = null;
-	if (req.query.x) {
-		x = parseInt(req.query.x);
-	}
+	console.log(updateNodeQuery);
 
-	var y = null;
-	if (req.query.y) {
-		y = parseInt(req.query.y);
-	}
+	req.getConnection(function(err, connection) {
 
-	var file = 'node_3.json';
+		connection.query(updateNodeQuery, function(err, rows) {
 
-	var graph = JSON.parse(fs.readFileSync(file, 'utf8'));
+			if (err) {
 
-	var graphView = graph.views[viewIndex];
-	var nodes = graphView.nodes;
+				console.log("Error Inserting : %s ", err);
 
-	var found = false;
-	for (nodesIndex in nodes) {
+			} else {
 
-		var currentNode = nodes[nodesIndex];
-		if (currentNode.index == nodeIndex) {
+				if (rows.affectedRows > 0) {
 
-			found = true;
-			currentNode.x = x;
-			currentNode.y = y;
+					console.log("Node with id " + nodeIndex + " updated");
 
-			break;
-		}
-	}
+					res.status(OK).json('result', {
+						"msg" : "node updated"
+					});
 
-	if (!found) {
+				} else {
 
-		res.end("Node not found");
+					console.log("Node with id " + nodeIndex + " updated");
 
-	} else {
-
-		fs.writeFile(file, JSON.stringify(graph, null, "\t"), 'utf8');
-
-		res.end(file + " updated");
-	}
+					res.status(OK).json('result', {
+						"msg" : "node updated"
+					});
+				}
+			}
+		});
+	});
 };

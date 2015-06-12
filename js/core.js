@@ -26,7 +26,7 @@ $('#persons-expandable').on(
 		'click',
 		function() {
 
-			$.get(serverUrl + "/graph/view/" + userId + "?view="
+			$.get(serverUrl + "/" + userId + "/graph/view/" + userId + "?view="
 					+ selectedViewId, function(graphView) {
 
 				for (nodeIndex in graphView.nodes) {
@@ -132,7 +132,8 @@ function drawTree(userId, userLabel, viewId, viewLabel) {
 
 	$
 			.get(
-					serverUrl + "/graph/view/" + userId + "?view=" + viewId,
+					serverUrl + "/" + userId + "/graph/view/" + userId
+							+ "?view=" + viewId,
 					function(graphView) {
 
 						if (viewId != 4) {
@@ -188,7 +189,11 @@ function drawTree(userId, userLabel, viewId, viewLabel) {
 													}
 												}).attr("r", function(d) {
 
-											return 125 / d.level;
+											if (d.label == userLabel) {
+												return 2*(125 / d.level);
+											} else {
+												return 125 / d.level;
+											}
 										});
 
 										currentNode

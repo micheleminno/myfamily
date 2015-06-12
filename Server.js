@@ -102,13 +102,13 @@ app.get('/documents/update', document.update);
 
 // Graph
 
-app.get('/graph/view/:node', graph.view);
+app.get('/:user/graph/view/:node', graph.view);
 
-app.get('/graph/add', graph.addNode);
+app.get('/:user/graph/add', graph.addNode);
 
-app.get('/graph/remove/:node', graph.removeNode);
+app.get('/:user/graph/remove/:node', graph.removeNode);
 
-app.get('/graph/update/:node', graph.updateNode);
+app.get('/:user/graph/update/:node', graph.updateNode);
 
 // Views
-app.get('/view/:view/update', view.updateNode);
+app.get('/:user/view/:view/update', view.updateNode);
