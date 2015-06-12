@@ -190,7 +190,7 @@ function drawTree(userId, userLabel, viewId, viewLabel) {
 												}).attr("r", function(d) {
 
 											if (d.label == userLabel) {
-												return 2*(125 / d.level);
+												return (125 / d.level)*1.5;
 											} else {
 												return 125 / d.level;
 											}
