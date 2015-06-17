@@ -101,8 +101,20 @@ function init() {
 
 	container = svg.append("g");
 
-	force = d3.layout.force().size([ width, height ]).charge(-800)
-			.linkDistance(300).on("tick", tick);
+	force = d3.layout.force().size([ width, height ]).gravity(0).charge(
+			function(d) {
+				if (d.person) {
+					return -800 / d.level;
+				} else {
+					return 0;
+				}
+			}).linkDistance(function(d) {
+		if (!d.source.person && d.target.person) {
+			return 900 * 1 / d.level;
+		} else {
+			return 300 * 1 / d.level;
+		}
+	}).on("tick", tick);
 
 	nodeDrag = force.drag().origin(function(d) {
 		return d;
@@ -141,8 +153,10 @@ function drawTree(userId, userLabel, viewId, viewLabel) {
 							svg.on('contextmenu', null);
 						}
 
-						force.nodes(graphView.nodes).links(graphView.links)
-								.start();
+						force = force.nodes(graphView.nodes).links(
+								graphView.links);
+
+						force.start();
 
 						link = link.data(graphView.links).enter()
 								.append("path");
@@ -190,7 +204,7 @@ function drawTree(userId, userLabel, viewId, viewLabel) {
 												}).attr("r", function(d) {
 
 											if (d.label == userLabel) {
-												return (125 / d.level)*1.5;
+												return (125 / d.level) * 1.5;
 											} else {
 												return 125 / d.level;
 											}
@@ -401,6 +415,7 @@ function tick() {
 	}).attr("cy", function(d) {
 		return d.y;
 	});
+
 }
 
 var onPersonMenu = [ {

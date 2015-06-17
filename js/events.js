@@ -482,6 +482,8 @@ function zoomed() {
 
 function nodeDragstarted(d) {
 
+	d3.select(this).classed("fixed", d.fixed = true);
+	
 	if (!onDetail) {
 		d3.event.sourceEvent.stopPropagation();
 		d3.select(this).classed("dragging", true);

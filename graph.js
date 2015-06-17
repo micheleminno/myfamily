@@ -40,6 +40,7 @@ function finalise(graph, viewIndex, user, req, res, callback) {
 
 		callback(graphViewWithPositions, res);
 	});
+
 };
 
 function getNode(nodeIndex, req, callback) {
@@ -59,7 +60,6 @@ function getNode(nodeIndex, req, callback) {
 				if (rows.length > 0) {
 
 					var node = rows[0];
-					node.fixed = true;
 
 					callback(node);
 				}
@@ -163,13 +163,15 @@ function getFamilyMembers(familyIndex, nodeIndex, memberType, graph, req,
 
 										var nodeIndex = row['id'];
 
+										var fixed = isPerson ? false : true;
+
 										var node = {
 
 											id : nodeIndex,
 											label : row['label'],
 											img : row['img'],
 											person : isPerson,
-											fixed : true
+											fixed : fixed
 										};
 
 										graphView.nodes.push(node);
@@ -1019,41 +1021,6 @@ function assignOtherLevels() {
 	}
 };
 
-function getFamilyNodeXPosition(nodeId, graph) {
-
-	var parents = [];
-	console.log("getFamilyNodeXPosition - node: " + nodeId);
-
-	for (linkIndex in graph.links) {
-
-		var link = graph.links[linkIndex];
-		if (link.target == nodeId) {
-
-			parents.push(link.source);
-		}
-	}
-
-	console.log("Parents: " + JSON.stringify(parents));
-
-	var x = 0;
-
-	for (nodeIndex in graph.nodes) {
-
-		var node = graph.nodes[nodeIndex];
-		if (parents.indexOf(parseInt(node.id)) > -1) {
-
-			console.log("Adding x " + node.x + " of node: " + node.id);
-			x += node.x;
-		}
-	}
-
-	x /= 2;
-
-	console.log("Final x: " + x);
-
-	return x;
-};
-
 function checkStoredPositions(user, viewIndex, graph, req, callback) {
 
 	var requests = 0;
@@ -1078,11 +1045,12 @@ function checkStoredPositions(user, viewIndex, graph, req, callback) {
 
 							if (nodePosition != -1) {
 
-								console.log("Stored position " + nodePosition);
-
 								node.x = nodePosition[0];
 								node.y = nodePosition[1];
+								node.fixed = true;
 
+								console.log("Node with stored position: "
+										+ JSON.stringify(node));
 							}
 
 							if (requests == 0) {
@@ -1096,11 +1064,22 @@ function checkStoredPositions(user, viewIndex, graph, req, callback) {
 var nodeIdToOriginalMap = {};
 var nodeOriginalToIdMap = {};
 
-function assignPositions(graph, viewIndex, user, req, callback) {
+var width = 2800;
+var height = 1200;
+var offset = 350;
 
-	var width = 2800;
-	var height = 1200;
-	var offset = 350;
+function getX(order, levelSize) {
+
+	var widthUnity = width / (1 + levelSize);
+	return widthUnity * order - 3 / 2 * offset;
+};
+
+function getY(level) {
+
+	return height - (offset * level);
+};
+
+function assignPositions(graph, viewIndex, user, req, callback) {
 
 	// Compute infos
 
@@ -1113,19 +1092,76 @@ function assignPositions(graph, viewIndex, user, req, callback) {
 
 		if (levelSizes[node.level] == null) {
 
-			levelSizes[node.level] = 0;
-			levelOrders[node.id] = 0;
+			levelSizes[node.level] = 1;
+			levelOrders[node.level] = {};
+			levelOrders[node.level][node.id] = 1;
+
 		} else {
 
 			levelSizes[node.level]++;
-			levelOrders[node.id] = levelSizes[node.level];
+			levelOrders[node.level][node.id] = levelSizes[node.level];
 		}
 
 		nodeIdToOriginalMap[nodeIndex] = node.originalId;
 		nodeOriginalToIdMap[node.originalId] = nodeIndex;
 	}
 
-	// Compute positions by algorithm
+	getFamilyIndexes(
+			user,
+			'any',
+			req,
+			function(familyIndexes) {
+
+				console.log("Families of logged user " + user + ": "
+						+ familyIndexes);
+
+				var requests = 2;
+				familyIndexes
+						.forEach(function(familyIndex) {
+
+							requests--;
+							if (familyIndex != -1) {
+								for (nodeIndex in graph.nodes) {
+
+									var node = graph.nodes[nodeIndex];
+									if (node.id == nodeOriginalToIdMap[familyIndex]) {
+
+										var nodeLevel = node.level;
+										var currentNodeOrder = levelOrders[nodeLevel][node.id];
+										var desiredOrder = parseInt(levelSizes[nodeLevel] / 2) + 1;
+
+										for (levelOrdersIndex in levelOrders[nodeLevel]) {
+
+											var levelOrder = levelOrders[nodeLevel][levelOrdersIndex];
+
+											if (levelOrder == desiredOrder) {
+
+												levelOrders[nodeLevel][levelOrdersIndex] = currentNodeOrder;
+												break;
+											}
+										}
+
+										levelOrders[nodeLevel][node.id] = desiredOrder;
+
+										console.log("Level orders: "
+												+ JSON.stringify(levelOrders));
+
+										break;
+									}
+								}
+							}
+
+							if (requests == 0) {
+
+								assignXY(graph, levelSizes, levelOrders, user,
+										viewIndex, req, callback);
+							}
+						});
+			});
+};
+
+function assignXY(graph, levelSizes, levelOrders, user, viewIndex, req,
+		callback) {
 
 	for ( var level = 1; levelSizes[level] != null; level += 0.5) {
 
@@ -1137,23 +1173,14 @@ function assignPositions(graph, viewIndex, user, req, callback) {
 
 			if (node.level == level) {
 
+				node.x = getX(levelOrders[level][node.id],
+						levelSizes[node.level]);
+				node.y = getY(node.level);
+
 				console.log("Node " + node.id + " (original id: "
-						+ node.originalId + ") of level " + level);
+						+ node.originalId + ") of level " + level
+						+ " - position: " + node.x + ", " + node.y);
 
-				node.y = height - (offset * node.level);
-
-				if (!node.person) {
-
-					node.x = getFamilyNodeXPosition(node.id, graph);
-				} else {
-
-					var levelSize = levelSizes[node.level];
-					var order = levelOrders[node.id];
-
-					var widthUnity = width / (1 + levelSize);
-
-					node.x = widthUnity * order - 500;
-				}
 			}
 		}
 	}

@@ -40,7 +40,7 @@
 .my-node {
 	cursor: url(../img/move-Hand.png) 17.5 5, pointer;
 	stroke: black;
-	fill: green;
+	fill: red;
 	stroke-width: 6px;
 	opacity: .8;
 }
