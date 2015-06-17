@@ -92,7 +92,7 @@ function init() {
 	force = d3.layout.force().size([ width, height ]).gravity(0).charge(
 			function(d) {
 				if (d.person) {
-					return -800 / d.level;
+					return -2000 / d.level;
 				} else {
 					return 0;
 				}
@@ -269,8 +269,9 @@ function drawTree(userId, userLabel, viewId, viewLabel) {
 										"rx", 20).attr("ry", 20).attr("class",
 										"data-stream");
 
-						$.get(serverUrl + "/documents/" + userId + "?view="
-								+ selectedViewId, function(documentsString) {
+						$.post(serverUrl + "/documents/" + userId, JSON
+								.stringify(graphView.nodes), function(
+								documentsString) {
 
 							documents = JSON.parse(documentsString);
 

@@ -362,8 +362,6 @@ function addMembers(asChild, nodeIndex, familyIndex, viewIndex, graph, history,
 
 			if (inExtendedFamily(history)) {
 
-				console.log("History before adding entities: " + history);
-
 				addIfNotFound(linkFamilyNode, graph.links);
 				addAllIfNotFound(graphView.links, graph.links);
 
@@ -389,9 +387,8 @@ function addMembers(asChild, nodeIndex, familyIndex, viewIndex, graph, history,
 								});
 					}
 				});
-			}
-			else {
-				
+			} else {
+
 				callback(graph, history);
 			}
 		} else {
@@ -1221,7 +1218,7 @@ function assignLevels(graph) {
 	for (nodeIndex in nodes) {
 
 		var node = nodes[nodeIndex];
-		if (sources.indexOf(node.id) == -1) {
+		if (sources.indexOf(parseInt(node.id)) == -1) {
 
 			node.leaf = true;
 			leaves.push({

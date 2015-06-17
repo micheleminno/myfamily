@@ -4,13 +4,16 @@ var mysql = require('mysql');
 var multer = require("multer");
 var cors = require("cors");
 var fs = require('fs');
+var bodyParser = require('body-parser');
 
 var document = require('./document.js');
 var graph = require('./graph.js');
 var view = require('./view.js');
 
 var app = express();
+
 app.use(cors());
+app.use(bodyParser.json());
 
 var connectionConfig = {
 
@@ -96,7 +99,7 @@ app.post('/profileImage/:nodeIndex', function(req, res) {
 // Documents
 app.get('/documents', document.list);
 
-app.get('/documents/:node', document.view);
+app.post('/documents/:node', document.view);
 
 app.get('/documents/update', document.update);
 
