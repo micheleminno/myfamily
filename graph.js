@@ -255,7 +255,7 @@ function getExtendedFamily(nodeIndex, viewIndex, req, callback) {
 
 			console.log("Entity " + JSON.stringify(node) + " added");
 
-			history = [];
+			history = '';
 
 			addExtendedFamilyLevel(nodeIndex, viewIndex, graph, history, req,
 					function(graph) {
@@ -314,6 +314,22 @@ function addAllIfNotFound(entitiesToAdd, entities) {
 	});
 };
 
+function inExtendedFamily(history) {
+
+	var indexOfLastC = history.lastIndexOf('c');
+	var indexOfCBeforeLast = history.substring(0, indexOfLastC)
+			.lastIndexOf('c');
+
+	if (history.length == 0 || indexOfLastC == indexOfCBeforeLast + 1) {
+
+		return true;
+
+	} else {
+
+		return false;
+	}
+};
+
 function addMembers(asChild, nodeIndex, familyIndex, viewIndex, graph, history,
 		req, callback) {
 
@@ -324,12 +340,11 @@ function addMembers(asChild, nodeIndex, familyIndex, viewIndex, graph, history,
 
 		if (familyIndex != -1 && graphView.nodes.length > 0) {
 
-			history.push('family members of ' + familyIndex + ' as a child');
-
 			var linkFamilyNode;
 
 			if (asChild) {
 
+				history += 'c';
 				linkFamilyNode = {
 					id : familyIndex + "-" + nodeIndex,
 					source : familyIndex,
@@ -337,6 +352,7 @@ function addMembers(asChild, nodeIndex, familyIndex, viewIndex, graph, history,
 				};
 			} else {
 
+				history += 'p';
 				linkFamilyNode = {
 					id : nodeIndex + "-" + familyIndex,
 					source : nodeIndex,
@@ -344,31 +360,40 @@ function addMembers(asChild, nodeIndex, familyIndex, viewIndex, graph, history,
 				};
 			}
 
-			addIfNotFound(linkFamilyNode, graph.links);
-			addAllIfNotFound(graphView.links, graph.links);
+			if (inExtendedFamily(history)) {
 
-			var requests = 0;
+				console.log("History before adding entities: " + history);
 
-			graphView.nodes.forEach(function(node) {
+				addIfNotFound(linkFamilyNode, graph.links);
+				addAllIfNotFound(graphView.links, graph.links);
 
-				var added = addIfNotFound(node, graph.nodes);
+				var requests = 0;
 
-				if (added && node.person && node.id != nodeIndex) {
+				graphView.nodes.forEach(function(node) {
 
-					requests++;
+					var added = addIfNotFound(node, graph.nodes);
 
-					addExtendedFamilyLevel(node.id, viewIndex, graph, history,
-							req, function(graph) {
+					if (added && node.person && node.id != nodeIndex) {
 
-								requests--;
+						requests++;
 
-								if (requests == 0) {
+						addExtendedFamilyLevel(node.id, viewIndex, graph,
+								history, req, function(graph) {
 
-									callback(graph, history);
-								}
-							});
-				}
-			});
+									requests--;
+
+									if (requests == 0) {
+
+										callback(graph, history);
+									}
+								});
+					}
+				});
+			}
+			else {
+				
+				callback(graph, history);
+			}
 		} else {
 
 			callback(graph, history);
@@ -384,6 +409,7 @@ function addExtendedFamilyLevel(nodeIndex, viewIndex, graph, history, req,
 	getFamilyIndexes(nodeIndex, mode, req, function(familyIndexes) {
 
 		// NodeIndex as a child
+
 		addMembers(true, nodeIndex, familyIndexes[0], viewIndex, graph,
 				history, req, function(graph, history) {
 
@@ -394,6 +420,7 @@ function addExtendedFamilyLevel(nodeIndex, viewIndex, graph, history, req,
 								callback(graph);
 							});
 				});
+
 	});
 };
 
@@ -1048,9 +1075,6 @@ function checkStoredPositions(user, viewIndex, graph, req, callback) {
 								node.x = nodePosition[0];
 								node.y = nodePosition[1];
 								node.fixed = true;
-
-								console.log("Node with stored position: "
-										+ JSON.stringify(node));
 							}
 
 							if (requests == 0) {
@@ -1112,9 +1136,6 @@ function assignPositions(graph, viewIndex, user, req, callback) {
 			req,
 			function(familyIndexes) {
 
-				console.log("Families of logged user " + user + ": "
-						+ familyIndexes);
-
 				var requests = 2;
 				familyIndexes
 						.forEach(function(familyIndex) {
@@ -1143,9 +1164,6 @@ function assignPositions(graph, viewIndex, user, req, callback) {
 
 										levelOrders[nodeLevel][node.id] = desiredOrder;
 
-										console.log("Level orders: "
-												+ JSON.stringify(levelOrders));
-
 										break;
 									}
 								}
@@ -1165,8 +1183,6 @@ function assignXY(graph, levelSizes, levelOrders, user, viewIndex, req,
 
 	for ( var level = 1; levelSizes[level] != null; level += 0.5) {
 
-		console.log("Level: " + level);
-
 		for (nodeIndex in graph.nodes) {
 
 			var node = graph.nodes[nodeIndex];
@@ -1176,11 +1192,6 @@ function assignXY(graph, levelSizes, levelOrders, user, viewIndex, req,
 				node.x = getX(levelOrders[level][node.id],
 						levelSizes[node.level]);
 				node.y = getY(node.level);
-
-				console.log("Node " + node.id + " (original id: "
-						+ node.originalId + ") of level " + level
-						+ " - position: " + node.x + ", " + node.y);
-
 			}
 		}
 	}
@@ -1230,4 +1241,32 @@ function assignLevels(graph) {
 	assignOtherLevels();
 
 	return graph;
+};
+
+exports.persons = function(req, res) {
+
+	var persons = [];
+
+	var selectPersons = 'SELECT * FROM nodes WHERE person = 1';
+
+	req.getConnection(function(err, connection) {
+
+		connection.query(selectPersons, function(err, rows) {
+
+			if (err) {
+
+				console.log("Error selecting persons: %s ", err);
+
+			} else {
+
+				for (rowIndex in rows) {
+
+					var row = rows[rowIndex];
+					persons.push(row);
+				}
+
+				res.status(OK).json('persons', persons);
+			}
+		});
+	});
 };

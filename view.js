@@ -23,7 +23,6 @@ exports.getPosition = function(user, view, node, req, callback) {
 
 					var position = [ x, y ];
 
-					console.log("Position of node " + node + ": " + position);
 					callback([ node, position ]);
 
 				} else {

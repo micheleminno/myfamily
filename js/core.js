@@ -13,6 +13,24 @@ var selectedViewLabel = 'Extended family';
 var userId = 3;
 var userLabel = "Michele Minno";
 
+$.get(serverUrl + "/" + userId + "/graph/persons", function(persons) {
+
+	for (personIndex in persons) {
+
+		var person = persons[personIndex];
+		$('#persons').append(
+				'<li id="' + person.id + '"><a href="#">' + person.label
+						+ '</a></li>');
+	}
+
+	$('#persons li').on('click', function() {
+
+		userId = $(this).attr('id');
+		userLabel = $(this).find('a').text();
+		drawTree(userId, userLabel, selectedViewId, selectedViewLabel);
+	});
+});
+
 $('#view li').on('click', function() {
 
 	$(this).siblings().removeClass("active");
@@ -21,36 +39,6 @@ $('#view li').on('click', function() {
 	selectedViewLabel = $(this).text();
 	drawTree(userId, userLabel, selectedViewId, selectedViewLabel);
 });
-
-$('#persons-expandable').on(
-		'click',
-		function() {
-
-			$.get(serverUrl + "/" + userId + "/graph/view/" + userId + "?view="
-					+ selectedViewId, function(graphView) {
-
-				for (nodeIndex in graphView.nodes) {
-
-					var node = graphView.nodes[nodeIndex];
-					if (node.person) {
-						$('#persons').append(
-								'<li id="' + node.originalId + '"><a href="#">'
-										+ node.label + '</a></li>');
-					}
-				}
-
-				$('#persons li').on(
-						'click',
-						function() {
-
-							userId = $(this).attr('id');
-							userLabel = $(this).find('a').text();
-							$('#persons').html("");
-							drawTree(userId, userLabel, selectedViewId,
-									selectedViewLabel);
-						});
-			});
-		});
 
 var width, height;
 
@@ -415,7 +403,6 @@ function tick() {
 	}).attr("cy", function(d) {
 		return d.y;
 	});
-
 }
 
 var onPersonMenu = [ {

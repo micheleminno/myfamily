@@ -110,5 +110,7 @@ app.get('/:user/graph/remove/:node', graph.removeNode);
 
 app.get('/:user/graph/update/:node', graph.updateNode);
 
+app.get('/:user/graph/persons', graph.persons);
+
 // Views
 app.get('/:user/view/:view/update', view.updateNode);
