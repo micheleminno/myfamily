@@ -333,10 +333,14 @@ function inExtendedFamily(history) {
 function addMembers(asChild, nodeIndex, familyIndex, viewIndex, graph, history,
 		req, callback) {
 
+	console.log("addMembers of family " + familyIndex);
+
 	var memberType = viewIndex == 4 ? 'any' : 'parent';
 
 	getFamilyMembers(familyIndex, nodeIndex, memberType, graph, req, function(
 			graphView) {
+
+		console.log("Members: " + JSON.stringify(graphView));
 
 		if (familyIndex != -1 && graphView.nodes.length > 0) {
 
@@ -360,6 +364,8 @@ function addMembers(asChild, nodeIndex, familyIndex, viewIndex, graph, history,
 				};
 			}
 
+			console.log("History: " + history);
+
 			if (inExtendedFamily(history)) {
 
 				addIfNotFound(linkFamilyNode, graph.links);
@@ -369,11 +375,11 @@ function addMembers(asChild, nodeIndex, familyIndex, viewIndex, graph, history,
 
 				graphView.nodes.forEach(function(node) {
 
+					requests++;
+
 					var added = addIfNotFound(node, graph.nodes);
 
 					if (added && node.person && node.id != nodeIndex) {
-
-						requests++;
 
 						addExtendedFamilyLevel(node.id, viewIndex, graph,
 								history, req, function(graph) {
@@ -385,8 +391,16 @@ function addMembers(asChild, nodeIndex, familyIndex, viewIndex, graph, history,
 										callback(graph, history);
 									}
 								});
+					} else {
+
+						requests--;
 					}
 				});
+
+				if (requests == 0) {
+
+					callback(graph, history);
+				}
 			} else {
 
 				callback(graph, history);
@@ -496,7 +510,6 @@ function output(graph, res) {
  */
 exports.view = function(req, res) {
 
-	var nodeIndex = req.param('node');
 	var user = req.param('user');
 	var viewIndex = req.query.view;
 
@@ -504,11 +517,11 @@ exports.view = function(req, res) {
 
 	if (viewIndex == 0) {
 
-		getFamilyIndexes(nodeIndex, 'asChild', req, function(familyIndexes) {
+		getFamilyIndexes(user, 'asChild', req, function(familyIndexes) {
 
 			var familyIndex = familyIndexes[0];
 
-			getFamilyMembers(familyIndex, nodeIndex, 'any', {}, req, function(
+			getFamilyMembers(familyIndex, user, 'any', {}, req, function(
 					graphView) {
 
 				finalise(graphView, viewIndex, user, req, res, output);
@@ -516,11 +529,11 @@ exports.view = function(req, res) {
 		});
 	} else if (viewIndex == 1) {
 
-		getFamilyIndexes(nodeIndex, 'asParent', req, function(familyIndexes) {
+		getFamilyIndexes(user, 'asParent', req, function(familyIndexes) {
 
 			var familyIndex = familyIndexes[1];
 
-			getFamilyMembers(familyIndex, nodeIndex, 'any', {}, req, function(
+			getFamilyMembers(familyIndex, user, 'any', {}, req, function(
 					graphView) {
 
 				finalise(graphView, viewIndex, user, req, res, output);
@@ -528,19 +541,19 @@ exports.view = function(req, res) {
 		});
 	} else if (viewIndex == 2) {
 
-		getExtendedFamily(nodeIndex, viewIndex, req, function(graphView) {
+		getExtendedFamily(user, viewIndex, req, function(graphView) {
 
 			finalise(graphView, viewIndex, user, req, res, output);
 		});
 	} else if (viewIndex == 3) {
 
-		getExtendedFamily(nodeIndex, viewIndex, req, function(graphView) {
+		getExtendedFamily(user, viewIndex, req, function(graphView) {
 
 			finalise(graphView, viewIndex, user, req, res, output);
 		});
 	} else if (viewIndex == 4) {
 
-		getExtendedFamily(nodeIndex, viewIndex, req, function(graphView) {
+		getExtendedFamily(user, viewIndex, req, function(graphView) {
 
 			finalise(graphView, viewIndex, user, req, res, output);
 		});
@@ -604,6 +617,40 @@ function insertNode(label, isPerson, req, callback) {
 	});
 };
 
+exports.updateNodeInDB = function(nodeIndex, field, value, req, callback) {
+
+	var updateNodeQuery = "UPDATE nodes SET " + field + " = '" + value
+			+ "' WHERE id = " + nodeIndex;
+
+	console.log(updateNodeQuery);
+
+	req.getConnection(function(err, connection) {
+
+		connection.query(updateNodeQuery, function(err, rows) {
+
+			if (err) {
+
+				console.log("Error Updating : %s ", err);
+
+			} else {
+
+				if (rows.affectedRows > 0) {
+
+					console.log("Node " + nodeIndex + " updated");
+
+					callback(true);
+
+				} else {
+
+					console.log("Node " + nodeIndex + " not updated");
+
+					callback(false);
+				}
+			}
+		});
+	});
+};
+
 function insertLink(source, target, req, callback) {
 
 	req.getConnection(function(err, connection) {
@@ -626,12 +673,12 @@ function insertLink(source, target, req, callback) {
 					if (rows.affectedRows > 0) {
 
 						console.log("New link inserted");
-						callback(1);
+						callback(true);
 
 					} else {
 
 						console.log("New link not inserted");
-						callback(-1);
+						callback(false);
 					}
 				}
 			});
@@ -681,23 +728,40 @@ exports.addNode = function(req, res) {
 		if (insertedId == -1) {
 
 			res.status(NOK).json('result', {
-				"msg" : "graph not updated"
+				"msg" : "node and link not added"
 			});
 		} else if (sourceIndex) {
 
-			insertLink(sourceIndex, insertedId, req, function() {
+			insertLink(sourceIndex, insertedId, req, function(linkInserted) {
 
-				res.status(OK).json('result', {
-					"msg" : "graph updated"
-				});
+				if (linkInserted) {
+
+					res.status(OK).json('result', {
+						"msg" : "graph updated"
+					});
+				} else {
+
+					res.status(NOK).json('result', {
+						"msg" : "link not added"
+					});
+				}
 			});
 		} else if (targetIndex) {
 
-			insertLink(insertedId, targetIndex, req, function() {
+			insertLink(insertedId, targetIndex, req, function(linkInserted) {
 
-				res.status(OK).json('result', {
-					"msg" : "graph updated"
-				});
+				if (linkInserted) {
+
+					res.status(OK).json('result', {
+						"msg" : "graph updated"
+					});
+				} else {
+
+					res.status(NOK).json('result', {
+						"msg" : "link not added"
+					});
+				}
+
 			});
 		} else {
 
@@ -795,41 +859,22 @@ exports.updateNode = function(req, res) {
 		nodeIndex = parseInt(req.param('node'));
 	}
 
-	var label = req.query.label;
+	var field = req.query.field;
+	var value = req.query.value;
 
-	var updateNodeQuery = "UPDATE nodes SET label = '" + label
-			+ "' WHERE id = " + nodeIndex;
+	exports.updateNodeInDB(nodeIndex, field, value, req, function(updated) {
 
-	console.log(updateNodeQuery);
+		if (updated) {
 
-	req.getConnection(function(err, connection) {
+			res.status(OK).json('result', {
+				"msg" : "node updated"
+			});
+		} else {
 
-		connection.query(updateNodeQuery, function(err, rows) {
-
-			if (err) {
-
-				console.log("Error Updating : %s ", err);
-
-			} else {
-
-				if (rows.affectedRows > 0) {
-
-					console.log("Node " + nodeIndex + " updated");
-
-					res.status(OK).json('result', {
-						"msg" : "node updated"
-					});
-
-				} else {
-
-					console.log("Node " + nodeIndex + " not updated");
-
-					res.status(NOK).json('result', {
-						"msg" : "node not updated"
-					});
-				}
-			}
-		});
+			res.status(NOK).json('result', {
+				"msg" : "node not updated"
+			});
+		}
 	});
 };
 

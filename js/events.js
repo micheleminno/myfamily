@@ -4,27 +4,30 @@ function makeEditable(d) {
 		d3.select(this).style("fill", "red");
 	}).on("mouseout", function() {
 		d3.select(this).style("fill", null);
-	}).on("click", function(d) {
+	}).on(
+			"click",
+			function(d) {
 
-		var result = prompt('Enter a new name', d.name);
+				var result = prompt('Enter a new name', d.name);
 
-		if (result) {
+				if (result) {
 
-			d.label = result;
-			var selection = d3.select(this);
-			var label = selection[0][0];
-			label.textContent = result;
+					d.label = result;
+					var selection = d3.select(this);
+					var label = selection[0][0];
+					label.textContent = result;
 
-			var node = d3.select(this.parentNode.parentNode);
-			var selection = node.selectAll(".nodeLabel");
-			var label = selection[0][0];
-			label.textContent = result;
+					var node = d3.select(this.parentNode.parentNode);
+					var selection = node.selectAll(".nodeLabel");
+					var label = selection[0][0];
+					label.textContent = result;
 
-			$.get(serverUrl + '/updateNode/' + d.index + '?label=' + result);
-		}
+					$.get(serverUrl + "/" + userId + '/graph/update/'
+							+ d.originalId + '?field=label&value=' + result);
+				}
 
-		d3.event.stopPropagation();
-	});
+				d3.event.stopPropagation();
+			});
 }
 
 function thumbnailMouseovered(d) {
@@ -256,7 +259,7 @@ function continueExecution() {
 
 	svg.selectAll(".profile-image").filter(function(d) {
 
-		return d.index == nodeIdToUpdate;
+		return d.originalId == nodeIdToUpdate;
 
 	}).attr("xlink:href", "./docs/" + fileName);
 
@@ -266,7 +269,7 @@ function continueExecution() {
 
 function profileImageClicked(d) {
 
-	nodeIdToUpdate = d.index;
+	nodeIdToUpdate = d.originalId;
 
 	$('#file-upload').val(null);
 	$('#file-upload').click();
@@ -323,7 +326,7 @@ function placeDocuments(serviceUrl, selectedNode, nodeIndex, centerX, centerY,
 
 							var docNode = container.append("image");
 
-							var defaultX = centerX / 2 + offset;
+							var defaultX = centerX / 2 - 300 + offset;
 							var defaultY = centerY + 100
 									* Math.floor(docIndex / maxRowSize);
 
@@ -536,7 +539,8 @@ var onSelectedNodeMenu = [ {
 	title : 'Add document',
 	action : function(elm, d, i) {
 
-		$.get(serverUrl + '/addDocument?owner=3&tagged=[' + d.index + ']');
+		$.get(serverUrl + '/documents/add?owner=' + userId + '&tagged=['
+				+ d.originalId + ']');
 		drawTree(selectedViewId);
 	}
 } ];

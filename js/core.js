@@ -132,8 +132,7 @@ function drawTree(userId, userLabel, viewId, viewLabel) {
 
 	$
 			.get(
-					serverUrl + "/" + userId + "/graph/view/" + userId
-							+ "?view=" + viewId,
+					serverUrl + "/" + userId + "/graph/view?view=" + viewId,
 					function(graphView) {
 
 						if (viewId != 4) {
@@ -172,7 +171,7 @@ function drawTree(userId, userLabel, viewId, viewLabel) {
 
 										currentNode.on("click", clickNode);
 
-										if (view == 4) {
+										if (viewId == 4) {
 
 											currentNode.on('contextmenu', d3
 													.contextMenu(onPersonMenu));
@@ -272,7 +271,6 @@ function drawTree(userId, userLabel, viewId, viewLabel) {
 						var nodes = JSON.stringify(graphView.nodes);
 						var data = '{"nodes": ' + nodes + '}';
 
-						/*
 						$.ajax({
 
 							url : serverUrl + "/documents/" + userId,
@@ -280,24 +278,25 @@ function drawTree(userId, userLabel, viewId, viewLabel) {
 							data : data,
 							contentType : "application/json",
 							dataType : "json",
-							success : function(documentsString) {
+							success : function(data) {
 
-								documents = JSON.parse(documentsString);
-
+								var documents = data.documents;
+								
+								console.log("Documents: " + JSON.stringify(documents));
+								
 								var documentsSize = documents.length;
-								
+
 								if (documentsSize > 0) {
-								
+
 									currentPage = Math.floor(documentsSize
 											/ docRowSize);
-								
+
 									maxPage = currentPage;
 
 									populateThumbnails(currentPage, true);
 								}
 							}
 						});
-						*/
 					});
 }
 
@@ -422,57 +421,69 @@ function tick() {
 	});
 }
 
-var onPersonMenu = [ {
-	title : 'Add family as a parent',
-	action : function(elm, d, i) {
+var onPersonMenu = [
+		{
+			title : 'Add family as a parent',
+			action : function(elm, d, i) {
 
-		$.get(serverUrl + '/addNode?type=family&source=' + d.originalIndex);
-		drawTree(userId, userLabel, selectedViewId, selectedViewLabel);
-	}
-}, {
-	title : 'Add family as a child',
-	action : function(elm, d, i) {
+				$.get(serverUrl + "/" + userId
+						+ '/graph/add?type=family&source=' + d.originalId);
+				drawTree(userId, userLabel, selectedViewId, selectedViewLabel);
+			}
+		},
+		{
+			title : 'Add family as a child',
+			action : function(elm, d, i) {
 
-		$.get(serverUrl + '/addNode?type=family&target=' + d.originalIndex);
-		drawTree(userId, userLabel, selectedViewId, selectedViewLabel);
-	}
-}, {
-	title : 'Remove',
-	action : function(elm, d, i) {
+				$.get(serverUrl + "/" + userId
+						+ '/graph/add?type=family&target=' + d.originalId);
+				drawTree(userId, userLabel, selectedViewId, selectedViewLabel);
+			}
+		},
+		{
+			title : 'Remove',
+			action : function(elm, d, i) {
 
-		$.get(serverUrl + '/removeNode/' + d.originalIndex);
-		drawTree(userId, userLabel, selectedViewId, selectedViewLabel);
-	}
-} ];
+				$.get(serverUrl + "/" + userId + '/graph/remove/'
+						+ d.originalId);
+				drawTree(userId, userLabel, selectedViewId, selectedViewLabel);
+			}
+		} ];
 
-var onFamilyMenu = [ {
-	title : 'Add parent',
-	action : function(elm, d, i) {
+var onFamilyMenu = [
+		{
+			title : 'Add parent',
+			action : function(elm, d, i) {
 
-		$.get(serverUrl + '/addNode?type=person&target=' + d.originalIndex);
-		drawTree(userId, userLabel, selectedViewId, selectedViewLabel);
-	}
-}, {
-	title : 'Add child',
-	action : function(elm, d, i) {
+				$.get(serverUrl + "/" + userId
+						+ '/graph/add?type=person&target=' + d.originalId);
+				drawTree(userId, userLabel, selectedViewId, selectedViewLabel);
+			}
+		},
+		{
+			title : 'Add child',
+			action : function(elm, d, i) {
 
-		$.get(serverUrl + '/addNode?type=person&source=' + d.originalIndex);
-		drawTree(userId, userLabel, selectedViewId, selectedViewLabel);
-	}
-}, {
-	title : 'Remove',
-	action : function(elm, d, i) {
+				$.get(serverUrl + "/" + userId
+						+ '/graph/add?type=person&source=' + d.originalId);
+				drawTree(userId, userLabel, selectedViewId, selectedViewLabel);
+			}
+		},
+		{
+			title : 'Remove',
+			action : function(elm, d, i) {
 
-		$.get(serverUrl + '/removeNode/' + d.originalIndex);
-		drawTree(userId, userLabel, selectedViewId, selectedViewLabel);
-	}
-} ];
+				$.get(serverUrl + "/" + userId + '/graph/remove/'
+						+ d.originalId);
+				drawTree(userId, userLabel, selectedViewId, selectedViewLabel);
+			}
+		} ];
 
 var onBackgroundMenu = [ {
 	title : 'Add person node',
 	action : function(elm, d, i) {
 
-		$.get(serverUrl + '/addNode?type=person');
+		$.get(serverUrl + "/" + userId + '/graph/add?type=person');
 		drawTree(userId, userLabel, selectedViewId, selectedViewLabel);
 	}
 } ];

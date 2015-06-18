@@ -17,8 +17,17 @@ exports.list = function(req, res) {
 
 	} else if (relation == 'tagged') {
 
-		query = 'SELECT * FROM tags JOIN documents ON tags.document = documents.id WHERE node = '
-				+ nodeIndex;
+		// Heritage
+		if (nodeIndex == -1) {
+
+			query = 'SELECT * FROM tags RIGHT JOIN documents ON tags.document = documents.id WHERE node IS NULL';
+			
+		} else {
+
+			query = 'SELECT * FROM tags JOIN documents ON tags.document = documents.id WHERE node = '
+					+ nodeIndex;
+		}
+
 	}
 
 	console.log(query);
@@ -118,7 +127,7 @@ exports.update = function(req, res) {
 			+ ' WHERE document = ' + index + ' AND node = ' + node;
 
 	console.log(updateDocumentQuery);
-	
+
 	req.getConnection(function(err, connection) {
 
 		connection.query(updateDocumentQuery, function(err, rows) {

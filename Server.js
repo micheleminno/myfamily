@@ -64,38 +64,61 @@ app.get('/', function(req, res) {
 	res.sendfile('myfamily/index.html');
 });
 
-app.post('/profileImage/:nodeIndex', function(req, res) {
+function getCurrentImage(node, req, callback) {
+
+	var selectNode = 'SELECT * FROM nodes WHERE id = ' + node;
+
+	req.getConnection(function(err, connection) {
+
+		connection.query(selectNode, function(err, rows) {
+
+			if (err) {
+
+				console.log("Error Selecting : %s ", err);
+
+			} else {
+
+				if (rows.length > 0) {
+
+					var node = rows[0];
+
+					callback(node.img);
+				}
+			}
+		});
+	});
+}
+app.post('/profileImage/:node', function(req, res) {
 
 	console.log("uploading profile image...");
 
-	var nodeIndex = req.param('nodeIndex');
+	var node = req.param('node');
 
 	if (done == true) {
 
 		console.log(req.files);
-		var graphFile = 'graph.json';
 
-		var graph = JSON.parse(fs.readFileSync(graphFile, 'utf8'));
+		getCurrentImage(node, req, function(previousImage) {
 
-		var nodes = graph.nodes;
-		for (currentNodeIndex in nodes) {
+			graph.updateNodeInDB(node, 'img',
+					req.files.userProfileImage.originalname, req, function(
+							updated) {
 
-			var node = nodes[currentNodeIndex];
-			if (node.index == nodeIndex) {
+						if (updated) {
 
-				if (node.img && node.img != "") {
+							if (previousImage && previousImage != "") {
 
-					// Remove the current profile image
-					fs.unlinkSync(__dirname + "/docs/" + node.img);
-				}
+								fs.unlinkSync(__dirname + "/docs/"
+										+ previousImage);
 
-				node.img = req.files.userProfileImage.originalname;
-			}
-		}
+								console.log("Previous image " + previousImage
+										+ " removed");
+							}
 
-		fs.writeFile(graphFile, JSON.stringify(graph, null, "\t"), 'utf8');
-
-		res.end("Profile image uploaded.");
+							res.end("Profile image uploaded.");
+						}
+					});
+		});
 	}
 });
 
@@ -108,7 +131,7 @@ app.get('/documents/update', document.update);
 
 // Graph
 
-app.get('/:user/graph/view/:node', graph.view);
+app.get('/:user/graph/view', graph.view);
 
 app.get('/:user/graph/add', graph.addNode);
 
