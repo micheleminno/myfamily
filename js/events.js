@@ -308,10 +308,10 @@ function placeDocuments(serviceUrl, selectedNode, nodeIndex, centerX, centerY,
 
 	$
 			.get(
-					serviceUrl + nodeIndex,
-					function(documentsString) {
+					serviceUrl,
+					function(data) {
 
-						var documents = JSON.parse(documentsString);
+						var documents = data.documents;
 
 						var container = selectedNode.append("g");
 
@@ -332,16 +332,9 @@ function placeDocuments(serviceUrl, selectedNode, nodeIndex, centerX, centerY,
 
 							if (!isHeritage) {
 
-								var filtered = doc.tagged.filter(function(n) {
-									return n.node == nodeIndex;
-								});
+								x = doc.position ? doc.position.x : defaultX;
+								y = doc.position ? doc.position.y : defaultY;
 
-								if (filtered) {
-									x = filtered[0].position ? filtered[0].position.x
-											: defaultX;
-									y = filtered[0].position ? filtered[0].position.y
-											: defaultY;
-								}
 							} else if (doc.position) {
 
 								x = doc.position.x;
@@ -350,7 +343,7 @@ function placeDocuments(serviceUrl, selectedNode, nodeIndex, centerX, centerY,
 
 							docNode
 									.attr("width", 100)
-									.attr("id", doc.index)
+									.attr("id", doc.id)
 									.attr("title", doc.title)
 									.attr("url", "./docs/" + doc.file)
 									.attr("date", getDate(doc))
@@ -405,8 +398,8 @@ function groundClicked(d) {
 	var centerY = 1100;
 	var maxRowSize = 40;
 
-	placeDocuments(serverUrl + "/documents/tagged/", selectedNode, -1, centerX,
-			centerY, maxRowSize, true);
+	placeDocuments(serverUrl + "/documents?node=-1&relation=tagged",
+			selectedNode, -1, centerX, centerY, maxRowSize, true);
 
 	d3.event.stopPropagation();
 };
@@ -452,8 +445,9 @@ function clickNode(d) {
 	selectedNode.append("text").attr('class', "label--selected").attr("y", -50)
 			.attr("x", centerX - 230).text(d.label).call(makeEditable);
 
-	placeDocuments(serverUrl + "/documents/tagged/", selectedNode, d.index,
-			centerX, centerY, maxRowSize, false);
+	placeDocuments(serverUrl + "/documents?node=" + d.originalId
+			+ "&relation=tagged", selectedNode, d.originalId, centerX, centerY,
+			maxRowSize, false);
 
 	d3.event.stopPropagation();
 };
@@ -483,7 +477,7 @@ function zoomed() {
 function nodeDragstarted(d) {
 
 	d3.select(this).classed("fixed", d.fixed = true);
-	
+
 	if (!onDetail) {
 		d3.event.sourceEvent.stopPropagation();
 		d3.select(this).classed("dragging", true);
@@ -534,8 +528,8 @@ function docDragended(d) {
 	var y = document.y.baseVal.value;
 	var id = document.attributes.id.nodeValue;
 
-	$.get(serverUrl + '/updateDoc?node=' + d.index + '&index=' + id + '&x=' + x
-			+ '&y=' + y);
+	$.get(serverUrl + '/documents/update?node=' + d.originalId + '&index=' + id
+			+ '&x=' + x + '&y=' + y);
 };
 
 var onSelectedNodeMenu = [ {

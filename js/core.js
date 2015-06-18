@@ -269,19 +269,35 @@ function drawTree(userId, userLabel, viewId, viewLabel) {
 										"rx", 20).attr("ry", 20).attr("class",
 										"data-stream");
 
-						$.post(serverUrl + "/documents/" + userId, JSON
-								.stringify(graphView.nodes), function(
-								documentsString) {
+						var nodes = JSON.stringify(graphView.nodes);
+						var data = '{"nodes": ' + nodes + '}';
 
-							documents = JSON.parse(documentsString);
+						/*
+						$.ajax({
 
-							var documentsSize = documents.length;
-							currentPage = Math
-									.floor(documentsSize / docRowSize);
-							maxPage = currentPage;
+							url : serverUrl + "/documents/" + userId,
+							type : "POST",
+							data : data,
+							contentType : "application/json",
+							dataType : "json",
+							success : function(documentsString) {
 
-							populateThumbnails(currentPage, true);
+								documents = JSON.parse(documentsString);
+
+								var documentsSize = documents.length;
+								
+								if (documentsSize > 0) {
+								
+									currentPage = Math.floor(documentsSize
+											/ docRowSize);
+								
+									maxPage = currentPage;
+
+									populateThumbnails(currentPage, true);
+								}
+							}
 						});
+						*/
 					});
 }
 
