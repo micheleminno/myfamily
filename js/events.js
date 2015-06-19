@@ -58,12 +58,12 @@ function thumbnailMouseovered(d) {
 
 			node.classed("node--tagged", function(n) {
 
-				if (d.tagged) {
+				if (d.node) {
 
-					for (taggedIndex in d.tagged) {
+					for (nodeIndex in d.node) {
 
-						var taggedNode = d.tagged[taggedIndex];
-						if (taggedNode["node"] == parseInt(n.index)) {
+						var taggedNode = d.node[nodeIndex];
+						if (taggedNode == n.originalId) {
 							return true;
 						}
 					}

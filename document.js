@@ -79,44 +79,77 @@ exports.view = function(req, res) {
 
 		requests++;
 
-		var query = 'SELECT d.id, d.title, d.date, d.file FROM tags as t JOIN documents as d '
+		var query = 'SELECT d.id, t.node, d.title, d.date, d.file FROM tags as t JOIN documents as d '
 				+ 'ON t.document = d.id WHERE t.node = ' + node.originalId;
 
-		req.getConnection(function(err, connection) {
+		req
+				.getConnection(function(err, connection) {
 
-			connection.query(query, function(err, rows) {
+					connection
+							.query(
+									query,
+									function(err, rows) {
 
-				requests--;
+										requests--;
 
-				if (err) {
+										if (err) {
 
-					console.log("Error Selecting : %s ", err);
+											console.log(
+													"Error Selecting : %s ",
+													err);
 
-				} else {
+										} else {
 
-					for ( var rowIndex in rows) {
+											for ( var rowIndex in rows) {
 
-						var row = rows[rowIndex];
-						var documentId = row.id;
+												var row = rows[rowIndex];
+												var documentId = row.id;
 
-						if (documentIds.indexOf(documentId) == -1) {
+												if (documentIds
+														.indexOf(documentId) == -1) {
 
-							documentIds.push(documentId);
-							documents.push(row);
-							console.log("Document added: "
-									+ JSON.stringify(row));
-						}
-					}
+													documentIds
+															.push(documentId);
+													row.node = [ row.node ];
+													documents.push(row);
+													console
+															.log("Document added: "
+																	+ JSON
+																			.stringify(row));
+												} else {
 
-					if (requests == 0) {
+													for (documentIndex in documents) {
 
-						res.status(OK).json('documents', {
-							documents : documents
-						});
-					}
-				}
-			});
-		});
+														var document = documents[documentIndex];
+														if (document.id == documentId) {
+
+															document.node
+																	.push(row.node);
+
+															console
+																	.log("Tag added to an already added document: "
+																			+ JSON
+																					.stringify(document));
+															break;
+														}
+													}
+
+												}
+											}
+
+											if (requests == 0) {
+
+												res
+														.status(OK)
+														.json(
+																'documents',
+																{
+																	documents : documents
+																});
+											}
+										}
+									});
+				});
 	}
 };
 
