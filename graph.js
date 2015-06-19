@@ -1,3 +1,5 @@
+var fs = require('fs');
+
 var view = require('./view.js');
 
 var OK = 200;
@@ -613,7 +615,7 @@ function insertNode(label, isPerson, req, callback) {
 	});
 };
 
-exports.updateNodeInDB = function(nodeIndex, field, value, req, callback) {
+function updateNodeInDB(nodeIndex, field, value, req, callback) {
 
 	var updateNodeQuery = "UPDATE nodes SET " + field + " = '" + value
 			+ "' WHERE id = " + nodeIndex;
@@ -1279,6 +1281,63 @@ function assignLevels(graph) {
 	assignOtherLevels();
 
 	return graph;
+};
+
+function getCurrentImage(node, req, callback) {
+
+	var selectNode = 'SELECT * FROM nodes WHERE id = ' + node;
+
+	req.getConnection(function(err, connection) {
+
+		connection.query(selectNode, function(err, rows) {
+
+			if (err) {
+
+				console.log("Error Selecting : %s ", err);
+
+			} else {
+
+				if (rows.length > 0) {
+
+					var node = rows[0];
+
+					callback(node.img);
+				}
+			}
+		});
+	});
+};
+
+exports.updateProfileImage = function(req, res) {
+
+	console.log("uploading profile image...");
+
+	var node = req.param('node');
+
+	console.log(req.files);
+
+	getCurrentImage(node, req,
+			function(previousImage) {
+
+				updateNodeInDB(node, 'img',
+						req.files['profile-img-upload']['originalname'], req,
+						function(updated) {
+
+							if (updated) {
+
+								if (previousImage && previousImage != "") {
+
+									fs.unlinkSync(__dirname + "/docs/"
+											+ previousImage);
+
+									console.log("Previous image "
+											+ previousImage + " removed");
+								}
+
+								res.end("Profile image uploaded.");
+							}
+						});
+			});
 };
 
 exports.persons = function(req, res) {

@@ -239,23 +239,69 @@ function profileNodeClicked(d) {
 	d3.event.stopPropagation();
 }
 
+$('#uploadDocument').click(
+		function() {
+
+			var filePath = $('#document-upload').val();
+			fileName = filePath.substring(filePath.lastIndexOf("\\") + 1);
+
+			var title = $('#title').val();
+			var date = $('#date').val();
+
+			var tagged = [];
+			$('#taggedArea > li').each(function() {
+
+				tagged.push(this.id);
+			});
+
+			$.get(serverUrl + "/documents/add?file=" + fileName + "&title="
+					+ title + "&date=" + date + "&tagged=[" + tagged
+					+ ']&owner=' + userId, function(added) {
+
+				if(added) {
+					
+					$('#addDocumentModal').modal('hide');
+					
+					//Display new document
+					var selectedNode = svg.selectAll(".node").filter(function(d) {
+
+						return d.originalId == nodeIdToUpdate;
+
+					});
+					
+					var centerX = width / 10;
+					var centerY = height / 1.7;
+					var maxRowSize = 10;
+					
+					placeDocuments(serverUrl + "/documents?node=" + nodeIdToUpdate
+							+ "&relation=tagged", selectedNode, nodeIdToUpdate, centerX, centerY,
+							maxRowSize, false);
+				}
+				else {
+					alert("Document not added!");
+				}
+			});
+		});
+
 var nodeIdToUpdate;
 var fileName;
 
-$('#file-upload').change(
+$('#profile-img-upload').change(
 		function() {
 
-			$('#uploadForm').attr('action',
-					serverUrl + '/profileImage/' + nodeIdToUpdate);
-			$('#uploadForm').submit();
+			$('#uploadProfileImageForm').attr(
+					'action',
+					serverUrl + "/" + userId + '/graph/profileImage/'
+							+ nodeIdToUpdate);
+			$('#uploadProfileImageForm').submit();
 
 			var filePath = $(this).val();
 			fileName = filePath.substring(filePath.lastIndexOf("\\") + 1);
 
-			setTimeout(continueExecution, 500);
+			setTimeout(profileImageUploadContinueExecution, 500);
 		});
 
-function continueExecution() {
+function profileImageUploadContinueExecution() {
 
 	svg.selectAll(".profile-image").filter(function(d) {
 
@@ -271,8 +317,8 @@ function profileImageClicked(d) {
 
 	nodeIdToUpdate = d.originalId;
 
-	$('#file-upload').val(null);
-	$('#file-upload').click();
+	$('#profile-img-upload').val(null);
+	$('#profile-img-upload').click();
 	d3.event.stopPropagation();
 }
 
@@ -539,8 +585,14 @@ var onSelectedNodeMenu = [ {
 	title : 'Add document',
 	action : function(elm, d, i) {
 
-		$.get(serverUrl + '/documents/add?owner=' + userId + '&tagged=['
-				+ d.originalId + ']');
-		drawTree(selectedViewId);
+		$('#addDocumentModal').modal('show');
+		var person = {
+			id : 22,
+			label : 'www'
+		};
+
+		$('#taggedPersons').append(
+				'<li id="' + person.id + '"><a href="#">' + person.label
+						+ '</a></li>');
 	}
 } ];

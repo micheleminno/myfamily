@@ -1,5 +1,5 @@
 var serverUrl = 'http://localhost:8091';
-var siteUrl = 'http://localhost/myfamily-engineered';
+var siteUrl = 'http://localhost/myfamily';
 
 // var serverUrl =
 // 'http://ec2-54-72-121-42.eu-west-1.compute.amazonaws.com:8090';
@@ -21,6 +21,9 @@ $.get(serverUrl + "/" + userId + "/graph/persons", function(persons) {
 		$('#persons').append(
 				'<li id="' + person.id + '"><a href="#">' + person.label
 						+ '</a></li>');
+		$('#taggedPersons').append(
+				'<li id="' + person.id + '"><a href="#">' + person.label
+						+ '</a></li>');
 	}
 
 	$('#persons li').on('click', function() {
@@ -29,6 +32,16 @@ $.get(serverUrl + "/" + userId + "/graph/persons", function(persons) {
 		userLabel = $(this).find('a').text();
 		drawTree(userId, userLabel, selectedViewId, selectedViewLabel);
 	});
+
+	$('#taggedPersons li').on(
+			'click',
+			function() {
+
+				personId = $(this).attr('id');
+				personLabel = $(this).find('a').text();
+				$('#taggedArea').append(
+						'<li id="' + personId + '">' + personLabel + '</li>');
+			});
 });
 
 $('#view li').on('click', function() {
@@ -273,11 +286,10 @@ function drawTree(userId, userLabel, viewId, viewLabel) {
 					});
 };
 
-
 function fillStream(nodes) {
 
 	console.log("Filling stream");
-	
+
 	var data = {
 		nodes : nodes
 	};
