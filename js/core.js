@@ -268,37 +268,46 @@ function drawTree(userId, userLabel, viewId, viewLabel) {
 										"rx", 20).attr("ry", 20).attr("class",
 										"data-stream");
 
-						var nodes = JSON.stringify(graphView.nodes);
-						var data = '{"nodes": ' + nodes + '}';
+						fillStream(graphView.nodes);
 
-						$.ajax({
-
-							url : serverUrl + "/documents/" + userId,
-							type : "POST",
-							data : data,
-							contentType : "application/json",
-							dataType : "json",
-							success : function(data) {
-
-								var documents = data.documents;
-								
-								console.log("Documents: " + JSON.stringify(documents));
-								
-								var documentsSize = documents.length;
-
-								if (documentsSize > 0) {
-
-									currentPage = Math.floor(documentsSize
-											/ docRowSize);
-
-									maxPage = currentPage;
-
-									populateThumbnails(currentPage, true);
-								}
-							}
-						});
 					});
-}
+};
+
+
+function fillStream(nodes) {
+
+	console.log("Filling stream");
+	
+	var data = {
+		nodes : nodes
+	};
+
+	$.ajax({
+
+		url : serverUrl + "/documents/" + userId,
+		type : "POST",
+		data : JSON.stringify(data),
+		contentType : "application/json",
+		dataType : "json",
+		success : function(data) {
+
+			documents = data.documents;
+
+			console.log("Documents: " + JSON.stringify(documents));
+
+			var documentsSize = documents.length;
+
+			if (documentsSize > 0) {
+
+				currentPage = Math.floor(documentsSize / docRowSize);
+
+				maxPage = currentPage;
+
+				populateThumbnails(currentPage, true);
+			}
+		}
+	});
+};
 
 drawTree(userId, userLabel, selectedViewId, selectedViewLabel);
 
@@ -309,7 +318,7 @@ function populateThumbnails(currentPage, back) {
 	for (docIndex in documents) {
 
 		var doc = documents[docIndex];
-		doc.index = docIndex;
+		doc.index = parseInt(docIndex);
 	}
 
 	var currentDocuments = documents.filter(function(d) {

@@ -21,7 +21,7 @@ exports.list = function(req, res) {
 		if (nodeIndex == -1) {
 
 			query = 'SELECT * FROM tags RIGHT JOIN documents ON tags.document = documents.id WHERE node IS NULL';
-			
+
 		} else {
 
 			query = 'SELECT * FROM tags JOIN documents ON tags.document = documents.id WHERE node = '
@@ -69,6 +69,8 @@ exports.view = function(req, res) {
 	console.log("viewNodes amount: " + viewNodes.length);
 
 	var documents = [];
+	var documentIds = [];
+
 	var requests = 0;
 
 	for (nodeIndex in viewNodes) {
@@ -77,7 +79,8 @@ exports.view = function(req, res) {
 
 		requests++;
 
-		var query = 'SELECT * FROM tags WHERE node = ' + node.originalId;
+		var query = 'SELECT d.id, d.title, d.date, d.file FROM tags as t JOIN documents as d '
+				+ 'ON t.document = d.id WHERE t.node = ' + node.originalId;
 
 		req.getConnection(function(err, connection) {
 
@@ -94,10 +97,15 @@ exports.view = function(req, res) {
 					for ( var rowIndex in rows) {
 
 						var row = rows[rowIndex];
-						documents.push(row);
+						var documentId = row.id;
 
-						console.log("Document " + JSON.stringify(row)
-								+ " added");
+						if (documentIds.indexOf(documentId) == -1) {
+
+							documentIds.push(documentId);
+							documents.push(row);
+							console.log("Document added: "
+									+ JSON.stringify(row));
+						}
 					}
 
 					if (requests == 0) {

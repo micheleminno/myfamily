@@ -333,14 +333,10 @@ function inExtendedFamily(history) {
 function addMembers(asChild, nodeIndex, familyIndex, viewIndex, graph, history,
 		req, callback) {
 
-	console.log("addMembers of family " + familyIndex);
-
 	var memberType = viewIndex == 4 ? 'any' : 'parent';
 
 	getFamilyMembers(familyIndex, nodeIndex, memberType, graph, req, function(
 			graphView) {
-
-		console.log("Members: " + JSON.stringify(graphView));
 
 		if (familyIndex != -1 && graphView.nodes.length > 0) {
 

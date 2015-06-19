@@ -26,7 +26,7 @@ var connectionConfig = {
 	database : "my-family"
 };
 
-var connection = connection(mysql, connectionConfig, 'request');
+var connection = connection(mysql, connectionConfig, 'single');
 
 app.use(connection);
 
