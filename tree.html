@@ -11,7 +11,6 @@
 <link href="css/style.css" rel="stylesheet">
 
 <link rel="shortcut icon" href="img/favicon.ico" type="image/x-icon" />
-<script src="http://d3js.org/d3.v3.js" charset="utf-8"></script>
 
 
 </head>
@@ -38,14 +37,16 @@
 				id="bs-example-navbar-collapse-1">
 				<ul class="nav navbar-nav">
 					<li class="active"><a href="#">Tree <span class="sr-only">(current)</span></a></li>
-					<li class="dropdown"><a href="#" class="dropdown-toggle"
-						data-toggle="dropdown" role="button" aria-expanded="false">View
-							<span class="caret"></span>
+					<li class="dropdown"><a id="view-mode" href="#"
+						class="dropdown-toggle" data-toggle="dropdown" role="button"
+						aria-expanded="false"> <span class="caret"></span>
 					</a>
 						<ul id="view" class="dropdown-menu" role="menu">
-							<li id=0><a href="#">Family</a></li>
-							<li id=1><a href="#">Pedigree</a></li>
-							<li id=2 class="active"><a href="#">Extended family</a></li>
+							<li id=0><a href="#">Family as a child</a></li>
+							<li id=1><a href="#">Family as a parent</a></li>
+							<li id=2><a href="#">Pedigree</a></li>
+							<li id=3><a href="#">Descendants</a></li>
+							<li id=4 class="active"><a href="#">Extended family</a></li>
 							<li class="divider"></li>
 							<li><a href="#">Custom view</a></li>
 						</ul></li>
@@ -59,15 +60,22 @@
 				</form>
 				<ul class="nav navbar-nav navbar-right">
 					<li><a href="mockup/upload.pdf">Upload</a></li>
-					<li class="dropdown"><a href="#" class="dropdown-toggle"
-						data-toggle="dropdown" role="button" aria-expanded="false">Michele
-							Minno <span class="caret myCaret"></span>
-					</a>
+					<li class="dropdown"><a href="#" id="logged-user"
+						class="dropdown-toggle" data-toggle="dropdown" role="button"
+						aria-expanded="false"> </a>
 						<ul class="dropdown-menu" role="menu">
 							<li><a href="mockup/profile.pdf">Profile</a></li>
 							<li><a href="#">Settings</a></li>
 							<li class="divider"></li>
 							<li><a href="#">Logout</a></li>
+						</ul></li>
+
+					<li class="dropdown"><a href="#" id="persons-expandable"
+						class="dropdown-toggle" data-toggle="dropdown" role="button"
+						aria-expanded="false">Login as<span class="caret myCaret"></span>
+					</a>
+						<ul id="persons" class="dropdown-menu" role="menu">
+
 						</ul></li>
 				</ul>
 			</div>
@@ -90,6 +98,7 @@
 
 <script src="lib/jquery.js"></script>
 <script src="lib/bootstrap.js"></script>
+<script src="lib/d3.js"></script>
 <script src="lib/d3-context-menu.js"></script>
 
 <script src="js/events.js" charset="utf-8"></script>

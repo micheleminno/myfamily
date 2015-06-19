@@ -1,19 +1,43 @@
-var serverUrl = 'http://localhost:8090';
-var siteUrl = 'http://localhost/myfamily';
+var serverUrl = 'http://localhost:8091';
+var siteUrl = 'http://localhost/myfamily-engineered';
 
 // var serverUrl =
 // 'http://ec2-54-72-121-42.eu-west-1.compute.amazonaws.com:8090';
 // var siteUrl =
 // 'http://ec2-54-72-121-42.eu-west-1.compute.amazonaws.com/familygraph.me';
 
-var selectedViewId = 2;
+var selectedViewId = 4;
+var selectedViewLabel = 'Extended family';
+
+// Default for testing purposes
+var userId = 3;
+var userLabel = "Michele Minno";
+
+$.get(serverUrl + "/" + userId + "/graph/persons", function(persons) {
+
+	for (personIndex in persons) {
+
+		var person = persons[personIndex];
+		$('#persons').append(
+				'<li id="' + person.id + '"><a href="#">' + person.label
+						+ '</a></li>');
+	}
+
+	$('#persons li').on('click', function() {
+
+		userId = $(this).attr('id');
+		userLabel = $(this).find('a').text();
+		drawTree(userId, userLabel, selectedViewId, selectedViewLabel);
+	});
+});
 
 $('#view li').on('click', function() {
 
 	$(this).siblings().removeClass("active");
 	$(this).addClass("active");
 	selectedViewId = $(this).attr('id');
-	drawTree(selectedViewId);
+	selectedViewLabel = $(this).text();
+	drawTree(userId, userLabel, selectedViewId, selectedViewLabel);
 });
 
 var width, height;
@@ -65,8 +89,20 @@ function init() {
 
 	container = svg.append("g");
 
-	force = d3.layout.force().size([ width, height ]).charge(-800)
-			.linkDistance(300).on("tick", tick);
+	force = d3.layout.force().size([ width, height ]).gravity(0).charge(
+			function(d) {
+				if (d.person) {
+					return -2000 / d.level;
+				} else {
+					return 0;
+				}
+			}).linkDistance(function(d) {
+		if (!d.source.person && d.target.person) {
+			return 900 * 1 / d.level;
+		} else {
+			return 300 * 1 / d.level;
+		}
+	}).on("tick", tick);
 
 	nodeDrag = force.drag().origin(function(d) {
 		return d;
@@ -86,27 +122,28 @@ function init() {
 
 var viewIndex;
 
-function drawTree(view) {
+function drawTree(userId, userLabel, viewId, viewLabel) {
+
+	$('#logged-user').html(userLabel + '<span class="caret myCaret"></span>');
+	$('#view-mode').html(viewLabel + '<span class="caret myCaret"></span>');
 
 	viewIndex = view;
 	init();
 
 	$
 			.get(
-					serverUrl + "/graph/3?view=" + view,
-					function(graphViewString) {
+					serverUrl + "/" + userId + "/graph/view?view=" + viewId,
+					function(graphView) {
 
-						var graphView = JSON.parse(graphViewString);
-
-						graphView = assignLevels(graphView);
-
-						if (view != 2) {
+						if (viewId != 4) {
 
 							svg.on('contextmenu', null);
 						}
 
-						force.nodes(graphView.nodes).links(graphView.links)
-								.start();
+						force = force.nodes(graphView.nodes).links(
+								graphView.links);
+
+						force.start();
 
 						link = link.data(graphView.links).enter()
 								.append("path");
@@ -134,31 +171,31 @@ function drawTree(view) {
 
 										currentNode.on("click", clickNode);
 
-										if (view == 2) {
+										if (viewId == 4) {
 
 											currentNode.on('contextmenu', d3
 													.contextMenu(onPersonMenu));
 										}
 
-										currentNode
-												.append("circle")
-												.attr(
-														"class",
-														function(d) {
-															if (d.label == "Michele Minno") {
-																return "my-node";
-															} else if (d.acquired) {
-																return "node acquired";
-															} else if (d.leaf) {
-																return "node leaf";
-															} else {
-																return "node";
-															}
-														})
-												.attr("r", function(d) {
+										currentNode.append("circle").attr(
+												"class", function(d) {
+													if (d.label == userLabel) {
+														return "my-node";
+													} else if (d.acquired) {
+														return "node acquired";
+													} else if (d.leaf) {
+														return "node leaf";
+													} else {
+														return "node";
+													}
+												}).attr("r", function(d) {
 
-													return 125 / d.level;
-												});
+											if (d.label == userLabel) {
+												return (125 / d.level) * 1.5;
+											} else {
+												return 125 / d.level;
+											}
+										});
 
 										currentNode
 												.append("image")
@@ -172,23 +209,20 @@ function drawTree(view) {
 														}).attr("width", 40)
 												.attr("height", 40);
 
-										currentNode
-												.append("text")
-												.attr(
-														"class",
-														function(d) {
-															if (d.label == "Michele Minno") {
-																return "my-nodeLabel";
-															} else {
-																return "nodeLabel";
-															}
-														}).attr("dy", "1.5em")
-												.text(function(d) {
+										currentNode.append("text").attr(
+												"class", function(d) {
+													if (d.label == userLabel) {
+														return "my-nodeLabel";
+													} else {
+														return "nodeLabel";
+													}
+												}).attr("dy", "1.5em").text(
+												function(d) {
 													return d.label;
 												}).call(makeEditable);
 									} else {
 
-										if (view == 2) {
+										if (viewId == 4) {
 
 											currentNode.on('contextmenu', d3
 													.contextMenu(onFamilyMenu));
@@ -234,24 +268,48 @@ function drawTree(view) {
 										"rx", 20).attr("ry", 20).attr("class",
 										"data-stream");
 
-						$.get(
-								serverUrl + "/documents/3?view="
-										+ selectedViewId, function(
-										documentsString) {
+						fillStream(graphView.nodes);
 
-									documents = JSON.parse(documentsString);
-
-									var documentsSize = documents.length;
-									currentPage = Math.floor(documentsSize
-											/ docRowSize);
-									maxPage = currentPage;
-
-									populateThumbnails(currentPage, true);
-								});
 					});
-}
+};
 
-drawTree(selectedViewId);
+
+function fillStream(nodes) {
+
+	console.log("Filling stream");
+	
+	var data = {
+		nodes : nodes
+	};
+
+	$.ajax({
+
+		url : serverUrl + "/documents/" + userId,
+		type : "POST",
+		data : JSON.stringify(data),
+		contentType : "application/json",
+		dataType : "json",
+		success : function(data) {
+
+			documents = data.documents;
+
+			console.log("Documents: " + JSON.stringify(documents));
+
+			var documentsSize = documents.length;
+
+			if (documentsSize > 0) {
+
+				currentPage = Math.floor(documentsSize / docRowSize);
+
+				maxPage = currentPage;
+
+				populateThumbnails(currentPage, true);
+			}
+		}
+	});
+};
+
+drawTree(userId, userLabel, selectedViewId, selectedViewLabel);
 
 function populateThumbnails(currentPage, back) {
 
@@ -260,7 +318,7 @@ function populateThumbnails(currentPage, back) {
 	for (docIndex in documents) {
 
 		var doc = documents[docIndex];
-		doc.index = docIndex;
+		doc.index = parseInt(docIndex);
 	}
 
 	var currentDocuments = documents.filter(function(d) {
@@ -372,57 +430,69 @@ function tick() {
 	});
 }
 
-var onPersonMenu = [ {
-	title : 'Add family as a parent',
-	action : function(elm, d, i) {
+var onPersonMenu = [
+		{
+			title : 'Add family as a parent',
+			action : function(elm, d, i) {
 
-		$.get(serverUrl + '/addNode?type=family&source=' + d.originalIndex);
-		drawTree(selectedViewId);
-	}
-}, {
-	title : 'Add family as a child',
-	action : function(elm, d, i) {
+				$.get(serverUrl + "/" + userId
+						+ '/graph/add?type=family&source=' + d.originalId);
+				drawTree(userId, userLabel, selectedViewId, selectedViewLabel);
+			}
+		},
+		{
+			title : 'Add family as a child',
+			action : function(elm, d, i) {
 
-		$.get(serverUrl + '/addNode?type=family&target=' + d.originalIndex);
-		drawTree(selectedViewId);
-	}
-}, {
-	title : 'Remove',
-	action : function(elm, d, i) {
+				$.get(serverUrl + "/" + userId
+						+ '/graph/add?type=family&target=' + d.originalId);
+				drawTree(userId, userLabel, selectedViewId, selectedViewLabel);
+			}
+		},
+		{
+			title : 'Remove',
+			action : function(elm, d, i) {
 
-		$.get(serverUrl + '/removeNode/' + d.originalIndex);
-		drawTree(selectedViewId);
-	}
-} ];
+				$.get(serverUrl + "/" + userId + '/graph/remove/'
+						+ d.originalId);
+				drawTree(userId, userLabel, selectedViewId, selectedViewLabel);
+			}
+		} ];
 
-var onFamilyMenu = [ {
-	title : 'Add parent',
-	action : function(elm, d, i) {
+var onFamilyMenu = [
+		{
+			title : 'Add parent',
+			action : function(elm, d, i) {
 
-		$.get(serverUrl + '/addNode?type=person&target=' + d.originalIndex);
-		drawTree(selectedViewId);
-	}
-}, {
-	title : 'Add child',
-	action : function(elm, d, i) {
+				$.get(serverUrl + "/" + userId
+						+ '/graph/add?type=person&target=' + d.originalId);
+				drawTree(userId, userLabel, selectedViewId, selectedViewLabel);
+			}
+		},
+		{
+			title : 'Add child',
+			action : function(elm, d, i) {
 
-		$.get(serverUrl + '/addNode?type=person&source=' + d.originalIndex);
-		drawTree(selectedViewId);
-	}
-}, {
-	title : 'Remove',
-	action : function(elm, d, i) {
+				$.get(serverUrl + "/" + userId
+						+ '/graph/add?type=person&source=' + d.originalId);
+				drawTree(userId, userLabel, selectedViewId, selectedViewLabel);
+			}
+		},
+		{
+			title : 'Remove',
+			action : function(elm, d, i) {
 
-		$.get(serverUrl + '/removeNode/' + d.originalIndex);
-		drawTree(selectedViewId);
-	}
-} ];
+				$.get(serverUrl + "/" + userId + '/graph/remove/'
+						+ d.originalId);
+				drawTree(userId, userLabel, selectedViewId, selectedViewLabel);
+			}
+		} ];
 
 var onBackgroundMenu = [ {
 	title : 'Add person node',
 	action : function(elm, d, i) {
 
-		$.get(serverUrl + '/addNode?type=person');
-		drawTree(selectedViewId);
+		$.get(serverUrl + "/" + userId + '/graph/add?type=person');
+		drawTree(userId, userLabel, selectedViewId, selectedViewLabel);
 	}
 } ];
