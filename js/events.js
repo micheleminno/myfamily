@@ -258,26 +258,27 @@ $('#uploadDocument').click(
 					+ title + "&date=" + date + "&tagged=[" + tagged
 					+ ']&owner=' + userId, function(added) {
 
-				if(added) {
-					
+				if (added) {
+
 					$('#addDocumentModal').modal('hide');
-					
-					//Display new document
-					var selectedNode = svg.selectAll(".node").filter(function(d) {
 
-						return d.originalId == nodeIdToUpdate;
+					// Display new document
+					var selectedNode = svg.selectAll(".node").filter(
+							function(d) {
 
-					});
-					
+								return d.originalId == nodeIdToUpdate;
+
+							});
+
 					var centerX = width / 10;
 					var centerY = height / 1.7;
 					var maxRowSize = 10;
-					
-					placeDocuments(serverUrl + "/documents?node=" + nodeIdToUpdate
-							+ "&relation=tagged", selectedNode, nodeIdToUpdate, centerX, centerY,
+
+					placeDocuments(serverUrl + "/documents?node="
+							+ nodeIdToUpdate + "&relation=tagged",
+							selectedNode, nodeIdToUpdate, centerX, centerY,
 							maxRowSize, false);
-				}
-				else {
+				} else {
 					alert("Document not added!");
 				}
 			});
@@ -418,6 +419,9 @@ function placeDocuments(serviceUrl, selectedNode, nodeIndex, centerX, centerY,
 									}).on("mouseover", thumbnailMouseovered)
 									.on("mouseout", thumbnailMouseouted).call(
 											docDrag);
+
+							docNode.on('contextmenu', d3
+									.contextMenu(onDocumentMenu));
 
 							offset += 100;
 							if (offset >= 100 * maxRowSize) {
@@ -577,7 +581,7 @@ function docDragended(d) {
 	var y = document.y.baseVal.value;
 	var id = document.attributes.id.nodeValue;
 
-	$.get(serverUrl + '/documents/update?node=' + d.originalId + '&index=' + id
+	$.get(serverUrl + '/documents/' + id + '/update?node=' + d.originalId
 			+ '&x=' + x + '&y=' + y);
 };
 
@@ -586,6 +590,8 @@ var onSelectedNodeMenu = [ {
 	action : function(elm, d, i) {
 
 		$('#addDocumentModal').modal('show');
+
+		// TODO
 		var person = {
 			id : 22,
 			label : 'www'
@@ -594,5 +600,13 @@ var onSelectedNodeMenu = [ {
 		$('#taggedPersons').append(
 				'<li id="' + person.id + '"><a href="#">' + person.label
 						+ '</a></li>');
+	}
+} ];
+
+var onDocumentMenu = [ {
+	title : 'Remove document',
+	action : function(elm, d, i) {
+
+		$.get(serverUrl + '/documents/' + d.id + '/remove');
 	}
 } ];

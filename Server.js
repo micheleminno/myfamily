@@ -22,7 +22,7 @@ var connectionConfig = {
 	host : "localhost",
 	user : "root",
 	password : "password",
-	database : "my-family"
+	database : "myfamily"
 };
 
 var connection = connection(mysql, connectionConfig, 'single');
@@ -63,7 +63,9 @@ app.get('/documents', document.list);
 
 app.post('/documents/:node', document.view);
 
-app.get('/documents/update', document.update);
+app.get('/documents/:document/update', document.update);
+
+app.get('/documents/:document/remove', document.remove);
 
 app.get('/documents/add', document.add);
 

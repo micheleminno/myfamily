@@ -153,13 +153,59 @@ exports.view = function(req, res) {
 	}
 };
 
+function deleteDocument(docIndex, req, callback) {
+
+	var deleteDocQuery = "DELETE FROM documents WHERE id = " + docIndex;
+	console.log(deleteDocQuery);
+
+	req.getConnection(function(err, connection) {
+
+		connection.query(deleteDocQuery, function(err, rows) {
+
+			if (err) {
+
+				console.log("Error Deleting : %s ", err);
+
+			} else {
+
+				if (rows.affectedRows > 0) {
+
+					console.log("Document " + docIndex + " deleted");
+					callback(1);
+
+				} else {
+
+					console.log("Document " + docIndex + " not deleted");
+					callback(0);
+				}
+			}
+		});
+	});
+};
+
+/*
+ * Remove a document.
+ */
+exports.remove = function(req, res) {
+
+	var docIndex = parseInt(req.param('document'));
+
+	deleteDocument(docIndex, req, function() {
+
+		res.status(OK).json('result', {
+			"msg" : "Document removed"
+		});
+
+	});
+};
+
 /*
  * Update the position of a document in a specific node details.
  */
 exports.update = function(req, res) {
 
 	var node = req.query.node;
-	var index = req.query.index;
+	var index = parseInt(req.param('document'));
 	var x = parseInt(req.query.x);
 	var y = parseInt(req.query.y);
 	var position = "POINT(" + x + ", " + y + ")";
@@ -275,28 +321,28 @@ function insertDocument(title, date, file, owner, tagged, req, callback) {
 											+ " inserted");
 
 									var requests = 0;
-									if(tagged.indexOf(owner) == -1) {
-										
+									if (tagged.indexOf(owner) == -1) {
+
 										tagged.push(owner);
 									}
-									
+
 									for (taggedIndex in tagged) {
 
 										requests++;
 										var taggedNode = tagged[taggedIndex];
 
-										insertTag(maxId, taggedNode, req, function(
-												tagInserted) {
+										insertTag(maxId, taggedNode, req,
+												function(tagInserted) {
 
-											//TODO check tag inserted
-											
-											requests--;
+													// TODO check tag inserted
 
-											if (requests == 0) {
+													requests--;
 
-												callback(1);
-											}
-										});
+													if (requests == 0) {
+
+														callback(1);
+													}
+												});
 									}
 								} else {
 
@@ -325,7 +371,7 @@ exports.add = function(req, res) {
 	var file = req.query.file;
 	var title = req.query.title;
 	var owner = req.query.owner;
-	
+
 	var date = null;
 	if (req.query.date) {
 
