@@ -243,56 +243,101 @@ function redrawStream() {
 
 	var nodes = [];
 	node.each(function(d) {
-		
-		nodes.push({"originalId" : d.originalId});
+
+		nodes.push({
+			"originalId" : d.originalId
+		});
 	});
-	
+
 	fillStream(nodes);
 };
 
-$('#uploadDocument').click(
-		function() {
+var container;
+var documentToAdd;
 
-			var filePath = $('#document-upload').val();
-			fileName = filePath.substring(filePath.lastIndexOf("\\") + 1);
+$('#uploadDocument')
+		.click(
+				function() {
 
-			var title = $('#title').val();
-			var date = $('#date').val();
+					$('#uploadDocumentForm').attr('action',
+							serverUrl + '/documents/upload');
 
-			var tagged = [];
-			$('#taggedArea > li').each(function() {
+					$('#uploadDocumentForm').submit();
 
-				tagged.push(this.id);
-			});
+					var filePath = $('#document-upload').val();
+					fileName = filePath
+							.substring(filePath.lastIndexOf("\\") + 1);
 
-			$.get(serverUrl + "/documents/add?file=" + fileName + "&title="
-					+ title + "&date=" + date + "&tagged=[" + tagged
-					+ ']&owner=' + userId, function(addedDoc) {
+					var title = $('#title').val();
+					var date = $('#date').val();
 
-				if (addedDoc) {
+					var tagged = [];
+					$('#taggedArea > li').each(function() {
 
-					$('#addDocumentModal').modal('hide');
+						tagged.push(this.id);
+					});
 
-					// Display new document
-					console.log(JSON.stringify(addedDoc));
-					var container = svg.selectAll(".docContainer");
+					$
+							.get(
+									serverUrl + "/documents/add?file="
+											+ fileName + "&title=" + title
+											+ "&date=" + date + "&tagged=["
+											+ tagged + ']&owner=' + userId,
+									function(addedDoc) {
 
-					addedDoc.position = {
-						x : documentPosition[0],
-						y : documentPosition[1]
-					};
+										if (addedDoc) {
 
-					documentPosition = [];
+											documentToAdd = addedDoc;
 
-					drawDoc(addedDoc, container, null, null, 0, null, false);
+											$('#addDocumentModal')
+													.modal('hide');
 
-					redrawStream();
-					
-				} else {
-					console.log("Document not added!");
-				}
-			});
-		});
+											// Display new document
+											console.log(JSON
+													.stringify(addedDoc));
+											container = svg
+													.selectAll(".docContainer");
+
+											addedDoc.position = {
+												x : documentPosition[0],
+												y : documentPosition[1]
+											};
+
+											documentPosition = [];
+
+											if (tagged.length > 0) {
+
+												setTimeout(
+														documentUploadContinueExecution,
+														500);
+											} else {
+
+												setTimeout(
+														heritageDocumentUploadContinueExecution,
+														500);
+											}
+
+										} else {
+											console.log("Document not added!");
+										}
+									});
+				});
+
+function documentUploadContinueExecution() {
+
+	drawDoc(documentToAdd, container, null, null, 0, null, false);
+
+	redrawStream();
+};
+
+function heritageDocumentUploadContinueExecution() {
+
+	var centerX = -200;
+	var centerY = 1100;
+	var maxRowSize = 40;
+
+	drawDoc(documentToAdd, container, centerX, centerY, 0, maxRowSize, true);
+};
 
 var nodeIdToUpdate;
 var fileName;
@@ -370,7 +415,7 @@ function drawDoc(doc, container, centerX, centerY, offset, maxRowSize,
 
 	var x, y;
 
-	if (doc.position) {
+	if (doc.position && !isHeritage) {
 
 		x = doc.position.x;
 		y = doc.position.y;
@@ -390,8 +435,9 @@ function drawDoc(doc, container, centerX, centerY, offset, maxRowSize,
 			.attr("id", doc.id)
 			.attr("title", doc.title)
 			.attr("url", "./docs/" + doc.file)
-			.attr("date", getDate(doc))
+			.attr("date", getDate(doc.date))
 			.attr("height", 80)
+			.attr("heritage", isHeritage)
 			.attr(
 					"xlink:href",
 					function() {
@@ -451,8 +497,7 @@ function groundClicked(d) {
 
 	selectedNode.append("rect").attr("class", "ground--selected").attr("width",
 			3100).attr("height", 350).attr("x", -700).attr("y", 1050).attr(
-			"cursor", "auto").on('contextmenu',
-			d3.contextMenu(onSelectedNodeMenu));
+			"cursor", "auto").on('contextmenu', d3.contextMenu(onHeritageMenu));
 
 	selectedNode.append("text").attr('class', "label--selected")
 			.attr("y", 1130).attr("x", -650).text("Heritage");
@@ -605,19 +650,23 @@ function docDragended(d) {
 
 function removeDocument(docId) {
 
-	// From node
+	var isHeritage = false;
+
 	svg.selectAll(".docContainer .myCursor-pointer-move").filter(function() {
 
 		var sel = d3.select(this);
 
 		var document = sel[0][0];
 		var id = document.attributes.id.nodeValue;
-
+		isHeritage = document.attributes.heritage.nodeValue;
 		return id == docId;
 
 	}).remove();
 
-	redrawStream();
+	if (!isHeritage) {
+		
+		redrawStream();
+	}
 };
 
 var onSelectedNodeMenu = [ {
@@ -629,7 +678,15 @@ var onSelectedNodeMenu = [ {
 				'<li id="' + d.originalId + '">' + d.label + '</li>');
 
 		$('#addDocumentModal').modal('show');
+	}
+} ];
 
+var onHeritageMenu = [ {
+	title : 'Add document',
+	action : function(elm, d, i) {
+
+		$('#addDocumentModal #tagged').hide();
+		$('#addDocumentModal').modal('show');
 	}
 } ];
 

@@ -311,7 +311,7 @@ function fillStream(nodes) {
 
 			if (documentsSize > 0) {
 
-				currentPage = Math.floor(documentsSize / docRowSize);
+				currentPage = Math.floor(documentsSize / (docRowSize + 1));
 
 				maxPage = currentPage;
 
@@ -372,7 +372,9 @@ function populateThumbnails(currentPage, back) {
 	}).attr("url", function(d) {
 		return "./docs/" + d.file;
 	}).attr("date", function(d) {
-		return getDate(d);
+
+		return getDate(d.date);
+
 	}).on("mouseover", thumbnailMouseovered)
 			.on("mouseout", thumbnailMouseouted).on("click", thumbnailClicked)
 			.attr("cursor", "pointer").attr("x", newTarget).transition()

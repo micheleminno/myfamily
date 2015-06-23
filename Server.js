@@ -37,7 +37,7 @@ var multerConfig = {
 	},
 
 	onFileUploadStart : function(file) {
-		console.log(file.originalname + ' is starting ...');
+		console.log(file.originalname + ' upload is starting...');
 	},
 
 	onFileUploadComplete : function(file) {
@@ -68,6 +68,8 @@ app.get('/documents/:document/update', document.update);
 app.get('/documents/:document/remove', document.remove);
 
 app.get('/documents/add', document.add);
+
+app.post('/documents/upload', document.upload);
 
 // Graph
 

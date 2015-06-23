@@ -63,10 +63,9 @@ exports.list = function(req, res) {
  */
 exports.view = function(req, res) {
 
-	var nodeIndex = req.param('node');
+	//TODO: userId not used
+	
 	var viewNodes = req.body.nodes;
-
-	console.log("viewNodes amount: " + viewNodes.length);
 
 	var documents = [];
 	var documentIds = [];
@@ -82,83 +81,58 @@ exports.view = function(req, res) {
 		var query = 'SELECT d.id, t.node, d.title, d.date, d.file FROM tags as t JOIN documents as d '
 				+ 'ON t.document = d.id WHERE t.node = ' + node.originalId;
 
-		req
-				.getConnection(function(err, connection) {
+		req.getConnection(function(err, connection) {
 
-					connection
-							.query(
-									query,
-									function(err, rows) {
+			connection.query(query, function(err, rows) {
 
-										requests--;
+				requests--;
 
-										if (err) {
+				if (err) {
 
-											console.log(
-													"Error Selecting : %s ",
-													err);
+					console.log("Error Selecting : %s ", err);
 
-										} else {
+				} else {
 
-											for ( var rowIndex in rows) {
+					for ( var rowIndex in rows) {
 
-												var row = rows[rowIndex];
-												var documentId = row.id;
+						var row = rows[rowIndex];
+						var documentId = row.id;
 
-												if (documentIds
-														.indexOf(documentId) == -1) {
+						if (documentIds.indexOf(documentId) == -1) {
 
-													documentIds
-															.push(documentId);
-													row.node = [ row.node ];
-													documents.push(row);
-													console
-															.log("Document added: "
-																	+ JSON
-																			.stringify(row));
-												} else {
+							documentIds.push(documentId);
+							row.node = [ row.node ];
+							documents.push(row);
 
-													for (documentIndex in documents) {
+						} else {
 
-														var document = documents[documentIndex];
-														if (document.id == documentId) {
+							for (documentIndex in documents) {
 
-															document.node
-																	.push(row.node);
+								var document = documents[documentIndex];
+								if (document.id == documentId) {
 
-															console
-																	.log("Tag added to an already added document: "
-																			+ JSON
-																					.stringify(document));
-															break;
-														}
-													}
+									document.node.push(row.node);
 
-												}
-											}
+									break;
+								}
+							}
 
-											if (requests == 0) {
+						}
+					}
 
-												documents.sort(function(a, b) {
-													return a.id - b.id;
-												});
+					if (requests == 0) {
 
-												console
-														.log("Sorted docs: "
-																+ JSON
-																		.stringify(documents));
+						documents.sort(function(a, b) {
+							return a.id - b.id;
+						});
 
-												res
-														.status(OK)
-														.json(
-																'documents',
-																{
-																	documents : documents
-																});
-											}
-										}
-									});
-				});
+						res.status(OK).json('documents', {
+							documents : documents
+						});
+					}
+				}
+			});
+		});
 	}
 };
 
@@ -324,85 +298,125 @@ function insertTag(document, node, req, callback) {
 
 function insertDocument(title, date, file, owner, tagged, req, callback) {
 
-	req.getConnection(function(err, connection) {
+	req
+			.getConnection(function(err, connection) {
 
-		connection.query("SELECT MAX(id) as maxId from documents", function(
-				err, rows) {
+				connection
+						.query(
+								"SELECT MAX(id) as maxId from documents",
+								function(err, rows) {
 
-			if (err) {
+									if (err) {
 
-				console.log("Error Selecting : %s ", err);
+										console.log("Error Selecting : %s ",
+												err);
 
-			} else {
+									} else {
 
-				if (rows.length > 0) {
+										if (rows.length > 0) {
 
-					var maxId = parseInt(rows[0]['maxId']) + 1;
+											var maxId = parseInt(rows[0]['maxId']) + 1;
 
-					var insertQuery = "INSERT INTO documents VALUES(" + maxId
-							+ ", '" + title + "', '" + date + "', '" + file
-							+ "', " + owner + ")";
+											var insertQuery = "INSERT INTO documents VALUES("
+													+ maxId
+													+ ", '"
+													+ title
+													+ "', '"
+													+ date
+													+ "', '"
+													+ file
+													+ "', "
+													+ owner
+													+ ")";
 
-					console.log(insertQuery);
+											console.log(insertQuery);
 
-					req.getConnection(function(err, connection) {
+											req
+													.getConnection(function(
+															err, connection) {
 
-						connection.query(insertQuery, function(err, rows) {
+														connection
+																.query(
+																		insertQuery,
+																		function(
+																				err,
+																				rows) {
 
-							if (err) {
+																			if (err) {
 
-								console.log("Error Inserting : %s ", err);
+																				console
+																						.log(
+																								"Error Inserting : %s ",
+																								err);
 
-							} else {
+																			} else {
 
-								if (rows.affectedRows > 0) {
+																				if (rows.affectedRows > 0) {
 
-									console.log("New document with id " + maxId
-											+ " inserted");
+																					console
+																							.log("New document with id "
+																									+ maxId
+																									+ " inserted");
 
-									var requests = 0;
+																					var requests = 0;
 
-									for (taggedIndex in tagged) {
+																					var addedDocument = {
+																						id : maxId,
+																						title : title,
+																						date : date,
+																						file : file,
+																						owner : owner
+																					};
 
-										requests++;
-										var taggedNode = tagged[taggedIndex];
+																					for (taggedIndex in tagged) {
 
-										insertTag(maxId, taggedNode, req,
-												function(tagInserted) {
+																						requests++;
+																						var taggedNode = tagged[taggedIndex];
 
-													// TODO check tag inserted
+																						insertTag(
+																								maxId,
+																								taggedNode,
+																								req,
+																								function(
+																										tagInserted) {
 
-													requests--;
+																									// TODO
+																									// check
+																									// tag
+																									// inserted
 
-													if (requests == 0) {
+																									requests--;
 
-														callback({
-															id : maxId,
-															title : title,
-															date : date,
-															file : file,
-															owner : owner
-														});
-													}
-												});
+																									if (requests == 0) {
+
+																										callback(addedDocument);
+																									}
+																								});
+																					}
+
+																					if (tagged.length == 0) {
+																				
+																						callback(addedDocument);
+																					}
+																				} else {
+
+																					console
+																							.log("New document with id "
+																									+ maxId
+																									+ " not inserted");
+																					callback(null);
+																				}
+																			}
+																		});
+													});
+
+										} else {
+
+											callback(-1);
+										}
 									}
-								} else {
-
-									console.log("New document with id " + maxId
-											+ " not inserted");
-									callback(null);
-								}
-							}
-						});
-					});
-
-				} else {
-
-					callback(-1);
-				}
-			}
-		});
-	});
+								});
+			});
 };
 
 /*
@@ -440,4 +454,12 @@ exports.add = function(req, res) {
 
 				}
 			});
+};
+
+exports.upload = function(req, res) {
+
+	console.log("uploading document...");
+	res.status(OK).json('result', {
+		status : 'ok'
+	});
 };
