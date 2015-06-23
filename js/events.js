@@ -239,6 +239,17 @@ function profileNodeClicked(d) {
 	d3.event.stopPropagation();
 }
 
+function redrawStream() {
+
+	var nodes = [];
+	node.each(function(d) {
+		
+		nodes.push({"originalId" : d.originalId});
+	});
+	
+	fillStream(nodes);
+};
+
 $('#uploadDocument').click(
 		function() {
 
@@ -256,30 +267,29 @@ $('#uploadDocument').click(
 
 			$.get(serverUrl + "/documents/add?file=" + fileName + "&title="
 					+ title + "&date=" + date + "&tagged=[" + tagged
-					+ ']&owner=' + userId, function(added) {
+					+ ']&owner=' + userId, function(addedDoc) {
 
-				if (added) {
+				if (addedDoc) {
 
 					$('#addDocumentModal').modal('hide');
 
 					// Display new document
-					var selectedNode = svg.selectAll(".node").filter(
-							function(d) {
+					console.log(JSON.stringify(addedDoc));
+					var container = svg.selectAll(".docContainer");
 
-								return d.originalId == nodeIdToUpdate;
+					addedDoc.position = {
+						x : documentPosition[0],
+						y : documentPosition[1]
+					};
 
-							});
+					documentPosition = [];
 
-					var centerX = width / 10;
-					var centerY = height / 1.7;
-					var maxRowSize = 10;
+					drawDoc(addedDoc, container, null, null, 0, null, false);
 
-					placeDocuments(serverUrl + "/documents?node="
-							+ nodeIdToUpdate + "&relation=tagged",
-							selectedNode, nodeIdToUpdate, centerX, centerY,
-							maxRowSize, false);
+					redrawStream();
+					
 				} else {
-					alert("Document not added!");
+					console.log("Document not added!");
 				}
 			});
 		});
@@ -353,83 +363,85 @@ var onDetail = false;
 var docDrag = d3.behavior.drag().on("dragstart", docDragstarted).on("drag",
 		docDragged).on("dragend", docDragended);
 
+function drawDoc(doc, container, centerX, centerY, offset, maxRowSize,
+		isHeritage) {
+
+	var docNode = container.append("image");
+
+	var x, y;
+
+	if (doc.position) {
+
+		x = doc.position.x;
+		y = doc.position.y;
+
+	} else {
+
+		var defaultX = centerX / 2 - 300 + offset;
+		var defaultY = centerY + 100 * Math.floor(docIndex / maxRowSize);
+
+		x = defaultX;
+		y = defaultY;
+
+	}
+
+	docNode
+			.attr("width", 100)
+			.attr("id", doc.id)
+			.attr("title", doc.title)
+			.attr("url", "./docs/" + doc.file)
+			.attr("date", getDate(doc))
+			.attr("height", 80)
+			.attr(
+					"xlink:href",
+					function() {
+						return doc.file.substr(-4) === ".pdf" ? "./docs/default_pdf.png"
+								: "./docs/" + doc.file;
+					}).attr("class", function() {
+				if (!isHeritage) {
+
+					return "myCursor-pointer-move";
+				}
+			}).attr("cursor", function() {
+				if (isHeritage) {
+
+					return "pointer";
+				}
+			}).attr("x", x).attr("y", y).on("click", docClicked).filter(
+					function() {
+						return !isHeritage;
+					}).on("mouseover", thumbnailMouseovered).on("mouseout",
+					thumbnailMouseouted).call(docDrag);
+
+	docNode.on('contextmenu', d3.contextMenu(onDocumentMenu));
+};
+
 function placeDocuments(serviceUrl, selectedNode, nodeIndex, centerX, centerY,
 		maxRowSize, isHeritage) {
 
-	$
-			.get(
-					serviceUrl,
-					function(data) {
+	$.get(serviceUrl, function(data) {
 
-						var documents = data.documents;
+		var documents = data.documents;
 
-						var container = selectedNode.append("g");
+		var container = selectedNode.append("g").attr("class", "docContainer");
 
-						var offset = 0;
+		var offset = 0;
 
-						for (docIndex in documents) {
+		for (docIndex in documents) {
 
-							var doc = documents[docIndex];
+			var doc = documents[docIndex];
 
-							var docNode = container.append("image");
+			drawDoc(doc, container, centerX, centerY, offset, maxRowSize,
+					isHeritage);
 
-							var defaultX = centerX / 2 - 300 + offset;
-							var defaultY = centerY + 100
-									* Math.floor(docIndex / maxRowSize);
+			offset += 100;
 
-							var x = defaultX;
-							var y = defaultY;
+			if (offset >= 100 * maxRowSize) {
 
-							if (!isHeritage) {
-
-								x = doc.position ? doc.position.x : defaultX;
-								y = doc.position ? doc.position.y : defaultY;
-
-							} else if (doc.position) {
-
-								x = doc.position.x;
-								y = doc.position.y;
-							}
-
-							docNode
-									.attr("width", 100)
-									.attr("id", doc.id)
-									.attr("title", doc.title)
-									.attr("url", "./docs/" + doc.file)
-									.attr("date", getDate(doc))
-									.attr("height", 80)
-									.attr(
-											"xlink:href",
-											function() {
-												return doc.file.substr(-4) === ".pdf" ? "./docs/default_pdf.png"
-														: "./docs/" + doc.file;
-											}).attr("class", function() {
-										if (!isHeritage) {
-
-											return "myCursor-pointer-move";
-										}
-									}).attr("cursor", function() {
-										if (isHeritage) {
-
-											return "pointer";
-										}
-									}).attr("x", x).attr("y", y).on("click",
-											docClicked).filter(function() {
-										return !isHeritage;
-									}).on("mouseover", thumbnailMouseovered)
-									.on("mouseout", thumbnailMouseouted).call(
-											docDrag);
-
-							docNode.on('contextmenu', d3
-									.contextMenu(onDocumentMenu));
-
-							offset += 100;
-							if (offset >= 100 * maxRowSize) {
-
-								offset = 0;
-							}
-						}
-					});
+				offset = 0;
+			}
+		}
+	});
 };
 
 function groundClicked(d) {
@@ -457,9 +469,11 @@ function groundClicked(d) {
 	d3.event.stopPropagation();
 };
 
+var documentPosition = [];
+
 function clickNode(d) {
 
-	if (d3.event.defaultPrevented) {
+	if (!d3.event || d3.event.defaultPrevented) {
 		return;
 	}
 
@@ -475,7 +489,10 @@ function clickNode(d) {
 	selectedNode.append("circle").attr('r', 615).attr("cx", centerX).attr("cy",
 			centerY).attr('class', "node--selected").on("click",
 			profileNodeClicked).attr("cursor", "auto").on('contextmenu',
-			d3.contextMenu(onSelectedNodeMenu));
+			d3.contextMenu(onSelectedNodeMenu, function() {
+
+				documentPosition = [ this.event.x, this.event.y ];
+			}));
 
 	var profileContainer = selectedNode.append("g").on("mouseover",
 			profileMouseovered).on("mouseout", profileMouseouted).on("click",
@@ -503,11 +520,12 @@ function clickNode(d) {
 			maxRowSize, false);
 
 	d3.event.stopPropagation();
+
 };
 
 function clickSvg(d) {
 
-	if (d3.event.defaultPrevented) {
+	if (!d3.event || d3.event.defaultPrevented) {
 		return;
 	}
 
@@ -585,21 +603,33 @@ function docDragended(d) {
 			+ '&x=' + x + '&y=' + y);
 };
 
+function removeDocument(docId) {
+
+	// From node
+	svg.selectAll(".docContainer .myCursor-pointer-move").filter(function() {
+
+		var sel = d3.select(this);
+
+		var document = sel[0][0];
+		var id = document.attributes.id.nodeValue;
+
+		return id == docId;
+
+	}).remove();
+
+	redrawStream();
+};
+
 var onSelectedNodeMenu = [ {
 	title : 'Add document',
 	action : function(elm, d, i) {
 
+		$('#taggedArea').html('');
+		$('#taggedArea').append(
+				'<li id="' + d.originalId + '">' + d.label + '</li>');
+
 		$('#addDocumentModal').modal('show');
 
-		// TODO
-		var person = {
-			id : 22,
-			label : 'www'
-		};
-
-		$('#taggedPersons').append(
-				'<li id="' + person.id + '"><a href="#">' + person.label
-						+ '</a></li>');
 	}
 } ];
 
@@ -607,6 +637,9 @@ var onDocumentMenu = [ {
 	title : 'Remove document',
 	action : function(elm, d, i) {
 
-		$.get(serverUrl + '/documents/' + d.id + '/remove');
+		$.get(serverUrl + '/documents/' + elm.id + '/remove', function() {
+
+			removeDocument(elm.id);
+		});
 	}
 } ];

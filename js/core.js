@@ -363,8 +363,10 @@ function populateThumbnails(currentPage, back) {
 				return d.file.substr(-4) === ".pdf" ? "./docs/default_pdf.png"
 						: "./docs/" + d.file;
 			}).attr("width", 100).attr("height", streamHeight).attr("y",
-			streamY).attr("id", function(d) {
+			streamY).attr("index", function(d) {
 		return d.index;
+	}).attr("id", function(d) {
+		return d.id;
 	}).attr("title", function(d) {
 		return d.title;
 	}).attr("url", function(d) {

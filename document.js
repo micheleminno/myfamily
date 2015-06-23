@@ -139,6 +139,15 @@ exports.view = function(req, res) {
 
 											if (requests == 0) {
 
+												documents.sort(function(a, b) {
+													return a.id - b.id;
+												});
+
+												console
+														.log("Sorted docs: "
+																+ JSON
+																		.stringify(documents));
+
 												res
 														.status(OK)
 														.json(
@@ -171,7 +180,30 @@ function deleteDocument(docIndex, req, callback) {
 				if (rows.affectedRows > 0) {
 
 					console.log("Document " + docIndex + " deleted");
-					callback(1);
+
+					var deleteTagsQuery = "DELETE FROM tags WHERE document = "
+							+ docIndex;
+					console.log(deleteTagsQuery);
+
+					req.getConnection(function(err, connection) {
+
+						connection.query(deleteTagsQuery, function(err, rows) {
+
+							if (err) {
+
+								console.log("Error Deleting : %s ", err);
+
+							} else {
+
+								if (rows.affectedRows > 0) {
+
+									console.log("Tags of document " + docIndex
+											+ " deleted");
+									callback(1);
+								}
+							}
+						});
+					});
 
 				} else {
 
@@ -190,11 +222,19 @@ exports.remove = function(req, res) {
 
 	var docIndex = parseInt(req.param('document'));
 
-	deleteDocument(docIndex, req, function() {
+	deleteDocument(docIndex, req, function(deleted) {
 
-		res.status(OK).json('result', {
-			"msg" : "Document removed"
-		});
+		if (deleted) {
+
+			res.status(OK).json('result', {
+				"msg" : "Document removed"
+			});
+		} else {
+
+			res.status(NOK).json('result', {
+				"msg" : "Document not removed"
+			});
+		}
 
 	});
 };
@@ -321,10 +361,6 @@ function insertDocument(title, date, file, owner, tagged, req, callback) {
 											+ " inserted");
 
 									var requests = 0;
-									if (tagged.indexOf(owner) == -1) {
-
-										tagged.push(owner);
-									}
 
 									for (taggedIndex in tagged) {
 
@@ -340,7 +376,13 @@ function insertDocument(title, date, file, owner, tagged, req, callback) {
 
 													if (requests == 0) {
 
-														callback(1);
+														callback({
+															id : maxId,
+															title : title,
+															date : date,
+															file : file,
+															owner : owner
+														});
 													}
 												});
 									}
@@ -348,7 +390,7 @@ function insertDocument(title, date, file, owner, tagged, req, callback) {
 
 									console.log("New document with id " + maxId
 											+ " not inserted");
-									callback(-1);
+									callback(null);
 								}
 							}
 						});
@@ -384,19 +426,18 @@ exports.add = function(req, res) {
 		tagged = JSON.parse(req.query.tagged);
 	}
 
-	insertDocument(title, date, file, owner, tagged, req, function(inserted) {
+	insertDocument(title, date, file, owner, tagged, req,
+			function(insertedDoc) {
 
-		if (inserted == -1) {
+				if (!insertedDoc) {
 
-			res.status(NOK).json('result', {
-				"msg" : "document not added"
+					res.status(NOK).json('result', {
+						"msg" : "document not added"
+					});
+				} else {
+
+					res.status(OK).json('result', insertedDoc);
+
+				}
 			});
-		} else {
-
-			res.status(OK).json('result', {
-				"msg" : "document updated"
-			});
-
-		}
-	});
 };
