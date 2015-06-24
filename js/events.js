@@ -39,7 +39,13 @@ function thumbnailMouseovered(d) {
 
 	var parent = d3.select(this.parentNode);
 
-	if (!onDetail || doc.attributes.url.nodeValue.substr(-4) === ".pdf") {
+	if (onDetail && doc.attributes.url.nodeValue.substr(-4) === ".pdf") {
+
+		parent.append("text").attr("class", "thumbnailText").attr("x",
+				doc.x.baseVal.value).attr("y", doc.y.baseVal.value - 20).text(
+				doc.attributes.title.nodeValue);
+
+	} else if (!onDetail) {
 
 		doc.width.baseVal.value = 200;
 		doc.height.baseVal.value = 200;
@@ -50,28 +56,25 @@ function thumbnailMouseovered(d) {
 				doc.x.baseVal.value).attr("y", doc.y.baseVal.value - 20).text(
 				doc.attributes.title.nodeValue);
 
-		if (!onDetail) {
+		parent.append("text").attr("class", "thumbnailText").attr("x",
+				doc.x.baseVal.value).attr("y", doc.y.baseVal.value + 235).text(
+				doc.attributes.date.nodeValue);
 
-			parent.append("text").attr("class", "thumbnailText").attr("x",
-					doc.x.baseVal.value).attr("y", doc.y.baseVal.value + 235)
-					.text(doc.attributes.date.nodeValue);
+		node.classed("node--tagged", function(n) {
 
-			node.classed("node--tagged", function(n) {
+			if (d.node) {
 
-				if (d.node) {
+				for (nodeIndex in d.node) {
 
-					for (nodeIndex in d.node) {
-
-						var taggedNode = d.node[nodeIndex];
-						if (taggedNode == n.originalId) {
-							return true;
-						}
+					var taggedNode = d.node[nodeIndex];
+					if (taggedNode == n.originalId) {
+						return true;
 					}
 				}
+			}
 
-				return false;
-			});
-		}
+			return false;
+		});
 	}
 };
 
@@ -83,7 +86,7 @@ function thumbnailMouseouted(d) {
 	var selection = d3.select(this);
 	var doc = selection[0][0];
 
-	if (!onDetail || doc.attributes.url.nodeValue.substr(-4) === ".pdf") {
+	if (!onDetail) {
 
 		doc.width.baseVal.value = 100;
 		doc.height.baseVal.value = 100;
