@@ -17,17 +17,8 @@ exports.list = function(req, res) {
 
 	} else if (relation == 'tagged') {
 
-		// Heritage
-		if (nodeIndex == -1) {
-
-			query = 'SELECT * FROM tags RIGHT JOIN documents ON tags.document = documents.id WHERE node IS NULL';
-
-		} else {
-
-			query = 'SELECT * FROM tags JOIN documents ON tags.document = documents.id WHERE node = '
-					+ nodeIndex;
-		}
-
+		query = 'SELECT * FROM tags JOIN documents ON tags.document = documents.id WHERE node = '
+				+ nodeIndex;
 	}
 
 	console.log(query);
@@ -63,8 +54,8 @@ exports.list = function(req, res) {
  */
 exports.view = function(req, res) {
 
-	//TODO: userId not used
-	
+	// TODO: userId not used
+
 	var viewNodes = req.body.nodes;
 
 	var documents = [];
@@ -395,7 +386,7 @@ function insertDocument(title, date, file, owner, tagged, req, callback) {
 																					}
 
 																					if (tagged.length == 0) {
-																				
+
 																						callback(addedDocument);
 																					}
 																				} else {
