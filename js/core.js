@@ -153,31 +153,7 @@ function init() {
 	docRowSize = 16;
 }
 
-function fillTaggedPersons(nodes) {
-
-	$('#taggedPersons').html('');
-	
-	for (nodeIndex in nodes) {
-
-		var node = nodes[nodeIndex];
-		if (node.person) {
-
-			$('#taggedPersons').append(
-					'<li id="' + node.id + '"><a href="#">' + node.label
-							+ '</a></li>');
-		}
-	}
-
-	$('#taggedPersons li').on(
-			'click',
-			function() {
-
-				personId = $(this).attr('id');
-				personLabel = $(this).find('a').text();
-				$('#taggedArea').append(
-						'<li id="' + personId + '">' + personLabel + '</li>');
-			});
-}
+var nodes;
 
 var viewIndex;
 
@@ -194,7 +170,7 @@ function drawTree(userId, userLabel, viewId, viewLabel) {
 					serverUrl + "/" + userId + "/graph/view?view=" + viewId,
 					function(graphView) {
 
-						fillTaggedPersons(graphView.nodes);
+						nodes = graphView.nodes;
 
 						if (viewId != 4) {
 

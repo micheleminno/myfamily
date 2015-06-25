@@ -273,7 +273,7 @@ $('#uploadDocument').click(
 			var date = $('#date').val();
 
 			var tagged = [];
-			$('#taggedArea > li').each(function() {
+			$('#add-taggedArea > li').each(function() {
 
 				tagged.push(this.id);
 			});
@@ -639,14 +639,55 @@ function removeDocument(docId) {
 	redrawStream();
 };
 
+function isAlreadyTagged(nodeId, taggedAreaId) {
+
+	var tagged = [];
+	$(taggedAreaId + ' li').each(function() {
+
+		tagged.push(parseInt(this.id));
+	});
+
+	return tagged.indexOf(nodeId) > -1;
+}
+
+function fillTaggedPersons(nodes) {
+
+	$('#add-taggedPersons').html('');
+
+	for (nodeIndex in nodes) {
+
+		var node = nodes[nodeIndex];
+		if (node.person && !isAlreadyTagged(node.originalId, '#add-taggedArea')) {
+
+			$('#add-taggedPersons').append(
+					'<li id="' + node.id + '"><a href="#">' + node.label
+							+ '</a></li>');
+		}
+	}
+
+	$('#add-taggedPersons li').on(
+			'click',
+			function() {
+
+				personId = $(this).attr('id');
+				personLabel = $(this).find('a').text();
+				$('#add-taggedArea').append(
+						'<li id="' + personId + '">' + personLabel + '</li>');
+
+				fillTaggedPersons(nodes);
+			});
+};
+
 var onSelectedNodeMenu = [ {
 	title : 'Add document',
 	action : function(elm, d, i) {
 
-		$('#taggedArea').html('');
-		$('#taggedArea').append(
+		$('#add-taggedArea').html('');
+		$('#add-taggedArea').append(
 				'<li id="' + d.originalId + '">' + d.label + '</li>');
 
+		fillTaggedPersons(nodes);
+		
 		$('#addDocumentModal').modal('show');
 	}
 } ];
@@ -655,21 +696,49 @@ var onHeritageMenu = [ {
 	title : 'Add document',
 	action : function(elm, d, i) {
 
-		$('#taggedArea').html('');
-		$('#taggedArea').append('<li id="-1">Heritage</li>');
+		$('#add-taggedArea').html('');
+		$('#add-taggedArea').append('<li id="-1">Heritage</li>');
 
 		$('#addDocumentModal #tagged').hide();
 		$('#addDocumentModal').modal('show');
 	}
 } ];
 
-var onDocumentMenu = [ {
-	title : 'Remove document',
-	action : function(elm, d, i) {
+var onDocumentMenu = [
+		{
+			title : 'Edit',
+			action : function(elm, d, i) {
 
-		$.get(serverUrl + '/documents/' + elm.id + '/remove', function() {
+				$.get(serverUrl + '/documents/' + elm.id, function(data) {
 
-			removeDocument(elm.id);
-		});
-	}
-} ];
+					if (data.document != -1) {
+
+						$('#edit-taggedArea').html('');
+
+						var tagged = data.document.tagged;
+						for ( var taggedIndex in tagged) {
+
+							tag = tagged[taggedIndex];
+							$('#edit-taggedArea').append(
+									'<li id="' + tag.id + '">' + tag.label
+											+ '</li>');
+						}
+
+						$('#editDocumentModal').modal('show');
+
+						$.get(serverUrl + '/documents/' + elm.id + '/update');
+					}
+				});
+			}
+		},
+		{
+			title : 'Remove',
+			action : function(elm, d, i) {
+
+				$.get(serverUrl + '/documents/' + elm.id + '/remove',
+						function() {
+
+							removeDocument(elm.id);
+						});
+			}
+		} ];

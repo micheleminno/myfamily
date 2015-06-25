@@ -146,14 +146,73 @@
 								Add <span class="caret"></span>
 							</button>
 
-							<ul id="taggedPersons" class="dropdown-menu"
+							<ul id="add-taggedPersons" class="dropdown-menu"
 								aria-labelledby="dropdownMenuTagged">
 							</ul>
 						</div>
 
 					</div>
 					<br />
-					<ul style="margin-top: 16px" id="taggedArea" name="taggedArea"></ul>
+					<ul style="margin-top: 16px" id="add-taggedArea" name="taggedArea"></ul>
+
+				</div>
+				<div class="modal-footer">
+					<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+					<button class="btn btn-primary" id="uploadDocument">Upload</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div id="editDocumentModal" class="modal fade" tabindex="-1"
+		role="dialog" aria-labelledby="addDocumentModalLabel">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-hidden="true">×</button>
+					<h3 id="addDocumentModalLabel">Edit a document</h3>
+				</div>
+				<div class="modal-body">
+
+					<h4>Select document in your local disk</h4>
+					<iframe id="upload_target" name="upload_target" src="#"
+						style="display: none;"></iframe>
+
+					<form target="upload_target" id="uploadDocumentForm"
+						enctype="multipart/form-data" method="post">
+						<input type="file" id="document-upload" name="document-upload" />
+					</form>
+
+					<h4 style="margin-top: 30px">Info</h4>
+					<div style="display: inline-block">
+						<p style="display: inline; margin-right: 20px">Title:</p>
+						<input type="text" id="title" name="title">
+					</div>
+					<div style="margin-bottom: 10px"></div>
+					<div style="display: inline-block">
+						<p style="display: inline; margin-right: 20px">Date:</p>
+						<input type="date" id="date" name="date">
+					</div>
+					<div style="margin-bottom: 20px"></div>
+					<div id="tagged" style="display: inline-block">
+						<p style="display: inline; margin-right: 20px">Persons tagged:</p>
+
+						<div class="dropdown" style="display: inline; margin-right: 10px">
+							<button class="btn btn-default dropdown-toggle" type="button"
+								id="dropdownMenuTagged" data-toggle="dropdown"
+								aria-haspopup="true" aria-expanded="true">
+								Add <span class="caret"></span>
+							</button>
+
+							<ul id="edit-taggedPersons" class="dropdown-menu"
+								aria-labelledby="dropdownMenuTagged">
+							</ul>
+						</div>
+
+					</div>
+					<br />
+					<ul style="margin-top: 16px" id="edit-taggedArea" name="taggedArea"></ul>
 
 				</div>
 				<div class="modal-footer">

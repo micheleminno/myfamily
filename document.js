@@ -255,6 +255,71 @@ exports.update = function(req, res) {
 	});
 };
 
+/*
+ * Get a document with all its tagged persons.
+ */
+exports.get = function(req, res) {
+
+	var index = parseInt(req.param('document'));
+
+	var getDocumentQuery = 'SELECT t.document, d.title, d.date, d.file, d.owner, t.node, n.id, n.label FROM tags as t JOIN documents as d '
+			+ 'ON t.document = d.id JOIN nodes as n ON t.node = n.id WHERE d.id = '
+			+ index;
+
+	console.log(getDocumentQuery);
+
+	req.getConnection(function(err, connection) {
+
+		connection.query(getDocumentQuery, function(err, rows) {
+
+			if (err) {
+
+				console.log("Error Selecting : %s ", err);
+
+			} else {
+
+				if (rows.length > 0) {
+
+					console.log("Document " + index + " retrieved");
+
+					var firstRow = rows[0];
+					var tagged = [];
+
+					for ( var rowIndex in rows) {
+
+						row = rows[rowIndex];
+						tagged.push({
+							id : row.node,
+							label : row.label
+						});
+					}
+
+					var document = {
+						id : firstRow.document,
+						title : firstRow.title,
+						date : firstRow.date,
+						file : firstRow.file,
+						owner : firstRow.owner,
+						tagged : tagged
+					};
+
+					res.status(OK).json('result', {
+						"document" : document
+					});
+
+				} else {
+
+					console.log("Document " + index + " not retrieved");
+
+					res.status(NOK).json('result', {
+						"document" : -1
+					});
+				}
+			}
+		});
+	});
+};
+
 function insertTag(document, node, req, callback) {
 
 	var insertQuery = "INSERT INTO tags VALUES(" + document + ", " + node

@@ -63,6 +63,8 @@ app.get('/documents', document.list);
 
 app.post('/documents/:node', document.view);
 
+app.get('/documents/:document', document.get);
+
 app.get('/documents/:document/update', document.update);
 
 app.get('/documents/:document/remove', document.remove);
