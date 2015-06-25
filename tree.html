@@ -70,18 +70,28 @@
 							<li><a href="#">Logout</a></li>
 						</ul></li>
 
-					<li class="dropdown"><a href="#" id="persons-expandable"
-						class="dropdown-toggle" data-toggle="dropdown" role="button"
-						aria-expanded="false">Login as<span class="caret myCaret"></span>
-					</a>
-						<ul id="persons" class="dropdown-menu" role="menu">
-
-						</ul></li>
+					<li id="login-dropdown" class="dropdown"><a href="#"
+						id="login-expandable" class="dropdown-toggle"
+						data-toggle="dropdown" role="button" aria-expanded="false">Login
+							as<span class="caret myCaret"></span>
+					</a></li>
 				</ul>
 			</div>
 		</div>
 	</nav>
 
+
+	<form id="login-form" hidden class="navbar-form navbar-right">
+		<div class="form-group">
+			<input type="checkbox" style="margin-bottom: 8px" id="new-user" value="new-user"> New
+			user<br> <input id="login-user"  type="text" class="form-control"
+				placeholder="Name">
+		</div>
+		<button id="submit-login" style="margin-top: 25px" type="submit"
+			class="btn btn-default">Login</button>
+		<button id="cancel-login" style="margin-top: 25px" type="submit"
+			class="btn btn-default">Cancel</button>
+	</form>
 
 
 	<div id="tree"></div>
@@ -144,7 +154,7 @@
 					</div>
 					<br />
 					<ul style="margin-top: 16px" id="taggedArea" name="taggedArea"></ul>
-				
+
 				</div>
 				<div class="modal-footer">
 					<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>

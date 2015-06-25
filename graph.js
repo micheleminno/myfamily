@@ -319,16 +319,23 @@ function addAllIfNotFound(entitiesToAdd, entities) {
 function inExtendedFamily(history) {
 
 	var indexOfLastC = history.lastIndexOf('c');
-	var indexOfCBeforeLast = history.substring(0, indexOfLastC)
-			.lastIndexOf('c');
-
-	if (history.length == 0 || indexOfLastC == indexOfCBeforeLast + 1) {
+	if (indexOfLastC == -1) {
 
 		return true;
 
 	} else {
 
-		return false;
+		var indexOfCBeforeLast = history.substring(0, indexOfLastC)
+				.lastIndexOf('c');
+
+		if (history.length == 0 || indexOfLastC == indexOfCBeforeLast + 1) {
+
+			return true;
+
+		} else {
+
+			return false;
+		}
 	}
 };
 
@@ -765,6 +772,26 @@ exports.addNode = function(req, res) {
 
 			res.status(OK).json('result', {
 				"msg" : "graph updated"
+			});
+		}
+	});
+};
+
+exports.addPerson = function(req, res) {
+
+	var name = req.query.name;
+
+	insertNode(name, true, req, function(insertedId) {
+
+		if (insertedId == -1) {
+
+			res.status(NOK).json('result', {
+				"msg" : "person not added"
+			});
+		} else {
+
+			res.status(OK).json('result', {
+				"personId" : insertedId
 			});
 		}
 	});
@@ -1340,15 +1367,18 @@ exports.updateProfileImage = function(req, res) {
 			});
 };
 
-exports.persons = function(req, res) {
+exports.namesakes = function(req, res) {
 
-	var persons = [];
+	var name = req.query.name;
+	var namesakes = [];
 
-	var selectPersons = 'SELECT * FROM nodes WHERE person = 1';
+	var selectNamesakes = "SELECT * FROM nodes WHERE label = '" + name + "'";
+
+	console.log(selectNamesakes);
 
 	req.getConnection(function(err, connection) {
 
-		connection.query(selectPersons, function(err, rows) {
+		connection.query(selectNamesakes, function(err, rows) {
 
 			if (err) {
 
@@ -1359,10 +1389,10 @@ exports.persons = function(req, res) {
 				for (rowIndex in rows) {
 
 					var row = rows[rowIndex];
-					persons.push(row);
+					namesakes.push(row);
 				}
 
-				res.status(OK).json('persons', persons);
+				res.status(OK).json('namesakes', namesakes);
 			}
 		});
 	});

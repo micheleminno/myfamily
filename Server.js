@@ -83,7 +83,9 @@ app.get('/:user/graph/update/:node', graph.updateNode);
 
 app.post('/:user/graph/profileImage/:node', graph.updateProfileImage);
 
-app.get('/:user/graph/persons', graph.persons);
+app.get('/graph/namesakes', graph.namesakes);
+
+app.get('/graph/addPerson', graph.addPerson);
 
 // Views
 app.get('/:user/view/:view/update', view.updateNode);

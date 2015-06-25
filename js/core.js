@@ -13,36 +13,57 @@ var selectedViewLabel = 'Extended family';
 var userId = 3;
 var userLabel = "Michele Minno";
 
-$.get(serverUrl + "/" + userId + "/graph/persons", function(persons) {
+$('#login-expandable').on(
+		'click',
+		function() {
 
-	for (personIndex in persons) {
+			$(this).after($('#login-form'));
+			$('#login-form').show();
+			$('#submit-login').on(
+					'click',
+					function() {
 
-		var person = persons[personIndex];
-		$('#persons').append(
-				'<li id="' + person.id + '"><a href="#">' + person.label
-						+ '</a></li>');
-		$('#taggedPersons').append(
-				'<li id="' + person.id + '"><a href="#">' + person.label
-						+ '</a></li>');
-	}
+						userLabel = $('#login-user').val();
+						$('#login-user').val('');
+						var newUser = $('#new-user').is(':checked');
 
-	$('#persons li').on('click', function() {
+						$.get(serverUrl + "/graph/namesakes?name=" + userLabel,
+								function(namesakes) {
 
-		userId = $(this).attr('id');
-		userLabel = $(this).find('a').text();
-		drawTree(userId, userLabel, selectedViewId, selectedViewLabel);
-	});
+									if (namesakes.length > 0) {
 
-	$('#taggedPersons li').on(
-			'click',
-			function() {
+										userId = namesakes[0]['id'];
 
-				personId = $(this).attr('id');
-				personLabel = $(this).find('a').text();
-				$('#taggedArea').append(
-						'<li id="' + personId + '">' + personLabel + '</li>');
+										drawTree(userId, userLabel,
+												selectedViewId,
+												selectedViewLabel);
+
+									} else if (newUser) {
+
+										$.get(serverUrl
+												+ '/graph/addPerson?name='
+												+ userLabel, function(data) {
+
+											userId = data.personId;
+											drawTree(userId, userLabel,
+													selectedViewId,
+													selectedViewLabel);
+										});
+
+									}
+
+									$('#login-form').hide();
+									$('#login-expandable').dropdown('toggle');
+								});
+					});
+
+			$('#cancel-login').on('click', function() {
+
+				$('#login-form').hide();
+				$('#login-expandable').dropdown('toggle');
+
 			});
-});
+		});
 
 $('#view li').on('click', function() {
 
@@ -80,8 +101,7 @@ function init() {
 			height).append("g").attr("transform",
 			"translate(300, 100)scale(.4)").attr("class", "myCursor-zoom-move");
 
-	svg.on("click", clickSvg).on('contextmenu',
-			d3.contextMenu(onBackgroundMenu));
+	svg.on("click", clickSvg);
 
 	svg.append("circle").attr("r", width * 10).attr("class", "lens").style(
 			"pointer-events", "all").call(zoom);
@@ -133,6 +153,32 @@ function init() {
 	docRowSize = 16;
 }
 
+function fillTaggedPersons(nodes) {
+
+	$('#taggedPersons').html('');
+	
+	for (nodeIndex in nodes) {
+
+		var node = nodes[nodeIndex];
+		if (node.person) {
+
+			$('#taggedPersons').append(
+					'<li id="' + node.id + '"><a href="#">' + node.label
+							+ '</a></li>');
+		}
+	}
+
+	$('#taggedPersons li').on(
+			'click',
+			function() {
+
+				personId = $(this).attr('id');
+				personLabel = $(this).find('a').text();
+				$('#taggedArea').append(
+						'<li id="' + personId + '">' + personLabel + '</li>');
+			});
+}
+
 var viewIndex;
 
 function drawTree(userId, userLabel, viewId, viewLabel) {
@@ -147,6 +193,8 @@ function drawTree(userId, userLabel, viewId, viewLabel) {
 			.get(
 					serverUrl + "/" + userId + "/graph/view?view=" + viewId,
 					function(graphView) {
+
+						fillTaggedPersons(graphView.nodes);
 
 						if (viewId != 4) {
 
@@ -452,8 +500,12 @@ var onPersonMenu = [
 			action : function(elm, d, i) {
 
 				$.get(serverUrl + "/" + userId
-						+ '/graph/add?type=family&source=' + d.originalId);
-				drawTree(userId, userLabel, selectedViewId, selectedViewLabel);
+						+ '/graph/add?type=family&source=' + d.originalId,
+						function() {
+
+							drawTree(userId, userLabel, selectedViewId,
+									selectedViewLabel);
+						});
 			}
 		},
 		{
@@ -461,8 +513,12 @@ var onPersonMenu = [
 			action : function(elm, d, i) {
 
 				$.get(serverUrl + "/" + userId
-						+ '/graph/add?type=family&target=' + d.originalId);
-				drawTree(userId, userLabel, selectedViewId, selectedViewLabel);
+						+ '/graph/add?type=family&target=' + d.originalId,
+						function() {
+
+							drawTree(userId, userLabel, selectedViewId,
+									selectedViewLabel);
+						});
 			}
 		},
 		{
@@ -470,8 +526,11 @@ var onPersonMenu = [
 			action : function(elm, d, i) {
 
 				$.get(serverUrl + "/" + userId + '/graph/remove/'
-						+ d.originalId);
-				drawTree(userId, userLabel, selectedViewId, selectedViewLabel);
+						+ d.originalId, function() {
+
+					drawTree(userId, userLabel, selectedViewId,
+							selectedViewLabel);
+				});
 			}
 		} ];
 
@@ -481,8 +540,12 @@ var onFamilyMenu = [
 			action : function(elm, d, i) {
 
 				$.get(serverUrl + "/" + userId
-						+ '/graph/add?type=person&target=' + d.originalId);
-				drawTree(userId, userLabel, selectedViewId, selectedViewLabel);
+						+ '/graph/add?type=person&target=' + d.originalId,
+						function() {
+
+							drawTree(userId, userLabel, selectedViewId,
+									selectedViewLabel);
+						});
 			}
 		},
 		{
@@ -490,8 +553,12 @@ var onFamilyMenu = [
 			action : function(elm, d, i) {
 
 				$.get(serverUrl + "/" + userId
-						+ '/graph/add?type=person&source=' + d.originalId);
-				drawTree(userId, userLabel, selectedViewId, selectedViewLabel);
+						+ '/graph/add?type=person&source=' + d.originalId,
+						function() {
+
+							drawTree(userId, userLabel, selectedViewId,
+									selectedViewLabel);
+						});
 			}
 		},
 		{
@@ -499,16 +566,10 @@ var onFamilyMenu = [
 			action : function(elm, d, i) {
 
 				$.get(serverUrl + "/" + userId + '/graph/remove/'
-						+ d.originalId);
-				drawTree(userId, userLabel, selectedViewId, selectedViewLabel);
+						+ d.originalId, function() {
+
+					drawTree(userId, userLabel, selectedViewId,
+							selectedViewLabel);
+				});
 			}
 		} ];
-
-var onBackgroundMenu = [ {
-	title : 'Add person node',
-	action : function(elm, d, i) {
-
-		$.get(serverUrl + "/" + userId + '/graph/add?type=person');
-		drawTree(userId, userLabel, selectedViewId, selectedViewLabel);
-	}
-} ];
