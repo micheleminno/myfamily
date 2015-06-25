@@ -175,24 +175,16 @@
 				</div>
 				<div class="modal-body">
 
-					<h4>Select document in your local disk</h4>
-					<iframe id="upload_target" name="upload_target" src="#"
-						style="display: none;"></iframe>
-
-					<form target="upload_target" id="uploadDocumentForm"
-						enctype="multipart/form-data" method="post">
-						<input type="file" id="document-upload" name="document-upload" />
-					</form>
-
-					<h4 style="margin-top: 30px">Info</h4>
+					<h4 id="edit-file"></h4>
+					<p id="edit-docId" style="visibility: hidden"></p>
 					<div style="display: inline-block">
 						<p style="display: inline; margin-right: 20px">Title:</p>
-						<input type="text" id="title" name="title">
+						<input type="text" id="edit-title" name="title">
 					</div>
 					<div style="margin-bottom: 10px"></div>
 					<div style="display: inline-block">
 						<p style="display: inline; margin-right: 20px">Date:</p>
-						<input type="date" id="date" name="date">
+						<input type="date" id="edit-date" name="date">
 					</div>
 					<div style="margin-bottom: 20px"></div>
 					<div id="tagged" style="display: inline-block">
@@ -217,7 +209,7 @@
 				</div>
 				<div class="modal-footer">
 					<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
-					<button class="btn btn-primary" id="uploadDocument">Upload</button>
+					<button class="btn btn-primary" id="updateDocument">Update</button>
 				</div>
 			</div>
 		</div>

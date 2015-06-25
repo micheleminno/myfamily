@@ -207,7 +207,7 @@ exports.remove = function(req, res) {
 /*
  * Update the position of a document in a specific node details.
  */
-exports.update = function(req, res) {
+exports.updatePosition = function(req, res) {
 
 	var node = req.query.node;
 	var index = parseInt(req.param('document'));
@@ -255,6 +255,195 @@ exports.update = function(req, res) {
 	});
 };
 
+function updateTagged(taggedIds, docIndex, callback) {
+
+	var getTagsQuery = 'SELECT * from tags WHERE document = ' + docIndex;
+
+	console.log(getTagsQuery);
+
+	req
+			.getConnection(function(err, connection) {
+
+				connection
+						.query(
+								getTagsQuery,
+								function(err, rows) {
+
+									if (err) {
+
+										console.log("Error Selecting : %s ",
+												err);
+
+									} else {
+
+										var newTags = [];
+
+										for (rowIndex in rows) {
+
+											var row = rows[rowIndex];
+
+											var found = false;
+											for (tagsIndex in taggedIds) {
+
+												if (taggedIds[tagsIndex] == row['node']) {
+
+													found = true;
+													break;
+												}
+											}
+
+											if (!found) {
+
+												newTags.push(row['node']);
+											}
+										}
+
+										var multipleInsertQuery = "INSERT INTO tags (document, node, position) VALUES ";
+
+										var separator = '';
+										for (tagsIndex in newTags) {
+
+											multipleInsertQuery += separator
+													+ '(' + docIndex + ', '
+													+ newTags[tagsIndex]
+													+ ', NULL)';
+											separator = ', ';
+										}
+
+										console.log(multipleInsertQuery);
+
+										req
+												.getConnection(function(err,
+														connection) {
+
+													connection
+															.query(
+																	insertQuery,
+																	function(
+																			err,
+																			rows) {
+
+																		if (err) {
+
+																			console
+																					.log(
+																							"Error Inserting : %s ",
+																							err);
+																			callback(-1);
+
+																		} else {
+
+																			if (rows.affectedRows > 0) {
+
+																				callback(1);
+																			}
+																		}
+																	});
+												});
+
+									}
+								});
+			});
+};
+
+/*
+ * Update info of a document.
+ */
+exports.update = function(req, res) {
+
+	var index = parseInt(req.param('document'));
+
+	var separator = '';
+	var titleQuerySegment = '';
+	if (req.query.title) {
+
+		titleQuerySegment = "title = '" + req.query.title + "'";
+		separator = ', ';
+	}
+
+	var dateQuerySegment = '';
+	if (req.query.date) {
+
+		dateQuerySegment = 'date = ' + req.query.date;
+	} else {
+
+		separator = '';
+	}
+
+	if (titleQuerySegment != '' || dateQuerySegment != '') {
+
+		var updateDocumentQuery = 'UPDATE documents SET ' + titleQuerySegment
+				+ separator + dateQuerySegment + ' WHERE id = ' + index;
+
+		console.log(updateDocumentQuery);
+
+		req.getConnection(function(err, connection) {
+
+			connection.query(updateDocumentQuery, function(err, rows) {
+
+				if (err) {
+
+					console.log("Error Selecting : %s ", err);
+
+				} else {
+
+					if (rows.affectedRows > 0) {
+
+						if (req.query.tagged) {
+
+							var taggedIds = JSON.parse(req.query.tagged);
+
+							updateTagged(taggedIds, index, function(inserted) {
+
+								if (inserted == 1) {
+
+									console.log("Document " + index
+											+ " updated");
+
+									res.status(OK).json(
+											'result',
+											{
+												"msg" : "Document " + index
+														+ " updated"
+											});
+								} else {
+
+									console.log("Document " + index
+											+ " not updated");
+
+									res.status(NOK).json(
+											'result',
+											{
+												"msg" : "Document " + index
+														+ " not updated"
+											});
+								}
+							});
+
+						} else {
+
+							console.log("Document " + index + " updated");
+
+							res.status(OK).json('result', {
+								"msg" : "Document " + index + " updated"
+							});
+						}
+
+					} else {
+
+						console.log("Document " + index + " not updated");
+
+						res.status(NOK).json('result', {
+							"msg" : "Document " + index + " not updated"
+						});
+					}
+				}
+			});
+		});
+	}
+
+};
+
 /*
  * Get a document with all its tagged persons.
  */
@@ -263,7 +452,7 @@ exports.get = function(req, res) {
 	var index = parseInt(req.param('document'));
 
 	var getDocumentQuery = 'SELECT t.document, d.title, d.date, d.file, d.owner, t.node, n.id, n.label FROM tags as t JOIN documents as d '
-			+ 'ON t.document = d.id JOIN nodes as n ON t.node = n.id WHERE d.id = '
+			+ 'ON t.document = d.id LEFT JOIN nodes as n ON t.node = n.id WHERE d.id = '
 			+ index;
 
 	console.log(getDocumentQuery);

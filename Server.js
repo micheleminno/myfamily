@@ -65,11 +65,13 @@ app.post('/documents/:node', document.view);
 
 app.get('/documents/:document', document.get);
 
+app.get('/documents/:document/updatePosition', document.updatePosition);
+
 app.get('/documents/:document/update', document.update);
 
 app.get('/documents/:document/remove', document.remove);
 
-app.get('/documents/add', document.add);
+app.get('/documents/add/document', document.add);
 
 app.post('/documents/upload', document.upload);
 

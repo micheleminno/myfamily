@@ -887,7 +887,7 @@ exports.updateNode = function(req, res) {
 	var field = req.query.field;
 	var value = req.query.value;
 
-	exports.updateNodeInDB(nodeIndex, field, value, req, function(updated) {
+	updateNodeInDB(nodeIndex, field, value, req, function(updated) {
 
 		if (updated) {
 

@@ -275,12 +275,14 @@ $('#uploadDocument').click(
 			var tagged = [];
 			$('#add-taggedArea > li').each(function() {
 
-				tagged.push(this.id);
+				tagged.push(parseInt(this.id));
 			});
 
-			$.get(serverUrl + "/documents/add?file=" + fileName + "&title="
-					+ title + "&date=" + date + "&tagged=[" + tagged
-					+ ']&owner=' + userId, function(addedDoc) {
+			var url = serverUrl + "/documents/add/document?file=" + fileName + "&title="
+					+ title + "&date=" + date + "&tagged="
+					+ JSON.stringify(tagged) + '&owner=' + userId;
+
+			$.get(url, function(addedDoc) {
 
 				if (addedDoc) {
 
@@ -300,8 +302,8 @@ $('#uploadDocument').click(
 					// update position on db
 					$
 							.get(serverUrl + '/documents/' + addedDoc.id
-									+ '/update?node=' + tagged[0] + '&x='
-									+ addedDoc.position.x + '&y='
+									+ '/updatePosition?node=' + tagged[0]
+									+ '&x=' + addedDoc.position.x + '&y='
 									+ addedDoc.position.y);
 
 					documentPosition = [];
@@ -320,6 +322,21 @@ function documentUploadContinueExecution() {
 
 	redrawStream();
 };
+
+$('#updateDocument').click(
+		function() {
+
+			$('#editDocumentModal').modal('hide');
+
+			var id = $('#edit-docId').text();
+			var title = $('#edit-title').val();
+			var date = $('#edit-date').val();
+
+			// TODO add tagged
+
+			$.get(serverUrl + '/documents/' + id + '/update?title=' + title
+					+ '&date=' + date);
+		});
 
 var nodeIdToUpdate;
 var fileName;
@@ -620,8 +637,8 @@ function docDragended(d) {
 
 	var nodeId = d ? d.originalId : -1;
 
-	$.get(serverUrl + '/documents/' + id + '/update?node=' + nodeId + '&x=' + x
-			+ '&y=' + y);
+	$.get(serverUrl + '/documents/' + id + '/updatePosition?node=' + nodeId
+			+ '&x=' + x + '&y=' + y);
 };
 
 function removeDocument(docId) {
@@ -665,17 +682,23 @@ function fillTaggedPersons(nodes) {
 		}
 	}
 
-	$('#add-taggedPersons li').on(
-			'click',
-			function() {
+	$('#add-taggedPersons li')
+			.on(
+					'click',
+					function() {
 
-				personId = $(this).attr('id');
-				personLabel = $(this).find('a').text();
-				$('#add-taggedArea').append(
-						'<li id="' + personId + '">' + personLabel + '</li>');
+						personId = $(this).attr('id');
+						personLabel = $(this).find('a').text();
+						$('#add-taggedArea')
+								.append(
+										'<li id="'
+												+ personId
+												+ '">'
+												+ personLabel
+												+ '<a style="margin-left: 5px">(remove)</a></li>');
 
-				fillTaggedPersons(nodes);
-			});
+						fillTaggedPersons(nodes);
+					});
 };
 
 var onSelectedNodeMenu = [ {
@@ -687,7 +710,7 @@ var onSelectedNodeMenu = [ {
 				'<li id="' + d.originalId + '">' + d.label + '</li>');
 
 		fillTaggedPersons(nodes);
-		
+
 		$('#addDocumentModal').modal('show');
 	}
 } ];
@@ -709,26 +732,41 @@ var onDocumentMenu = [
 			title : 'Edit',
 			action : function(elm, d, i) {
 
-				$.get(serverUrl + '/documents/' + elm.id, function(data) {
+				$
+						.get(
+								serverUrl + '/documents/' + elm.id,
+								function(data) {
 
-					if (data.document != -1) {
+									if (data.document != -1) {
 
-						$('#edit-taggedArea').html('');
+										$('#edit-taggedArea').html('');
 
-						var tagged = data.document.tagged;
-						for ( var taggedIndex in tagged) {
+										var tagged = data.document.tagged;
+										for ( var taggedIndex in tagged) {
 
-							tag = tagged[taggedIndex];
-							$('#edit-taggedArea').append(
-									'<li id="' + tag.id + '">' + tag.label
-											+ '</li>');
-						}
+											tag = tagged[taggedIndex];
+											if (tag.id != -1) {
+												$('#edit-taggedArea')
+														.append(
+																'<li id="'
+																		+ tag.id
+																		+ '">'
+																		+ tag.label
+																		+ '<a style="margin-left: 5px">(remove)</a>'
+																		+ '</li>');
+											}
+										}
 
-						$('#editDocumentModal').modal('show');
+										$('#edit-docId').text(data.document.id);
+										$('#edit-file')
+												.text(data.document.file);
+										$('#edit-title').val(
+												data.document.title);
+										$('#edit-date').val(data.document.date);
 
-						$.get(serverUrl + '/documents/' + elm.id + '/update');
-					}
-				});
+										$('#editDocumentModal').modal('show');
+									}
+								});
 			}
 		},
 		{
