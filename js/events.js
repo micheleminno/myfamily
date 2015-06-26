@@ -39,42 +39,39 @@ function thumbnailMouseovered(d) {
 
 	var parent = d3.select(this.parentNode);
 
-	if (onDetail && doc.attributes.url.nodeValue.substr(-4) === ".pdf") {
+	doc.width.baseVal.value = 200;
+	doc.height.baseVal.value = 200;
+	doc.x.baseVal.value -= 50;
+	doc.y.baseVal.value -= 50;
+
+	if (!onDetail || doc.attributes.url.nodeValue.substr(-4) === ".pdf") {
 
 		parent.append("text").attr("class", "thumbnailText").attr("x",
 				doc.x.baseVal.value).attr("y", doc.y.baseVal.value - 20).text(
 				doc.attributes.title.nodeValue);
 
-	} else if (!onDetail) {
+		if (!onDetail) {
 
-		doc.width.baseVal.value = 200;
-		doc.height.baseVal.value = 200;
-		doc.x.baseVal.value -= 50;
-		doc.y.baseVal.value -= 50;
+			parent.append("text").attr("class", "thumbnailText").attr("x",
+					doc.x.baseVal.value).attr("y", doc.y.baseVal.value + 235)
+					.text(doc.attributes.date.nodeValue);
 
-		parent.append("text").attr("class", "thumbnailText").attr("x",
-				doc.x.baseVal.value).attr("y", doc.y.baseVal.value - 20).text(
-				doc.attributes.title.nodeValue);
+			node.classed("node--tagged", function(n) {
 
-		parent.append("text").attr("class", "thumbnailText").attr("x",
-				doc.x.baseVal.value).attr("y", doc.y.baseVal.value + 235).text(
-				doc.attributes.date.nodeValue);
+				if (d.node) {
 
-		node.classed("node--tagged", function(n) {
+					for (nodeIndex in d.node) {
 
-			if (d.node) {
-
-				for (nodeIndex in d.node) {
-
-					var taggedNode = d.node[nodeIndex];
-					if (taggedNode == n.originalId) {
-						return true;
+						var taggedNode = d.node[nodeIndex];
+						if (taggedNode == n.originalId) {
+							return true;
+						}
 					}
 				}
-			}
 
-			return false;
-		});
+				return false;
+			});
+		}
 	}
 };
 
@@ -86,13 +83,10 @@ function thumbnailMouseouted(d) {
 	var selection = d3.select(this);
 	var doc = selection[0][0];
 
-	if (!onDetail) {
-
-		doc.width.baseVal.value = 100;
-		doc.height.baseVal.value = 100;
-		doc.x.baseVal.value += 50;
-		doc.y.baseVal.value += 50;
-	}
+	doc.width.baseVal.value = 100;
+	doc.height.baseVal.value = 100;
+	doc.x.baseVal.value += 50;
+	doc.y.baseVal.value += 50;
 
 	node.classed("node--tagged", false);
 };
@@ -278,8 +272,8 @@ $('#uploadDocument').click(
 				tagged.push(parseInt(this.id));
 			});
 
-			var url = serverUrl + "/documents/add/document?file=" + fileName + "&title="
-					+ title + "&date=" + date + "&tagged="
+			var url = serverUrl + "/documents/add/document?file=" + fileName
+					+ "&title=" + title + "&date=" + date + "&tagged="
 					+ JSON.stringify(tagged) + '&owner=' + userId;
 
 			$.get(url, function(addedDoc) {
@@ -332,10 +326,17 @@ $('#updateDocument').click(
 			var title = $('#edit-title').val();
 			var date = $('#edit-date').val();
 
-			// TODO add tagged
+			var tagged = [];
 
-			$.get(serverUrl + '/documents/' + id + '/update?title=' + title
-					+ '&date=' + date);
+			$('#edit-taggedArea li').each(function() {
+
+				personId = $(this).attr('id');
+				tagged.push(parseInt(personId));
+			});
+
+			var url = serverUrl + '/documents/' + id + '/update?title=' + title
+					+ '&date=' + date + '&tagged=' + JSON.stringify(tagged);
+			$.get(url);
 		});
 
 var nodeIdToUpdate;
@@ -614,6 +615,7 @@ function nodeDragended(d) {
 function docDragstarted(d) {
 
 	d3.event.sourceEvent.stopPropagation();
+
 	svg.selectAll(".thumbnailText").remove();
 	d3.select(this).classed("dragging", true);
 };
@@ -667,37 +669,40 @@ function isAlreadyTagged(nodeId, taggedAreaId) {
 	return tagged.indexOf(nodeId) > -1;
 }
 
-function fillTaggedPersons(nodes) {
+function fillTaggedPersons(nodes, mode) {
 
-	$('#add-taggedPersons').html('');
+	$('#' + mode + '-taggedPersons').html('');
 
 	for (nodeIndex in nodes) {
 
 		var node = nodes[nodeIndex];
-		if (node.person && !isAlreadyTagged(node.originalId, '#add-taggedArea')) {
+		if (node.person
+				&& !isAlreadyTagged(node.originalId, '#' + mode + '-taggedArea')) {
 
-			$('#add-taggedPersons').append(
+			$('#' + mode + '-taggedPersons').append(
 					'<li id="' + node.id + '"><a href="#">' + node.label
 							+ '</a></li>');
 		}
 	}
 
-	$('#add-taggedPersons li')
+	$('#' + mode + '-taggedPersons li')
 			.on(
 					'click',
 					function() {
 
 						personId = $(this).attr('id');
 						personLabel = $(this).find('a').text();
-						$('#add-taggedArea')
+						$('#' + mode + '-taggedArea')
 								.append(
 										'<li id="'
 												+ personId
 												+ '">'
 												+ personLabel
-												+ '<a style="margin-left: 5px">(remove)</a></li>');
+												+ '<a id="remove-'
+												+ personId
+												+ '" style="margin-left: 5px" href="#">(remove)</a></li>');
 
-						fillTaggedPersons(nodes);
+						fillTaggedPersons(nodes, mode);
 					});
 };
 
@@ -709,7 +714,7 @@ var onSelectedNodeMenu = [ {
 		$('#add-taggedArea').append(
 				'<li id="' + d.originalId + '">' + d.label + '</li>');
 
-		fillTaggedPersons(nodes);
+		fillTaggedPersons(nodes, 'add');
 
 		$('#addDocumentModal').modal('show');
 	}
@@ -752,10 +757,25 @@ var onDocumentMenu = [
 																		+ tag.id
 																		+ '">'
 																		+ tag.label
-																		+ '<a style="margin-left: 5px">(remove)</a>'
+																		+ '<a id="remove-'
+																		+ tag.id
+																		+ '" style="margin-left: 5px" href="#">(remove)</a>'
 																		+ '</li>');
 											}
 										}
+
+										$('#edit-taggedArea li a').click(
+												function() {
+
+													fillTaggedPersons(nodes,
+															'edit');
+													$(
+															'#edit-taggedArea '
+																	+ personId)
+															.remove();
+												});
+
+										fillTaggedPersons(nodes, 'edit');
 
 										$('#edit-docId').text(data.document.id);
 										$('#edit-file')

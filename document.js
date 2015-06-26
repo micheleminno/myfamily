@@ -255,7 +255,7 @@ exports.updatePosition = function(req, res) {
 	});
 };
 
-function updateTagged(taggedIds, docIndex, callback) {
+function updateTagged(taggedIds, docIndex, req, callback) {
 
 	var getTagsQuery = 'SELECT * from tags WHERE document = ' + docIndex;
 
@@ -278,14 +278,22 @@ function updateTagged(taggedIds, docIndex, callback) {
 
 										var newTags = [];
 
-										for (rowIndex in rows) {
+										console.log("Tags after edit: "
+												+ JSON.stringify(taggedIds));
 
-											var row = rows[rowIndex];
+										for (tagsIndex in taggedIds) {
 
 											var found = false;
-											for (tagsIndex in taggedIds) {
+											for (rowIndex in rows) {
+
+												var row = rows[rowIndex];
 
 												if (taggedIds[tagsIndex] == row['node']) {
+
+													console
+															.log("Tag "
+																	+ taggedIds[tagsIndex]
+																	+ " found");
 
 													found = true;
 													break;
@@ -294,9 +302,13 @@ function updateTagged(taggedIds, docIndex, callback) {
 
 											if (!found) {
 
-												newTags.push(row['node']);
+												newTags
+														.push(taggedIds[tagsIndex]);
 											}
 										}
+
+										console.log("New tags: "
+												+ JSON.stringify(newTags));
 
 										var multipleInsertQuery = "INSERT INTO tags (document, node, position) VALUES ";
 
@@ -318,7 +330,7 @@ function updateTagged(taggedIds, docIndex, callback) {
 
 													connection
 															.query(
-																	insertQuery,
+																	multipleInsertQuery,
 																	function(
 																			err,
 																			rows) {
@@ -391,9 +403,11 @@ exports.update = function(req, res) {
 
 						if (req.query.tagged) {
 
+							console.log(req.query.tagged);
 							var taggedIds = JSON.parse(req.query.tagged);
 
-							updateTagged(taggedIds, index, function(inserted) {
+							updateTagged(taggedIds, index, req, function(
+									inserted) {
 
 								if (inserted == 1) {
 
@@ -440,6 +454,31 @@ exports.update = function(req, res) {
 				}
 			});
 		});
+	} else {
+
+		if (req.query.tagged) {
+
+			var taggedIds = JSON.parse(req.query.tagged);
+
+			updateTagged(taggedIds, index, req, function(inserted) {
+
+				if (inserted == 1) {
+
+					console.log("Document " + index + " updated");
+
+					res.status(OK).json('result', {
+						"msg" : "Document " + index + " updated"
+					});
+				} else {
+
+					console.log("Document " + index + " not updated");
+
+					res.status(NOK).json('result', {
+						"msg" : "Document " + index + " not updated"
+					});
+				}
+			});
+		}
 	}
 
 };
