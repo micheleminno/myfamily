@@ -324,7 +324,7 @@ $('#updateDocument').click(
 
 			var id = $('#edit-docId').text();
 			var title = $('#edit-title').val();
-			var date = $('#edit-date').val();
+			var date = $('#edit-date').val() + " 00:00:00";
 
 			var tagged = [];
 
@@ -792,7 +792,8 @@ var onDocumentMenu = [
 												.text(data.document.file);
 										$('#edit-title').val(
 												data.document.title);
-										$('#edit-date').val(data.document.date);
+										
+										$('#edit-date').val(getFormattedDate(data.document.date));
 
 										$('#editDocumentModal').modal('show');
 									}

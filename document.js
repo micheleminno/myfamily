@@ -437,7 +437,9 @@ exports.update = function(req, res) {
 	var dateQuerySegment = '';
 	if (req.query.date) {
 
-		dateQuerySegment = 'date = ' + req.query.date;
+		dateQuerySegment = "date = STR_TO_DATE('" + req.query.date
+				+ "', GET_FORMAT(DATETIME, 'JIS'))";
+
 	} else {
 
 		separator = '';

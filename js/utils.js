@@ -17,6 +17,18 @@ function getDate(dateString) {
 	}
 }
 
+function getFormattedDate(dateString) {
+
+	if (!dateString || dateString == '') {
+
+		return "";
+	} else {
+		// yyyy-mm-dd
+		var originalFormat = dateString.substring(0, dateString.indexOf('T'));
+		return originalFormat;
+	}
+}
+
 function wrap(text, width) {
 	text
 			.each(function() {
