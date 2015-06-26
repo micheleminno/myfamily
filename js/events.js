@@ -336,7 +336,14 @@ $('#updateDocument').click(
 
 			var url = serverUrl + '/documents/' + id + '/update?title=' + title
 					+ '&date=' + date + '&tagged=' + JSON.stringify(tagged);
-			$.get(url);
+			$.get(url, function() {
+
+				var nodeId = $('#edit-nodeId').text();
+				if (tagged.indexOf(nodeId) == -1) {
+
+					removeDocument(id);
+				}
+			});
 		});
 
 var nodeIdToUpdate;
@@ -680,10 +687,19 @@ function fillTaggedPersons(nodes, mode) {
 				&& !isAlreadyTagged(node.originalId, '#' + mode + '-taggedArea')) {
 
 			$('#' + mode + '-taggedPersons').append(
-					'<li id="' + node.id + '"><a href="#">' + node.label
-							+ '</a></li>');
+					'<li id="' + node.originalId + '"><a href="#">'
+							+ node.label + '</a></li>');
 		}
 	}
+
+	$('#' + mode + '-taggedArea li a').click(function() {
+
+		personId = $(this).attr('id');
+
+		$('#' + mode + '-taggedArea li#' + personId.slice(-1)).remove();
+
+		fillTaggedPersons(nodes, mode);
+	});
 
 	$('#' + mode + '-taggedPersons li')
 			.on(
@@ -764,18 +780,12 @@ var onDocumentMenu = [
 											}
 										}
 
-										$('#edit-taggedArea li a').click(
-												function() {
-
-													fillTaggedPersons(nodes,
-															'edit');
-													$(
-															'#edit-taggedArea '
-																	+ personId)
-															.remove();
-												});
-
 										fillTaggedPersons(nodes, 'edit');
+
+										if (d) {
+											$('#edit-nodeId')
+													.text(d.originalId);
+										}
 
 										$('#edit-docId').text(data.document.id);
 										$('#edit-file')
