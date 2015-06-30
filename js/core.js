@@ -13,57 +13,53 @@ var selectedViewLabel = 'Extended family';
 var userId = 3;
 var userLabel = "Michele Minno";
 
-$('#login-expandable').on(
+$('#login-expandable').on('click', function() {
+
+	$(this).after($('#login-form'));
+	$('#login-form').show();
+});
+
+$('#submit-login').on(
 		'click',
 		function() {
 
-			$(this).after($('#login-form'));
-			$('#login-form').show();
-			$('#submit-login').on(
-					'click',
-					function() {
+			userLabel = $('#login-user').val();
+			$('#login-user').val('');
+			var newUser = $('#new-user').is(':checked');
 
-						userLabel = $('#login-user').val();
-						$('#login-user').val('');
-						var newUser = $('#new-user').is(':checked');
+			$.get(serverUrl + "/graph/namesakes?name=" + userLabel, function(
+					namesakes) {
 
-						$.get(serverUrl + "/graph/namesakes?name=" + userLabel,
-								function(namesakes) {
+				if (namesakes.length > 0) {
 
-									if (namesakes.length > 0) {
+					userId = namesakes[0]['id'];
 
-										userId = namesakes[0]['id'];
+					drawTree(userId, userLabel, selectedViewId,
+							selectedViewLabel);
 
-										drawTree(userId, userLabel,
-												selectedViewId,
-												selectedViewLabel);
+				} else if (newUser) {
 
-									} else if (newUser) {
+					$.get(serverUrl + '/graph/addPerson?name=' + userLabel,
+							function(data) {
 
-										$.get(serverUrl
-												+ '/graph/addPerson?name='
-												+ userLabel, function(data) {
+								userId = data.personId;
+								drawTree(userId, userLabel, selectedViewId,
+										selectedViewLabel);
+							});
 
-											userId = data.personId;
-											drawTree(userId, userLabel,
-													selectedViewId,
-													selectedViewLabel);
-										});
-
-									}
-
-									$('#login-form').hide();
-									$('#login-expandable').dropdown('toggle');
-								});
-					});
-
-			$('#cancel-login').on('click', function() {
+				}
 
 				$('#login-form').hide();
 				$('#login-expandable').dropdown('toggle');
-
 			});
 		});
+
+$('#cancel-login').on('click', function() {
+
+	$('#login-form').hide();
+	$('#login-expandable').dropdown('toggle');
+
+});
 
 $('#view li').on('click', function() {
 
@@ -214,25 +210,35 @@ function drawTree(userId, userLabel, viewId, viewLabel) {
 													.contextMenu(onPersonMenu));
 										}
 
-										currentNode.append("circle").attr(
-												"class", function(d) {
-													if (d.label == userLabel) {
-														return "my-node";
-													} else if (d.acquired) {
-														return "node acquired";
-													} else if (d.leaf) {
-														return "node leaf";
-													} else {
-														return "node";
-													}
-												}).attr("r", function(d) {
+										currentNode
+												.append("circle")
+												.attr(
+														"class",
+														function(d) {
+															if (d.label
+																	.toUpperCase() == userLabel
+																	.toUpperCase()) {
+																return "my-node";
+															} else if (d.acquired) {
+																return "node acquired";
+															} else if (d.leaf) {
+																return "node leaf";
+															} else {
+																return "node";
+															}
+														})
+												.attr(
+														"r",
+														function(d) {
 
-											if (d.label == userLabel) {
-												return (125 / d.level) * 1.5;
-											} else {
-												return 125 / d.level;
-											}
-										});
+															if (d.label
+																	.toUpperCase() == userLabel
+																	.toUpperCase()) {
+																return (125 / d.level) * 1.5;
+															} else {
+																return 125 / d.level;
+															}
+														});
 
 										currentNode
 												.append("image")

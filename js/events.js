@@ -8,22 +8,38 @@ function makeEditable(d) {
 			"click",
 			function(d) {
 
+				var oldName = d.label;
 				var result = prompt('Enter a new name', d.name);
 
 				if (result) {
 
-					d.label = result;
-					var selection = d3.select(this);
-					var label = selection[0][0];
-					label.textContent = result;
-
 					var node = d3.select(this.parentNode.parentNode);
 					var selection = node.selectAll(".nodeLabel");
-					var label = selection[0][0];
-					label.textContent = result;
 
-					$.get(serverUrl + "/" + userId + '/graph/update/'
-							+ d.originalId + '?field=label&value=' + result);
+					if (selection[0].length == 0
+							&& node.selectAll(".my-nodeLabel")) {
+
+						alert("Change your name from the setting menu");
+
+						selection = node.selectAll(".my-nodeLabel");
+						var label = selection[0][0];
+						label.textContent = oldName;
+
+					} else {
+
+						var label = selection[0][0];
+						label.textContent = result;
+
+						d.label = result;
+						var selection = d3.select(this);
+						var label = selection[0][0];
+						label.textContent = result;
+
+						$
+								.get(serverUrl + "/" + userId
+										+ '/graph/update/' + d.originalId
+										+ '?field=label&value=' + result);
+					}
 				}
 
 				d3.event.stopPropagation();
@@ -137,6 +153,7 @@ function profileMouseouted(d) {
 function thumbnailClicked(d) {
 
 	svg.selectAll(".docText").remove();
+	svg.selectAll(".docText-small").remove();
 	svg.selectAll(".zoomedDoc").remove();
 	svg.selectAll(".frame").remove();
 
@@ -156,19 +173,20 @@ function thumbnailClicked(d) {
 
 		parent.append("rect").attr("class", "frame").attr("width", 1205).attr(
 				"height", 1014).attr("xlink:href", doc.href.baseVal).attr("x",
-				997.5).attr("y", -102);
+				997.5).attr("y", -182);
 		parent.append("image").attr("class", "zoomedDoc").moveToFront().attr(
-				"width", 1200).attr("height", 1000).attr("xlink:href",
-				doc.href.baseVal).attr("x", 1000).attr("y", -100);
+				"width", 1200).attr("height", 1010).attr("xlink:href",
+				doc.href.baseVal).attr("x", 1000).attr("y", -180);
 
-		parent.append("text").attr("class", "docText").attr("x", 1850).attr(
-				"y", 1000).text(doc.attributes.title.nodeValue);
+		parent.append("text").attr("class", "docText").attr("x", 1800).attr(
+				"y", 900).text(doc.attributes.title.nodeValue);
 
-		parent.append("text").attr("class", "docText").attr("x", 1850).attr(
-				"y", 1100).text(doc.attributes.date.nodeValue);
+		parent.append("text").attr("class", "docText-small").attr("x", 1800)
+				.attr("y", 1000).text(
+						"(on " + doc.attributes.date.nodeValue + ")");
 
 		parent.append("text").attr("class", "closeDoc").attr("x", 2125).attr(
-				"y", -130).text("[close]").attr("cursor", "pointer").on(
+				"y", -220).text("[close]").attr("cursor", "pointer").on(
 				"click", closeDocClicked);
 	}
 
@@ -182,6 +200,7 @@ function docClicked(d) {
 	}
 
 	svg.selectAll(".docText").remove();
+	svg.selectAll(".docText-small").remove();
 	svg.selectAll(".zoomedDoc").remove();
 
 	var selection = d3.select(this);
@@ -197,20 +216,21 @@ function docClicked(d) {
 	} else {
 
 		grandParent.append("rect").attr("class", "frame").attr("width", 1205)
-				.attr("height", 1204).attr("xlink:href", doc.href.baseVal)
-				.attr("x", 997.5).attr("y", -202).on("click", zoomedDocClicked)
+				.attr("height", 1014).attr("xlink:href", doc.href.baseVal)
+				.attr("x", 997.5).attr("y", -182).on("click", zoomedDocClicked)
 				.attr("cursor", "auto");
 
 		grandParent.append("image").attr("class", "zoomedDoc").moveToFront()
-				.attr("width", 1200).attr("height", 1200).attr("xlink:href",
-						doc.href.baseVal).attr("x", 1000).attr("y", -200).on(
+				.attr("width", 1200).attr("height", 1010).attr("xlink:href",
+						doc.href.baseVal).attr("x", 1000).attr("y", -180).on(
 						"click", zoomedDocClicked).attr("cursor", "auto");
 
-		grandParent.append("text").attr("class", "docText").attr("x", 1850)
-				.attr("y", 1120).text(doc.attributes.title.nodeValue);
-
 		grandParent.append("text").attr("class", "docText").attr("x", 1800)
-				.attr("y", 1050).text(doc.attributes.date.nodeValue);
+				.attr("y", 900).text(doc.attributes.title.nodeValue);
+
+		grandParent.append("text").attr("class", "docText-small").attr("x",
+				1800).attr("y", 1000).text(
+				"(on " + doc.attributes.date.nodeValue + ")");
 
 		grandParent.append("text").attr("class", "closeDoc").attr("x", 2125)
 				.attr("y", -220).text("[close]").attr("cursor", "pointer").on(
@@ -226,6 +246,7 @@ function closeDocClicked() {
 	svg.selectAll(".zoomedDoc").remove();
 	svg.selectAll(".frame").remove();
 	svg.selectAll(".docText").remove();
+	svg.selectAll(".docText-small").remove();
 	svg.selectAll(".closeDoc").remove();
 
 	d3.event.stopPropagation();
@@ -324,7 +345,7 @@ $('#updateDocument').click(
 
 			var id = $('#edit-docId').text();
 			var title = $('#edit-title').val();
-			var date = $('#edit-date').val() + " 00:00:00";
+			var date = $('#edit-date').val() + " 12:00:00";
 
 			var tagged = [];
 
@@ -339,7 +360,7 @@ $('#updateDocument').click(
 			$.get(url, function() {
 
 				var nodeId = $('#edit-nodeId').text();
-				if (tagged.indexOf(nodeId) == -1) {
+				if (tagged.indexOf(nodeId) > -1) {
 
 					removeDocument(id);
 				}
@@ -792,8 +813,10 @@ var onDocumentMenu = [
 												.text(data.document.file);
 										$('#edit-title').val(
 												data.document.title);
-										
-										$('#edit-date').val(getFormattedDate(data.document.date));
+
+										$('#edit-date')
+												.val(
+														getFormattedDate(data.document.date));
 
 										$('#editDocumentModal').modal('show');
 									}

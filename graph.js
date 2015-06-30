@@ -342,7 +342,8 @@ function inExtendedFamily(history) {
 function addMembers(asChild, nodeIndex, familyIndex, viewIndex, graph, history,
 		req, callback) {
 
-	var memberType = viewIndex == 4 ? 'any' : 'parent';
+	var memberType = viewIndex == 4 ? 'any' : viewIndex == 3 ? 'child'
+			: 'parent';
 
 	getFamilyMembers(familyIndex, nodeIndex, memberType, graph, req, function(
 			graphView) {
@@ -424,12 +425,13 @@ function addExtendedFamilyLevel(nodeIndex, viewIndex, graph, history, req,
 
 	getFamilyIndexes(nodeIndex, mode, req, function(familyIndexes) {
 
-		// NodeIndex as a child
+		// Exploring parents of nodeIndex as a child
 
 		addMembers(true, nodeIndex, familyIndexes[0], viewIndex, graph,
 				history, req, function(graph, history) {
 
-					// NodeIndex as a parent
+					// Exploring children of nodeIndex as a parent
+
 					addMembers(false, nodeIndex, familyIndexes[1], viewIndex,
 							graph, history, req, function(graph, history) {
 
