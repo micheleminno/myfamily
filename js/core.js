@@ -2,9 +2,9 @@ var serverUrl = 'http://localhost:8091';
 var siteUrl = 'http://localhost/myfamily';
 
 // var serverUrl =
-// 'http://ec2-54-72-121-42.eu-west-1.compute.amazonaws.com:8090';
+// 'http://ec2-54-72-121-42.eu-west-1.compute.amazonaws.com:8091';
 // var siteUrl =
-// 'http://ec2-54-72-121-42.eu-west-1.compute.amazonaws.com/familygraph.me';
+// 'http://ec2-54-72-121-42.eu-west-1.compute.amazonaws.com/myfamily';
 
 var selectedViewId = 4;
 var selectedViewLabel = 'Extended family';
