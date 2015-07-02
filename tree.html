@@ -59,7 +59,16 @@
 					<!-- <button type="submit" class="btn btn-default">Submit</button> -->
 				</form>
 				<ul class="nav navbar-nav navbar-right">
+
 					<li><a href="mockup/upload.pdf">Upload</a></li>
+
+					<li class="dropdown"><a href="#" id="notifications"
+						class="dropdown-toggle" data-toggle="dropdown" role="button"
+						aria-expanded="false"> Notifications <span
+							class="caret myCaret"></span></a>
+						<ul class="dropdown-menu" role="menu">
+						</ul></li>
+
 					<li class="dropdown"><a href="#" id="logged-user"
 						class="dropdown-toggle" data-toggle="dropdown" role="button"
 						aria-expanded="false"> </a>
@@ -83,9 +92,9 @@
 
 	<form id="login-form" hidden class="navbar-form navbar-right">
 		<div class="form-group">
-			<input type="checkbox" style="margin-bottom: 8px" id="new-user" value="new-user"> New
-			user<br> <input id="login-user"  type="text" class="form-control"
-				placeholder="Name">
+			<input type="checkbox" style="margin-bottom: 8px" id="new-user"
+				value="new-user"> New user<br> <input id="login-user"
+				type="text" class="form-control" placeholder="Name">
 		</div>
 		<button id="submit-login" style="margin-top: 25px" type="submit"
 			class="btn btn-default">Login</button>
@@ -163,7 +172,7 @@
 			</div>
 		</div>
 	</div>
-	
+
 	<div id="editDocumentModal" class="modal fade" tabindex="-1"
 		role="dialog" aria-labelledby="addDocumentModalLabel">
 		<div class="modal-dialog" role="document">

@@ -161,6 +161,8 @@ function thumbnailClicked(d) {
 
 	var parent = d3.select(this.parentNode);
 
+	parent.moveToFront();
+
 	var doc = selection[0][0];
 
 	if (doc.attributes.url.nodeValue.substr(-4) === ".pdf") {
@@ -206,6 +208,8 @@ function docClicked(d) {
 	var selection = d3.select(this);
 
 	var grandParent = d3.select(this.parentNode.parentNode);
+
+	grandParent.moveToFront();
 
 	var doc = selection[0][0];
 
@@ -320,6 +324,10 @@ $('#uploadDocument').click(
 									+ '/updatePosition?node=' + tagged[0]
 									+ '&x=' + addedDoc.position.x + '&y='
 									+ addedDoc.position.y);
+
+					// register event
+					$.get(serverUrl + '/events/add/document/' + addedDoc.id
+							+ "?type=creation");
 
 					documentPosition = [];
 
@@ -544,8 +552,8 @@ function clickNode(d) {
 
 	onDetail = true;
 
-	var selectedNode = d3.select(this.parentNode).moveToFront().append("g")
-			.attr("class", "selection").style("pointer-events", "click");
+	var selectedNode = d3.select(this).moveToFront().append("g").attr("class",
+			"selection").style("pointer-events", "click");
 
 	var centerX = width / 10;
 	var centerY = height / 1.7;
@@ -681,6 +689,9 @@ function removeDocument(docId) {
 		return id == docId;
 
 	}).remove();
+
+	// register event
+	$.get(serverUrl + '/events/add/document/' + docId + "?type=removal");
 
 	redrawStream();
 };

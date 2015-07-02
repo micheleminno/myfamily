@@ -54,6 +54,10 @@ $('#submit-login').on(
 			});
 		});
 
+// TODO: Populate notifications: get all events about nodes or docs in this user
+// view who are not already read by this
+// user
+
 $('#cancel-login').on('click', function() {
 
 	$('#login-form').hide();
@@ -254,15 +258,20 @@ function drawTree(userId, userLabel, viewId, viewLabel) {
 																+ d.originalId
 																+ ")");
 
-										currentNode.append("text").attr(
-												"class", function(d) {
-													if (d.label == userLabel) {
-														return "my-nodeLabel";
-													} else {
-														return "nodeLabel";
-													}
-												}).attr("dy", "1.5em").text(
-												function(d) {
+										currentNode
+												.append("text")
+												.attr(
+														"class",
+														function(d) {
+															if (d.label
+																	.toUpperCase() == userLabel
+																	.toUpperCase()) {
+																return "my-nodeLabel";
+															} else {
+																return "nodeLabel";
+															}
+														}).attr("dy", "1.5em")
+												.text(function(d) {
 													return d.label;
 												}).call(makeEditable);
 									} else {

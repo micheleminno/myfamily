@@ -8,6 +8,7 @@ var bodyParser = require('body-parser');
 var document = require('./document.js');
 var graph = require('./graph.js');
 var view = require('./view.js');
+var event = require('./event.js');
 
 var app = express();
 
@@ -93,3 +94,6 @@ app.get('/graph/addPerson', graph.addPerson);
 
 // Views
 app.get('/:user/view/:view/update', view.updateNode);
+
+//Events
+app.get('/events/add/:entityType/:entityId', event.add);
