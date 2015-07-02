@@ -100,7 +100,7 @@
 
 .node--tagged circle {
 	opacity: 1;
-	fill: yellow;
+	stroke: yellow;
 }
 
 .profile-image {
