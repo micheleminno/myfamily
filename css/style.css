@@ -98,7 +98,7 @@
 	font-weight: bold;
 }
 
-.node--tagged circle {
+.node--tagged .node {
 	opacity: 1;
 	stroke: yellow;
 }

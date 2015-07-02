@@ -196,7 +196,7 @@ function drawTree(userId, userLabel, viewId, viewLabel) {
 						node
 								.each(function(d) {
 
-									currentNode = d3.select(this).append("g");
+									currentNode = d3.select(this);
 
 									currentNode.call(nodeDrag);
 

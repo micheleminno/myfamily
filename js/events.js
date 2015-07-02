@@ -567,15 +567,14 @@ function clickNode(d) {
 			.attr('class', "profile-frame").attr("x", centerX - 155).attr("y",
 					-10);
 
+	var imagePath = d.img == "" ? "./docs/default_profile.jpg" : "./docs/"
+			+ d.img;
+
 	profileContainer.append("image").attr("width", 200).attr("height", 200)
 			.attr('class', "profile-image--selected").attr("x", centerX - 145)
-			.attr("y", 0).attr(
-					"xlink:href",
-					function(d) {
-						return d.img == "" ? "./docs/default_profile.jpg"
-								: "./docs/" + d.img;
-					}).on("click", profileImageClicked).attr("cursor", "auto")
-			.append("title").text("Click to upload a new profile image");
+			.attr("y", 0).attr("xlink:href", imagePath).on("click",
+					profileImageClicked).attr("cursor", "auto").append("title")
+			.text("Click to upload a new profile image");
 
 	selectedNode.append("text").attr('class', "label--selected").attr("y", -50)
 			.attr("x", centerX - 230).text(d.label).call(makeEditable);
