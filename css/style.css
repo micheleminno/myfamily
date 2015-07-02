@@ -20,28 +20,31 @@
 
 .node {
 	cursor: url(../img/move-Hand.png) 17.5 5, pointer;
+	stroke-width: 20px;
+	opacity: .7;
+}
+
+.core {
 	stroke: brown;
 	fill: brown;
-	stroke-width: 1.5px;
-	opacity: .4;
+	opacity: .7;
 }
 
 .leaf {
+	stroke: green;
 	fill: green;
 	opacity: .7;
 }
 
 .acquired {
-	stroke: brown;
+	stroke: blue;
 	fill: blue;
 	opacity: .2;
 }
 
-.my-node {
-	cursor: url(../img/move-Hand.png) 17.5 5, pointer;
-	stroke: black;
+.me {
+	stroke: red;
 	fill: red;
-	stroke-width: 6px;
 	opacity: .8;
 }
 

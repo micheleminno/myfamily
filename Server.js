@@ -55,7 +55,7 @@ app.listen(8091, function() {
 
 app.get('/', function(req, res) {
 
-	res.sendfile('myfamily/index.html');
+	res.sendfile('index.html');
 });
 
 // Documents

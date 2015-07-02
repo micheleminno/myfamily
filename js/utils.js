@@ -6,6 +6,44 @@ d3.selection.prototype.moveToFront = function() {
 	});
 };
 
+function getCircleSize(d) {
+
+	var circleSize;
+
+	if (d.label.toUpperCase() == userLabel.toUpperCase()) {
+
+		circleSize = (125 / d.level) * 1.5;
+
+	} else {
+
+		circleSize = 125 / d.level;
+	}
+
+	return circleSize;
+}
+
+function getNodeClass(d, userLabel) {
+
+	if (d.label.toUpperCase() == userLabel.toUpperCase()) {
+
+		nodeClass = "node me";
+
+	} else if (d.acquired) {
+
+		nodeClass = "node acquired";
+
+	} else if (d.leaf) {
+
+		nodeClass = "node leaf";
+
+	} else {
+
+		nodeClass = "node core";
+	}
+
+	return nodeClass;
+}
+
 function getDate(dateString) {
 
 	if (!dateString || dateString == '') {

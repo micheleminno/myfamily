@@ -210,38 +210,32 @@ function drawTree(userId, userLabel, viewId, viewLabel) {
 													.contextMenu(onPersonMenu));
 										}
 
-										currentNode
-												.append("circle")
-												.attr(
-														"class",
-														function(d) {
-															if (d.label
-																	.toUpperCase() == userLabel
-																	.toUpperCase()) {
-																return "my-node";
-															} else if (d.acquired) {
-																return "node acquired";
-															} else if (d.leaf) {
-																return "node leaf";
-															} else {
-																return "node";
-															}
-														})
-												.attr(
-														"r",
-														function(d) {
+										var defs = currentNode
+												.append('svg:defs');
 
-															if (d.label
-																	.toUpperCase() == userLabel
-																	.toUpperCase()) {
-																return (125 / d.level) * 1.5;
-															} else {
-																return 125 / d.level;
-															}
-														});
+										clipPath = defs.append("svg:clipPath")
+												.attr(
+														"id",
+														"clipPath_"
+																+ d.originalId);
+
+										var circleSize = getCircleSize(d);
+										var nodeClass = getNodeClass(d,
+												userLabel);
+
+										clipPath.append("circle").attr("class",
+												nodeClass)
+												.attr("r", circleSize).attr(
+														"id",
+														"circle_"
+																+ d.originalId);
+
+										currentNode.append("svg:use").attr(
+												"xlink:href",
+												"#" + "circle_" + d.originalId);
 
 										currentNode
-												.append("image")
+												.append("svg:image")
 												.attr("class", "profile-image")
 												.attr(
 														"xlink:href",
@@ -249,8 +243,16 @@ function drawTree(userId, userLabel, viewId, viewLabel) {
 															return d.img == "" ? "./docs/default_profile.jpg"
 																	: "./docs/"
 																			+ d.img;
-														}).attr("width", 40)
-												.attr("height", 40);
+														}).attr("width",
+														circleSize * 2).attr(
+														"height",
+														circleSize * 2).attr(
+														"x", 0).attr("y", 0)
+												.attr(
+														"clip-path",
+														"url(#clipPath_"
+																+ d.originalId
+																+ ")");
 
 										currentNode.append("text").attr(
 												"class", function(d) {
@@ -445,28 +447,22 @@ function tick() {
 		return d.y;
 	});
 
-	node.selectAll(".my-node").attr("cx", function(d) {
-		return d.x;
-	}).attr("cy", function(d) {
-		return d.y;
-	});
-
 	node.selectAll(".nodeLabel").attr("x", function(d) {
 		return d.x - 25;
 	}).attr("y", function(d) {
-		return d.y + 35;
+		return d.y + getCircleSize(d);
 	});
 
 	node.selectAll(".my-nodeLabel").attr("x", function(d) {
 		return d.x - 45;
 	}).attr("y", function(d) {
-		return d.y + 35;
+		return d.y + getCircleSize(d);
 	});
 
 	node.selectAll(".profile-image").attr("x", function(d) {
-		return d.x - 20;
+		return d.x - getCircleSize(d);
 	}).attr("y", function(d) {
-		return d.y - 20;
+		return d.y - getCircleSize(d);
 	});
 
 	node.selectAll("ellipse").attr("cx", function(d) {
