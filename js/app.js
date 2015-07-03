@@ -1,4 +1,4 @@
-var app = angular.module('main', [ 'ngRoute', 'd3', 'controllers' ]);
+var app = angular.module('main', [ 'ngRoute', 'controllers' ]);
 
 app.config([ '$routeProvider', function($routeProvider) {
 
@@ -28,36 +28,33 @@ app.directive('ngEnter', function() {
 	};
 });
 
-app.directive('d3Tree', [ '$window', '$timeout', 'd3Service',
-		function($window, $timeout, d3Service) {
+app.directive('d3Tree', [ '$window', '$timeout', function($window, $timeout) {
 
-			return {
+	return {
 
-				restrict : 'A',
+		restrict : 'A',
 
-				scope : {},
-				link : function(scope, element, attrs) {
+		scope : {},
+		link : function(scope, element, attrs) {
 
-					d3Service.d3().then(function(d3) {
-
-						// Browser onresize
-						// event
-						window.onresize = function() {
-							scope.$apply();
-						};
-
-						// Watch for resize
-						// event
-						scope.$watch(function() {
-							return angular.element($window)[0].innerWidth;
-						}, function() {
-							
-							scope.render(scope.data);
-						});
-						
-						scope.render = treeRender;
-					});
-				}
+			// Browser onresize
+			// event
+			window.onresize = function() {
+				scope.$apply();
 			};
 
-		} ]);
+			// Watch for resize
+			// event
+			scope.$watch(function() {
+				return angular.element($window)[0].innerWidth;
+			}, function() {
+
+				scope.render(scope.data);
+			});
+
+			scope.render = treeRender;
+
+		}
+	};
+
+} ]);
