@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+
+<html data-ng-app="main">
+
+<head>
+
+<title>My Family</title>
+<meta charset="UTF-8" />
+
+<link href="lib/bootstrap.min.css" rel="stylesheet">
+<link href="lib/d3-context-menu.css" rel="stylesheet">
+
+<link href="css/style.css" rel="stylesheet">
+
+<link rel="shortcut icon" href="img/favicon.ico" type="image/x-icon" />
+
+
+<script src="lib/jquery.js"></script>
+<script src="lib/angular.js"></script>
+<script src="lib/angular-route.js"></script>
+
+<script src="lib/bootstrap.js"></script>
+
+<script src="js/app.js" charset="utf-8"></script>
+<script src="js/tree-render.js" charset="utf-8"></script>
+<script src="js/controllers.js" charset="utf-8"></script>
+<script src="js/myfamily-service.js"></script>
+<script src="js/d3-service.js"></script>
+
+</head>
+
+<body>
+
+	<div class="view-container">
+		<div ng-view class="view-frame"></div>
+	</div>
+
+</body>
+
+</html>

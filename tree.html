@@ -1,238 +1,208 @@
-<html>
 
-<head>
+<nav class="navbar navbar-default">
+	<div class="container-fluid">
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle collapsed"
+				data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+				<span class="sr-only">Toggle navigation</span> <span
+					class="icon-bar"></span> <span class="icon-bar"></span> <span
+					class="icon-bar"></span>
+			</button>
+			<a class="navbar-brand" href="#"> <img class="logo" alt="Brand"
+				src="img/logo.png">
+			</a>
+		</div>
 
-<title>My Family</title>
-<meta charset="UTF-8" />
-
-<link href="lib/bootstrap.min.css" rel="stylesheet">
-<link href="lib/d3-context-menu.css" rel="stylesheet">
-
-<link href="css/style.css" rel="stylesheet">
-
-<link rel="shortcut icon" href="img/favicon.ico" type="image/x-icon" />
-
-
-</head>
-
-
-
-<body>
-
-	<nav class="navbar navbar-default">
-		<div class="container-fluid">
-			<div class="navbar-header">
-				<button type="button" class="navbar-toggle collapsed"
-					data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
-					<span class="sr-only">Toggle navigation</span> <span
-						class="icon-bar"></span> <span class="icon-bar"></span> <span
-						class="icon-bar"></span>
-				</button>
-				<a class="navbar-brand" href="#"> <img class="logo" alt="Brand"
-					src="img/logo.png">
+		<div class="collapse navbar-collapse"
+			id="bs-example-navbar-collapse-1">
+			<ul class="nav navbar-nav">
+				<li class="active"><a href="#">Tree <span class="sr-only">(current)</span></a></li>
+				<li class="dropdown"><a id="view-mode" href="#"
+					class="dropdown-toggle" data-toggle="dropdown" role="button"
+					aria-expanded="false"> <span class="caret"></span>
 				</a>
-			</div>
+					<ul id="view" class="dropdown-menu" role="menu">
+						<li id=0><a href="#">Family as a child</a></li>
+						<li id=1><a href="#">Family as a parent</a></li>
+						<li id=2><a href="#">Pedigree</a></li>
+						<li id=3><a href="#">Descendants</a></li>
+						<li id=4 class="active"><a href="#">Extended family</a></li>
+						<li class="divider"></li>
+						<li><a href="#">Custom view</a></li>
+					</ul></li>
+				<li><a href="mockup/memory.pdf">Explore</a></li>
+			</ul>
+			<form class="navbar-form navbar-left" role="search">
+				<div class="form-group">
+					<input type="text" class="form-control" placeholder="Search">
+				</div>
+				<!-- <button type="submit" class="btn btn-default">Submit</button> -->
+			</form>
+			<ul class="nav navbar-nav navbar-right">
 
-			<div class="collapse navbar-collapse"
-				id="bs-example-navbar-collapse-1">
-				<ul class="nav navbar-nav">
-					<li class="active"><a href="#">Tree <span class="sr-only">(current)</span></a></li>
-					<li class="dropdown"><a id="view-mode" href="#"
-						class="dropdown-toggle" data-toggle="dropdown" role="button"
-						aria-expanded="false"> <span class="caret"></span>
-					</a>
-						<ul id="view" class="dropdown-menu" role="menu">
-							<li id=0><a href="#">Family as a child</a></li>
-							<li id=1><a href="#">Family as a parent</a></li>
-							<li id=2><a href="#">Pedigree</a></li>
-							<li id=3><a href="#">Descendants</a></li>
-							<li id=4 class="active"><a href="#">Extended family</a></li>
-							<li class="divider"></li>
-							<li><a href="#">Custom view</a></li>
-						</ul></li>
-					<li><a href="mockup/memory.pdf">Explore</a></li>
-				</ul>
-				<form class="navbar-form navbar-left" role="search">
-					<div class="form-group">
-						<input type="text" class="form-control" placeholder="Search">
-					</div>
-					<!-- <button type="submit" class="btn btn-default">Submit</button> -->
+				<li><a href="mockup/upload.pdf">Upload</a></li>
+
+				<li class="dropdown"><a href="#" id="notifications"
+					class="dropdown-toggle" data-toggle="dropdown" role="button"
+					aria-expanded="false"> Notifications <span
+						class="caret myCaret"></span></a>
+					<ul class="dropdown-menu" role="menu" id="notifications-list">
+					</ul></li>
+
+				<li class="dropdown"><a href="#" id="logged-user"
+					class="dropdown-toggle" data-toggle="dropdown" role="button"
+					aria-expanded="false"> </a>
+					<ul class="dropdown-menu" role="menu">
+						<li><a href="mockup/profile.pdf">Profile</a></li>
+						<li><a href="#">Settings</a></li>
+						<li class="divider"></li>
+						<li><a href="#">Logout</a></li>
+					</ul></li>
+
+				<li id="login-dropdown" class="dropdown"><a href=""
+					id="login-expandable" class="dropdown-toggle"
+					data-toggle="dropdown" role="button" aria-expanded="false"
+					ng-click="showLogin = true;">Login as<span
+						class="caret myCaret"></span>
+				</a></li>
+			</ul>
+		</div>
+	</div>
+</nav>
+
+
+<form id="login-form" ng-init="showLogin = false" ng-show=showLogin
+	class="navbar-form navbar-right">
+	<div class="form-group">
+		<input type="checkbox" style="margin-bottom: 8px" id="new-user"
+			value="new-user" ng-model="isNewUser"> New user<br> <input id="login-user"
+			type="text" class="form-control" placeholder="Name" ng-model="loggedUser.name">
+	</div>
+	<button id="submit-login" style="margin-top: 25px" type="submit"
+		class="btn btn-default" ng-click="login()">Login</button>
+	<button id="cancel-login" style="margin-top: 25px" type="submit"
+		class="btn btn-default" ng-click="showLogin = false">Cancel</button>
+</form>
+
+<div d3-tree></div>
+
+
+<iframe id="upload_target" name="upload_target" src="#"
+	style="display: none;"></iframe>
+
+<form target="upload_target" style="display: none"
+	id="uploadProfileImageForm" enctype="multipart/form-data" method="post">
+	<input type="file" id="profile-img-upload" name="profile-img-upload" />
+</form>
+
+<div id="addDocumentModal" class="modal fade" tabindex="-1"
+	role="dialog" aria-labelledby="addDocumentModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"
+					aria-hidden="true">×</button>
+				<h3 id="addDocumentModalLabel">Upload a document</h3>
+			</div>
+			<div class="modal-body">
+
+				<h4>Select document in your local disk</h4>
+				<iframe id="upload_target" name="upload_target" src="#"
+					style="display: none;"></iframe>
+
+				<form target="upload_target" id="uploadDocumentForm"
+					enctype="multipart/form-data" method="post">
+					<input type="file" id="document-upload" name="document-upload" />
 				</form>
-				<ul class="nav navbar-nav navbar-right">
 
-					<li><a href="mockup/upload.pdf">Upload</a></li>
+				<h4 style="margin-top: 30px">Info</h4>
+				<div style="display: inline-block">
+					<p style="display: inline; margin-right: 20px">Title:</p>
+					<input type="text" id="title" name="title">
+				</div>
+				<div style="margin-bottom: 10px"></div>
+				<div style="display: inline-block">
+					<p style="display: inline; margin-right: 20px">Date:</p>
+					<input type="date" id="date" name="date">
+				</div>
+				<div style="margin-bottom: 20px"></div>
+				<div id="tagged" style="display: inline-block">
+					<p style="display: inline; margin-right: 20px">Persons tagged:</p>
 
-					<li class="dropdown"><a href="#" id="notifications"
-						class="dropdown-toggle" data-toggle="dropdown" role="button"
-						aria-expanded="false"> Notifications <span
-							class="caret myCaret"></span></a>
-						<ul class="dropdown-menu" role="menu" id="notifications-list">
-						</ul></li>
+					<div class="dropdown" style="display: inline; margin-right: 10px">
+						<button class="btn btn-default dropdown-toggle" type="button"
+							id="dropdownMenuTagged" data-toggle="dropdown"
+							aria-haspopup="true" aria-expanded="true">
+							Add <span class="caret"></span>
+						</button>
 
-					<li class="dropdown"><a href="#" id="logged-user"
-						class="dropdown-toggle" data-toggle="dropdown" role="button"
-						aria-expanded="false"> </a>
-						<ul class="dropdown-menu" role="menu">
-							<li><a href="mockup/profile.pdf">Profile</a></li>
-							<li><a href="#">Settings</a></li>
-							<li class="divider"></li>
-							<li><a href="#">Logout</a></li>
-						</ul></li>
+						<ul id="add-taggedPersons" class="dropdown-menu"
+							aria-labelledby="dropdownMenuTagged">
+						</ul>
+					</div>
 
-					<li id="login-dropdown" class="dropdown"><a href="#"
-						id="login-expandable" class="dropdown-toggle"
-						data-toggle="dropdown" role="button" aria-expanded="false">Login
-							as<span class="caret myCaret"></span>
-					</a></li>
-				</ul>
+				</div>
+				<br />
+				<ul style="margin-top: 16px" id="add-taggedArea" name="taggedArea"></ul>
+
 			</div>
-		</div>
-	</nav>
-
-
-	<form id="login-form" hidden class="navbar-form navbar-right">
-		<div class="form-group">
-			<input type="checkbox" style="margin-bottom: 8px" id="new-user"
-				value="new-user"> New user<br> <input id="login-user"
-				type="text" class="form-control" placeholder="Name">
-		</div>
-		<button id="submit-login" style="margin-top: 25px" type="submit"
-			class="btn btn-default">Login</button>
-		<button id="cancel-login" style="margin-top: 25px" type="submit"
-			class="btn btn-default">Cancel</button>
-	</form>
-
-
-	<div id="tree"></div>
-
-	<iframe id="upload_target" name="upload_target" src="#"
-		style="display: none;"></iframe>
-
-	<form target="upload_target" style="display: none"
-		id="uploadProfileImageForm" enctype="multipart/form-data"
-		method="post">
-		<input type="file" id="profile-img-upload" name="profile-img-upload" />
-	</form>
-
-	<div id="addDocumentModal" class="modal fade" tabindex="-1"
-		role="dialog" aria-labelledby="addDocumentModalLabel">
-		<div class="modal-dialog" role="document">
-			<div class="modal-content">
-				<div class="modal-header">
-					<button type="button" class="close" data-dismiss="modal"
-						aria-hidden="true">×</button>
-					<h3 id="addDocumentModalLabel">Upload a document</h3>
-				</div>
-				<div class="modal-body">
-
-					<h4>Select document in your local disk</h4>
-					<iframe id="upload_target" name="upload_target" src="#"
-						style="display: none;"></iframe>
-
-					<form target="upload_target" id="uploadDocumentForm"
-						enctype="multipart/form-data" method="post">
-						<input type="file" id="document-upload" name="document-upload" />
-					</form>
-
-					<h4 style="margin-top: 30px">Info</h4>
-					<div style="display: inline-block">
-						<p style="display: inline; margin-right: 20px">Title:</p>
-						<input type="text" id="title" name="title">
-					</div>
-					<div style="margin-bottom: 10px"></div>
-					<div style="display: inline-block">
-						<p style="display: inline; margin-right: 20px">Date:</p>
-						<input type="date" id="date" name="date">
-					</div>
-					<div style="margin-bottom: 20px"></div>
-					<div id="tagged" style="display: inline-block">
-						<p style="display: inline; margin-right: 20px">Persons tagged:</p>
-
-						<div class="dropdown" style="display: inline; margin-right: 10px">
-							<button class="btn btn-default dropdown-toggle" type="button"
-								id="dropdownMenuTagged" data-toggle="dropdown"
-								aria-haspopup="true" aria-expanded="true">
-								Add <span class="caret"></span>
-							</button>
-
-							<ul id="add-taggedPersons" class="dropdown-menu"
-								aria-labelledby="dropdownMenuTagged">
-							</ul>
-						</div>
-
-					</div>
-					<br />
-					<ul style="margin-top: 16px" id="add-taggedArea" name="taggedArea"></ul>
-
-				</div>
-				<div class="modal-footer">
-					<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
-					<button class="btn btn-primary" id="uploadDocument">Upload</button>
-				</div>
+			<div class="modal-footer">
+				<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+				<button class="btn btn-primary" id="uploadDocument">Upload</button>
 			</div>
 		</div>
 	</div>
+</div>
 
-	<div id="editDocumentModal" class="modal fade" tabindex="-1"
-		role="dialog" aria-labelledby="addDocumentModalLabel">
-		<div class="modal-dialog" role="document">
-			<div class="modal-content">
-				<div class="modal-header">
-					<button type="button" class="close" data-dismiss="modal"
-						aria-hidden="true">×</button>
-					<h3 id="addDocumentModalLabel">Edit a document</h3>
+<div id="editDocumentModal" class="modal fade" tabindex="-1"
+	role="dialog" aria-labelledby="addDocumentModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"
+					aria-hidden="true">×</button>
+				<h3 id="addDocumentModalLabel">Edit a document</h3>
+			</div>
+			<div class="modal-body">
+
+				<h4 id="edit-file"></h4>
+				<p id="edit-docId" style="visibility: hidden"></p>
+				<p id="edit-nodeId" style="visibility: hidden"></p>
+				<div style="display: inline-block">
+					<p style="display: inline; margin-right: 20px">Title:</p>
+					<input type="text" id="edit-title" name="title">
 				</div>
-				<div class="modal-body">
+				<div style="margin-bottom: 10px"></div>
+				<div style="display: inline-block">
+					<p style="display: inline; margin-right: 20px">Date:</p>
+					<input type="date" id="edit-date" name="date">
+				</div>
+				<div style="margin-bottom: 20px"></div>
+				<div id="tagged" style="display: inline-block">
+					<p style="display: inline; margin-right: 20px">Persons tagged:</p>
 
-					<h4 id="edit-file"></h4>
-					<p id="edit-docId" style="visibility: hidden"></p>
-					<p id="edit-nodeId" style="visibility: hidden"></p>
-					<div style="display: inline-block">
-						<p style="display: inline; margin-right: 20px">Title:</p>
-						<input type="text" id="edit-title" name="title">
+					<div class="dropdown" style="display: inline; margin-right: 10px">
+						<button class="btn btn-default dropdown-toggle" type="button"
+							id="dropdownMenuTagged" data-toggle="dropdown"
+							aria-haspopup="true" aria-expanded="true">
+							Add <span class="caret"></span>
+						</button>
+
+						<ul id="edit-taggedPersons" class="dropdown-menu"
+							aria-labelledby="dropdownMenuTagged">
+						</ul>
 					</div>
-					<div style="margin-bottom: 10px"></div>
-					<div style="display: inline-block">
-						<p style="display: inline; margin-right: 20px">Date:</p>
-						<input type="date" id="edit-date" name="date">
-					</div>
-					<div style="margin-bottom: 20px"></div>
-					<div id="tagged" style="display: inline-block">
-						<p style="display: inline; margin-right: 20px">Persons tagged:</p>
-
-						<div class="dropdown" style="display: inline; margin-right: 10px">
-							<button class="btn btn-default dropdown-toggle" type="button"
-								id="dropdownMenuTagged" data-toggle="dropdown"
-								aria-haspopup="true" aria-expanded="true">
-								Add <span class="caret"></span>
-							</button>
-
-							<ul id="edit-taggedPersons" class="dropdown-menu"
-								aria-labelledby="dropdownMenuTagged">
-							</ul>
-						</div>
-
-					</div>
-					<br />
-					<ul style="margin-top: 16px" id="edit-taggedArea" name="taggedArea"></ul>
 
 				</div>
-				<div class="modal-footer">
-					<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
-					<button class="btn btn-primary" id="updateDocument">Update</button>
-				</div>
+				<br />
+				<ul style="margin-top: 16px" id="edit-taggedArea" name="taggedArea"></ul>
+
+			</div>
+			<div class="modal-footer">
+				<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+				<button class="btn btn-primary" id="updateDocument">Update</button>
 			</div>
 		</div>
 	</div>
-</body>
+</div>
 
-<script src="lib/jquery.js"></script>
-<script src="lib/bootstrap.js"></script>
-<script src="lib/d3.js"></script>
-<script src="lib/d3-context-menu.js"></script>
-
-<script src="js/events.js" charset="utf-8"></script>
-<script src="js/utils.js" charset="utf-8"></script>
-<script src="js/core.js" charset="utf-8"></script>
-
-</html>

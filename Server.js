@@ -5,10 +5,10 @@ var multer = require("multer");
 var cors = require("cors");
 var bodyParser = require('body-parser');
 
-var document = require('./document.js');
-var graph = require('./graph.js');
-var view = require('./view.js');
-var event = require('./event.js');
+var document = require('./node_code/document.js');
+var graph = require('./node_code/graph.js');
+var view = require('./node_code/view.js');
+var event = require('./node_code/event.js');
 
 var app = express();
 
