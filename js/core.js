@@ -54,10 +54,6 @@ $('#submit-login').on(
 			});
 		});
 
-// TODO: Populate notifications: get all events about nodes or docs in this user
-// view who are not already read by this
-// user
-
 $('#cancel-login').on('click', function() {
 
 	$('#login-form').hide();
@@ -153,6 +149,44 @@ function init() {
 	docRowSize = 16;
 }
 
+/*
+ * Populate notifications: get all events about nodes or docs in this user view
+ * who are not already read by this user.
+ */
+function fillNotifications(nodes) {
+
+	var data = {
+		nodes : nodes
+	};
+
+	$.ajax({
+
+		url : serverUrl + "/" + userId + "/events",
+		type : "POST",
+		data : JSON.stringify(data),
+		contentType : "application/json",
+		dataType : "json",
+		success : function(events) {
+
+			var items = [];
+
+			$.each(events,
+					function(i, item) {
+
+						var label = item.description + " of "
+								+ item.entity_type + " " + item.entity + " on "
+								+ item.date;
+						
+						items.push('<li><a href="#">' + label
+								+ '</a></li>');
+
+					});
+
+			$('#notifications-list').append(items.join(''));
+		}
+	});
+};
+
 var nodes;
 
 var viewIndex;
@@ -171,6 +205,8 @@ function drawTree(userId, userLabel, viewId, viewLabel) {
 					function(graphView) {
 
 						nodes = graphView.nodes;
+
+						fillNotifications(nodes);
 
 						if (viewId != 4) {
 

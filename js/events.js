@@ -327,7 +327,7 @@ $('#uploadDocument').click(
 
 					// register event
 					$.get(serverUrl + '/events/add/document/' + addedDoc.id
-							+ "?type=creation");
+							+ "?type=creation&node=" + tagged[0]);
 
 					documentPosition = [];
 
@@ -690,9 +690,6 @@ function removeDocument(docId) {
 
 	}).remove();
 
-	// register event
-	$.get(serverUrl + '/events/add/document/' + docId + "?type=removal");
-
 	redrawStream();
 };
 
@@ -841,6 +838,11 @@ var onDocumentMenu = [
 						function() {
 
 							removeDocument(elm.id);
+
+							// register event
+							$.get(serverUrl + '/events/add/document/' + elm.id
+									+ "?type=removal&node=" + d.originalId);
+
 						});
 			}
 		} ];

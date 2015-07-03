@@ -97,3 +97,4 @@ app.get('/:user/view/:view/update', view.updateNode);
 
 //Events
 app.get('/events/add/:entityType/:entityId', event.add);
+app.post('/:user/events', event.list);
