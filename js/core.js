@@ -155,6 +155,8 @@ function init() {
  */
 function fillNotifications(nodes) {
 
+	$('#notifications-list').html('');
+	
 	var data = {
 		nodes : nodes
 	};
