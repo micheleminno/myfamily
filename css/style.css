@@ -1,3 +1,4 @@
+
 .lens {
 	fill: white;
 }
@@ -192,3 +193,14 @@
 .myCursor-pointer-move {
 	cursor: url(../img/move-Hand.png) 17.5 5, pointer;
 }
+
+.login-input {
+	font-size: 20px;
+}
+
+.register-input {
+	font-size: 20px;
+	margin-top:10px;
+	margin-left: 15px;
+}
+

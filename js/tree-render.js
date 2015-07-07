@@ -1,20 +1,11 @@
+var serverUrl = 'http://localhost:8091';
+
 var treeRender = function(data) {
 
-	var serverUrl = 'http://localhost:8091';
-	var siteUrl = 'http://localhost/myfamily';
+	if (!data) {
 
-	// var serverUrl =
-	// 'http://ec2-54-72-121-42.eu-west-1.compute.amazonaws.com:8091';
-	// var siteUrl =
-	// 'http://ec2-54-72-121-42.eu-west-1.compute.amazonaws.com/myfamily';
-
-	var selectedViewId = 4;
-	var selectedViewLabel = 'Extended family';
-
-	// Default for
-	// testing purposes
-	var userId = 3;
-	var userLabel = "Michele Minno";
+		return;
+	}
 
 	var width, height;
 
@@ -132,7 +123,6 @@ var treeRender = function(data) {
 			}
 		});
 	}
-	;
 
 	var nodes;
 
@@ -144,185 +134,134 @@ var treeRender = function(data) {
 				userLabel + '<span class="caret myCaret"></span>');
 		$('#view-mode').html(viewLabel + '<span class="caret myCaret"></span>');
 
-		viewIndex = view;
+		viewIndex = viewId;
 		init();
 
-		$
-				.get(
-						serverUrl + "/" + userId + "/graph/view?view=" + viewId,
-						function(graphView) {
+		nodes = data.nodes;
+		links = data.links;
 
-							nodes = graphView.nodes;
+		//fillNotifications(nodes);
 
-							fillNotifications(nodes);
+		if (viewId != 4) {
 
-							if (viewId != 4) {
+			svg.on('contextmenu', null);
+		}
 
-								svg.on('contextmenu', null);
-							}
+		force = force.nodes(nodes).links(links);
 
-							force = force.nodes(graphView.nodes).links(
-									graphView.links);
+		force.start();
 
-							force.start();
+		link = link.data(links).enter().append("path");
 
-							link = link.data(graphView.links).enter().append(
-									"path");
+		link.each(function(d) {
 
-							link.each(function(d) {
+			currentLink = d3.select(this);
+			currentLink.attr("class", "link").attr("stroke-width", function(d) {
 
-								currentLink = d3.select(this);
-								currentLink.attr("class", "link").attr(
-										"stroke-width", function(d) {
+				return 30 / d.level + "px";
+			});
+		});
 
-											return 30 / d.level + "px";
-										});
-							});
+		node = node.data(nodes).enter().append("g");
 
-							node = node.data(graphView.nodes).enter().append(
-									"g");
+		node
+				.each(function(d) {
 
-							node
-									.each(function(d) {
+					currentNode = d3.select(this);
 
-										currentNode = d3.select(this);
+					currentNode.call(nodeDrag);
 
-										currentNode.call(nodeDrag);
+					if (d.person) {
 
-										if (d.person) {
+						currentNode.on("click", clickNode);
 
-											currentNode.on("click", clickNode);
+						if (viewId == 4) {
 
-											if (viewId == 4) {
+							currentNode.on('contextmenu', d3
+									.contextMenu(onPersonMenu));
+						}
 
-												currentNode
-														.on(
-																'contextmenu',
-																d3
-																		.contextMenu(onPersonMenu));
-											}
+						var defs = currentNode.append('svg:defs');
 
-											var defs = currentNode
-													.append('svg:defs');
+						clipPath = defs.append("svg:clipPath").attr("id",
+								"clipPath_" + d.originalId);
 
-											clipPath = defs.append(
-													"svg:clipPath").attr("id",
-													"clipPath_" + d.originalId);
+						var circleSize = getCircleSize(d);
+						var nodeClass = getNodeClass(d);
 
-											var circleSize = getCircleSize(d);
-											var nodeClass = getNodeClass(d,
-													userLabel);
+						clipPath.append("circle").attr("class", nodeClass)
+								.attr("r", circleSize).attr("id",
+										"circle_" + d.originalId);
 
-											clipPath.append("circle").attr(
-													"class", nodeClass).attr(
-													"r", circleSize).attr("id",
-													"circle_" + d.originalId);
+						currentNode.append("svg:use").attr("xlink:href",
+								"#" + "circle_" + d.originalId);
 
-											currentNode.append("svg:use").attr(
-													"xlink:href",
-													"#" + "circle_"
-															+ d.originalId);
+						currentNode
+								.append("svg:image")
+								.attr("class", "profile-image")
+								.attr(
+										"xlink:href",
+										function(d) {
+											return d.img == "" ? "./docs/default_profile.jpg"
+													: "./docs/" + d.img;
+										}).attr("width", circleSize * 2).attr(
+										"height", circleSize * 2).attr("x", 0)
+								.attr("y", 0).attr("clip-path",
+										"url(#clipPath_" + d.originalId + ")");
 
-											currentNode
-													.append("svg:image")
-													.attr("class",
-															"profile-image")
-													.attr(
-															"xlink:href",
-															function(d) {
-																return d.img == "" ? "./docs/default_profile.jpg"
-																		: "./docs/"
-																				+ d.img;
-															})
-													.attr("width",
-															circleSize * 2)
-													.attr("height",
-															circleSize * 2)
-													.attr("x", 0)
-													.attr("y", 0)
-													.attr(
-															"clip-path",
-															"url(#clipPath_"
-																	+ d.originalId
-																	+ ")");
+						currentNode.append("text").attr(
+								"class",
+								function(d) {
+									if (d.label.toUpperCase() == userLabel
+											.toUpperCase()) {
+										return "my-nodeLabel";
+									} else {
+										return "nodeLabel";
+									}
+								}).attr("dy", "1.5em").text(function(d) {
+							return d.label;
+						}).call(makeEditable);
+					} else {
 
-											currentNode
-													.append("text")
-													.attr(
-															"class",
-															function(d) {
-																if (d.label
-																		.toUpperCase() == userLabel
-																		.toUpperCase()) {
-																	return "my-nodeLabel";
-																} else {
-																	return "nodeLabel";
-																}
-															}).attr("dy",
-															"1.5em").text(
-															function(d) {
-																return d.label;
-															}).call(
-															makeEditable);
-										} else {
+						if (viewId == 4) {
 
-											if (viewId == 4) {
+							currentNode.on('contextmenu', d3
+									.contextMenu(onFamilyMenu));
+						}
 
-												currentNode
-														.on(
-																'contextmenu',
-																d3
-																		.contextMenu(onFamilyMenu));
-											}
+						currentNode.append("ellipse").attr("rx", function(d) {
 
-											currentNode.append("ellipse").attr(
-													"rx", function(d) {
+							return 100 / d.level;
+						}).attr("ry", function(d) {
 
-														return 100 / d.level;
-													}).attr("ry", function(d) {
+							return 50 / d.level;
+						}).attr("fill", "brown").attr("class", "myCursor-move");
+					}
+				});
 
-												return 50 / d.level;
-											}).attr("fill", "brown").attr(
-													"class", "myCursor-move");
-										}
-									});
+		streamNode = svg.append("g").attr("cursor", "auto");
 
-							streamNode = svg.append("g").attr("cursor", "auto");
+		streamNode.append("circle").attr("r", 30).attr("cx", streamX - 67)
+				.attr("cy", streamY + 50).attr("class", "navigator");
 
-							streamNode.append("circle").attr("r", 30).attr(
-									"cx", streamX - 67)
-									.attr("cy", streamY + 50).attr("class",
-											"navigator");
+		streamNode.append("text").attr("class", "navigator-arrow").attr("x",
+				streamX - 88).attr("y", streamY + 65).text("<").on("click",
+				backMain).attr("cursor", "pointer");
 
-							streamNode.append("text").attr("class",
-									"navigator-arrow").attr("x", streamX - 88)
-									.attr("y", streamY + 65).text("<").on(
-											"click", backMain).attr("cursor",
-											"pointer");
+		streamNode.append("circle").attr("r", 30).attr("cx",
+				streamX + streamWidth + 66).attr("cy", streamY + 45).attr(
+				"class", "navigator");
 
-							streamNode.append("circle").attr("r", 30).attr(
-									"cx", streamX + streamWidth + 66).attr(
-									"cy", streamY + 45).attr("class",
-									"navigator");
+		streamNode.append("text").attr("class", "navigator-arrow").attr("x",
+				streamX + streamWidth + 50).attr("y", streamY + 60).text(">")
+				.on("click", forwardMain).attr("cursor", "pointer");
 
-							streamNode.append("text").attr("class",
-									"navigator-arrow").attr("x",
-									streamX + streamWidth + 50).attr("y",
-									streamY + 60).text(">").on("click",
-									forwardMain).attr("cursor", "pointer");
+		streamNode.append("rect").attr("width", streamWidth).attr("height",
+				streamHeight).attr("x", streamX).attr("y", streamY).attr("rx",
+				20).attr("ry", 20).attr("class", "data-stream");
 
-							streamNode.append("rect")
-									.attr("width", streamWidth).attr("height",
-											streamHeight).attr("x", streamX)
-									.attr("y", streamY).attr("rx", 20).attr(
-											"ry", 20).attr("class",
-											"data-stream");
-
-							fillStream(graphView.nodes);
-
-						});
+		//fillStream(nodes);
 	}
-	;
 
 	function fillStream(nodes) {
 
@@ -359,7 +298,7 @@ var treeRender = function(data) {
 		});
 	}
 
-	drawTree(userId, userLabel, selectedViewId, selectedViewLabel);
+	drawTree(data.userId, data.userLabel, data.viewId, data.viewLabel);
 
 	function populateThumbnails(currentPage, back) {
 
@@ -566,7 +505,7 @@ var treeRender = function(data) {
 
 		var circleSize;
 
-		if (d.label.toUpperCase() == userLabel.toUpperCase()) {
+		if (d.label.toUpperCase() == data.userLabel.toUpperCase()) {
 
 			circleSize = (125 / d.level) * 1.5;
 
@@ -586,9 +525,9 @@ var treeRender = function(data) {
 		});
 	};
 
-	function getNodeClass(d, userLabel) {
+	function getNodeClass(d) {
 
-		if (d.label.toUpperCase() == userLabel.toUpperCase()) {
+		if (d.label.toUpperCase() == data.userLabel.toUpperCase()) {
 
 			nodeClass = "node me";
 

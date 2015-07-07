@@ -1,32 +1,86 @@
 var controllers = angular.module('controllers', []);
 
-var mainController = controllers.controller("MainCtrl", function($scope,
-		$location, MyFamilyService) {
+var mainController = controllers
+		.controller(
+				"MainCtrl",
+				function($scope, $location, MyFamilyService) {
 
-	$scope.login = function() {
+					$scope.login = function() {
 
-		MyFamilyService.getUser($scope.loggedUser.name).then(
-				function(namesakes) {
+						MyFamilyService
+								.getUser($scope.loggedUser.name)
+								.then(
+										function(namesakes) {
 
-					if (namesakes.length > 0) {
+											if (namesakes.length > 0) {
 
-						userId = namesakes[0]['id'];
+												var userId = namesakes[0]['id'];
 
-						drawTree(userId, userLabel, selectedViewId,
-								selectedViewLabel);
+												MyFamilyService
+														.getGraphView(userId, 4)
+														.then(
+																function(
+																		graphView) {
 
-					} else if ($scope.isNewUser) {
+																	graphView.userId = userId;
+																	graphView.viewId = $scope.selectedView.id;
+																	graphView.viewLabel = $scope.selectedView.label;
+																	graphView.userLabel = $scope.loggedUser.name;
+																	$scope.graphData = graphView;
+																});
 
-						MyFamilyService.addUser($scope.loggedUser.name).then(
-								function(userId) {
+											} else if ($scope.isNewUser) {
 
-									drawTree(userId, userLabel, selectedViewId,
-											selectedViewLabel);
-								});
-					}
-					
-					$scope.showLogin = false;
+												MyFamilyService
+														.addUser(
+																$scope.loggedUser.name)
+														.then(
+																function(userId) {
+
+																	$scope.userId = userId;
+																	MyFamilyService
+																			.getGraphView(
+																					userId,
+																					4)
+																			.then(
+																					function(
+																							graphView) {
+
+																						$scope.graphData = graphView;
+																					});
+																});
+											}
+
+											$scope.showLogin = false;
+										});
+					};
+
+					initViews($scope);
+
+					$scope.updateView = function(view) {
+
+						$scope.selectedView = view;
+
+						MyFamilyService
+								.getGraphView(userId, view.id)
+								.then(
+										function(graphView) {
+
+											graphView.userId = userId;
+											graphView.viewId = $scope.selectedView.id;
+											graphView.userLabel = $scope.loggedUser.name;
+											$scope.graphData = graphView;
+										});
+					};
+
 				});
-	};
 
+var loginController = controllers.controller("LoginCtrl", function($scope, dateFilter) {
+
+	
+	$scope.$watch('birthDate', function(date) {
+
+		$scope.birthDate = dateFilter(date,
+				'dd-MM-yyyy');
+	});
 });
