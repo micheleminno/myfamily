@@ -1,8 +1,8 @@
 var serverUrl = 'http://localhost:8091';
 
-var treeRender = function(data) {
+var treeRender = function(graphView) {
 
-	if (!data) {
+	if (!graphView || !graphView.documents) {
 
 		return;
 	}
@@ -87,43 +87,6 @@ var treeRender = function(data) {
 		docRowSize = 16;
 	}
 
-	/*
-	 * Populate notifications: get all events about nodes or docs in this user
-	 * view who are not already read by this user.
-	 */
-	function fillNotifications(nodes) {
-
-		$('#notifications-list').html('');
-
-		var data = {
-			nodes : nodes
-		};
-
-		$.ajax({
-
-			url : serverUrl + "/" + userId + "/events",
-			type : "POST",
-			data : JSON.stringify(data),
-			contentType : "application/json",
-			dataType : "json",
-			success : function(events) {
-
-				var items = [];
-
-				$.each(events, function(i, item) {
-
-					var label = item.description + " of " + item.entity_type
-							+ " " + item.entity + " on " + item.date;
-
-					items.push('<li><a href="#">' + label + '</a></li>');
-
-				});
-
-				$('#notifications-list').append(items.join(''));
-			}
-		});
-	}
-
 	var nodes;
 
 	var viewIndex;
@@ -137,10 +100,8 @@ var treeRender = function(data) {
 		viewIndex = viewId;
 		init();
 
-		nodes = data.nodes;
-		links = data.links;
-
-		//fillNotifications(nodes);
+		nodes = graphView.nodes;
+		links = graphView.links;
 
 		if (viewId != 4) {
 
@@ -260,57 +221,37 @@ var treeRender = function(data) {
 				streamHeight).attr("x", streamX).attr("y", streamY).attr("rx",
 				20).attr("ry", 20).attr("class", "data-stream");
 
-		//fillStream(nodes);
+		fillStream(nodes);
 	}
 
-	function fillStream(nodes) {
+	function fillStream() {
 
-		console.log("Filling stream");
+		console.log("Documents: " + JSON.stringify(graphView.documents));
 
-		var data = {
-			nodes : nodes
-		};
+		var documentsSize = graphView.documents.length;
 
-		$.ajax({
+		if (documentsSize > 0) {
 
-			url : serverUrl + "/documents/" + userId,
-			type : "POST",
-			data : JSON.stringify(data),
-			contentType : "application/json",
-			dataType : "json",
-			success : function(data) {
-
-				documents = data.documents;
-
-				console.log("Documents: " + JSON.stringify(documents));
-
-				var documentsSize = documents.length;
-
-				if (documentsSize > 0) {
-
-					currentPage = Math.floor(documentsSize / (docRowSize + 1));
-
-					maxPage = currentPage;
-
-					populateThumbnails(currentPage, true);
-				}
-			}
-		});
+			currentPage = Math.floor(documentsSize / (docRowSize + 1));
+			maxPage = currentPage;
+			populateThumbnails(currentPage, true);
+		}
 	}
 
-	drawTree(data.userId, data.userLabel, data.viewId, data.viewLabel);
+	drawTree(graphView.userId, graphView.userLabel, graphView.viewId,
+			graphView.viewLabel);
 
 	function populateThumbnails(currentPage, back) {
 
 		var minIndex = currentPage * docRowSize;
 
-		for (docIndex in documents) {
+		for (docIndex in graphView.documents) {
 
-			var doc = documents[docIndex];
+			var doc = graphView.documents[docIndex];
 			doc.index = parseInt(docIndex);
 		}
 
-		var currentDocuments = documents.filter(function(d) {
+		var currentDocuments = graphView.documents.filter(function(d) {
 
 			return d.index >= minIndex && d.index < minIndex + docRowSize;
 		});
@@ -426,12 +367,12 @@ var treeRender = function(data) {
 				title : 'Add family as a parent',
 				action : function(elm, d, i) {
 
-					$.get(serverUrl + "/" + userId
+					$.get(serverUrl + "/" + graphView.userId
 							+ '/graph/add?type=family&source=' + d.originalId,
 							function() {
 
-								drawTree(userId, userLabel, selectedViewId,
-										selectedViewLabel);
+								drawTree(graphView.userId, graphView.userLabel,
+										graphView.viewId, graphView.viewLabel);
 							});
 				}
 			},
@@ -439,12 +380,12 @@ var treeRender = function(data) {
 				title : 'Add family as a child',
 				action : function(elm, d, i) {
 
-					$.get(serverUrl + "/" + userId
+					$.get(serverUrl + "/" + graphView.userId
 							+ '/graph/add?type=family&target=' + d.originalId,
 							function() {
 
-								drawTree(userId, userLabel, selectedViewId,
-										selectedViewLabel);
+								drawTree(graphView.userId, graphView.userLabel,
+										graphView.viewId, graphView.viewLabel);
 							});
 				}
 			},
@@ -452,11 +393,11 @@ var treeRender = function(data) {
 				title : 'Remove',
 				action : function(elm, d, i) {
 
-					$.get(serverUrl + "/" + userId + '/graph/remove/'
+					$.get(serverUrl + "/" + graphView.userId + '/graph/remove/'
 							+ d.originalId, function() {
 
-						drawTree(userId, userLabel, selectedViewId,
-								selectedViewLabel);
+						drawTree(graphView.userId, graphView.userLabel,
+								graphView.viewId, graphView.viewLabel);
 					});
 				}
 			} ];
@@ -466,12 +407,12 @@ var treeRender = function(data) {
 				title : 'Add parent',
 				action : function(elm, d, i) {
 
-					$.get(serverUrl + "/" + userId
+					$.get(serverUrl + "/" + graphView.userId
 							+ '/graph/add?type=person&target=' + d.originalId,
 							function() {
 
-								drawTree(userId, userLabel, selectedViewId,
-										selectedViewLabel);
+								drawTree(graphView.userId, graphView.userLabel,
+										graphView.viewId, graphView.viewLabel);
 							});
 				}
 			},
@@ -479,12 +420,12 @@ var treeRender = function(data) {
 				title : 'Add child',
 				action : function(elm, d, i) {
 
-					$.get(serverUrl + "/" + userId
+					$.get(serverUrl + "/" + graphView.userId
 							+ '/graph/add?type=person&source=' + d.originalId,
 							function() {
 
-								drawTree(userId, userLabel, selectedViewId,
-										selectedViewLabel);
+								drawTree(graphView.userId, graphView.userLabel,
+										graphView.viewId, graphView.viewLabel);
 							});
 				}
 			},
@@ -492,11 +433,11 @@ var treeRender = function(data) {
 				title : 'Remove',
 				action : function(elm, d, i) {
 
-					$.get(serverUrl + "/" + userId + '/graph/remove/'
+					$.get(serverUrl + "/" + graphView.userId + '/graph/remove/'
 							+ d.originalId, function() {
 
-						drawTree(userId, userLabel, selectedViewId,
-								selectedViewLabel);
+						drawTree(graphView.userId, graphView.userLabel,
+								graphView.viewId, graphView.viewLabel);
 					});
 				}
 			} ];
@@ -505,7 +446,7 @@ var treeRender = function(data) {
 
 		var circleSize;
 
-		if (d.label.toUpperCase() == data.userLabel.toUpperCase()) {
+		if (d.label.toUpperCase() == graphView.userLabel.toUpperCase()) {
 
 			circleSize = (125 / d.level) * 1.5;
 
@@ -527,7 +468,7 @@ var treeRender = function(data) {
 
 	function getNodeClass(d) {
 
-		if (d.label.toUpperCase() == data.userLabel.toUpperCase()) {
+		if (d.label.toUpperCase() == graphView.userLabel.toUpperCase()) {
 
 			nodeClass = "node me";
 
@@ -664,7 +605,6 @@ var treeRender = function(data) {
 			}
 		}
 	}
-	;
 
 	function thumbnailMouseouted(d) {
 
@@ -681,7 +621,6 @@ var treeRender = function(data) {
 
 		node.classed("node--tagged", false);
 	}
-	;
 
 	function profileMouseovered(d) {
 
@@ -704,7 +643,6 @@ var treeRender = function(data) {
 		image.x.baseVal.value -= 150;
 		image.y.baseVal.value -= 130;
 	}
-	;
 
 	function profileMouseouted(d) {
 
@@ -726,7 +664,6 @@ var treeRender = function(data) {
 		image.x.baseVal.value += 150;
 		image.y.baseVal.value += 130;
 	}
-	;
 
 	function thumbnailClicked(d) {
 
@@ -774,7 +711,6 @@ var treeRender = function(data) {
 
 		d3.event.stopPropagation();
 	}
-	;
 
 	function docClicked(d) {
 
@@ -827,7 +763,6 @@ var treeRender = function(data) {
 
 		d3.event.stopPropagation();
 	}
-	;
 
 	function closeDocClicked() {
 
@@ -857,7 +792,6 @@ var treeRender = function(data) {
 
 		fillStream(nodes);
 	}
-	;
 
 	var container;
 	var documentToAdd;
@@ -885,7 +819,7 @@ var treeRender = function(data) {
 				var url = serverUrl + "/documents/add/document?file="
 						+ fileName + "&title=" + title + "&date=" + date
 						+ "&tagged=" + JSON.stringify(tagged) + '&owner='
-						+ userId;
+						+ graphView.userId;
 
 				$.get(url, function(addedDoc) {
 
@@ -930,7 +864,6 @@ var treeRender = function(data) {
 
 		redrawStream();
 	}
-	;
 
 	$('#updateDocument').click(
 			function() {
@@ -991,7 +924,6 @@ var treeRender = function(data) {
 		svg.selectAll(".profile-image--selected").attr("xlink:href",
 				"./docs/" + fileName);
 	}
-	;
 
 	function profileImageClicked(d) {
 
@@ -1074,7 +1006,6 @@ var treeRender = function(data) {
 
 		docNode.on('contextmenu', d3.contextMenu(onDocumentMenu));
 	}
-	;
 
 	function placeDocuments(serviceUrl, selectedNode, nodeIndex, centerX,
 			centerY, maxRowSize) {
@@ -1103,7 +1034,6 @@ var treeRender = function(data) {
 			}
 		});
 	}
-	;
 
 	function groundClicked(d) {
 
@@ -1135,7 +1065,6 @@ var treeRender = function(data) {
 
 		d3.event.stopPropagation();
 	}
-	;
 
 	var documentPosition = [];
 
@@ -1190,7 +1119,6 @@ var treeRender = function(data) {
 		d3.event.stopPropagation();
 
 	}
-	;
 
 	function clickSvg(d) {
 
@@ -1207,14 +1135,12 @@ var treeRender = function(data) {
 
 		svg.selectAll(".tree-leaf").style("pointer-events", "all");
 	}
-	;
 
 	function zoomed() {
 
 		container.attr("transform", "translate(" + d3.event.translate
 				+ ")scale(" + d3.event.scale + ")");
 	}
-	;
 
 	function nodeDragstarted(d) {
 
@@ -1228,7 +1154,6 @@ var treeRender = function(data) {
 		var actions = svg.selectAll(".action");
 		actions.remove();
 	}
-	;
 
 	function nodeDragged(d) {
 
@@ -1243,12 +1168,11 @@ var treeRender = function(data) {
 		if (!onDetail) {
 			d3.select(this).classed("dragging", false);
 
-			$.get(serverUrl + '/' + userId + '/view/' + selectedViewId
-					+ '/update?node=' + d.originalId + '&x=' + d.x + '&y='
-					+ d.y);
+			$.get(serverUrl + '/' + graphView.userId + '/view/'
+					+ graphView.viewId + '/update?node=' + d.originalId + '&x='
+					+ d.x + '&y=' + d.y);
 		}
 	}
-	;
 
 	function docDragstarted(d) {
 
@@ -1257,7 +1181,6 @@ var treeRender = function(data) {
 		svg.selectAll(".thumbnailText").remove();
 		d3.select(this).classed("dragging", true);
 	}
-	;
 
 	function docDragged(d) {
 
@@ -1265,7 +1188,6 @@ var treeRender = function(data) {
 		sel.attr("x", d3.event.x - parseInt(sel.attr("width")) / 2).attr("y",
 				d3.event.y - parseInt(sel.attr("height")) / 2);
 	}
-	;
 
 	function docDragended(d) {
 
@@ -1282,7 +1204,6 @@ var treeRender = function(data) {
 		$.get(serverUrl + '/documents/' + id + '/updatePosition?node=' + nodeId
 				+ '&x=' + x + '&y=' + y);
 	}
-	;
 
 	function removeDocument(docId) {
 
@@ -1299,7 +1220,6 @@ var treeRender = function(data) {
 
 		redrawStream();
 	}
-	;
 
 	function isAlreadyTagged(nodeId, taggedAreaId) {
 
@@ -1358,7 +1278,6 @@ var treeRender = function(data) {
 							fillTaggedPersons(nodes, mode);
 						});
 	}
-	;
 
 	var onSelectedNodeMenu = [ {
 		title : 'Add document',

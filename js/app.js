@@ -1,5 +1,7 @@
 var app = angular.module('main', [ 'ngRoute', 'controllers',
-		'ui.bootstrap.datetimepicker' ]);
+		'ui.bootstrap.datetimepicker', 'ngMessages' ]);
+
+var controllers = angular.module('controllers', [ 'user-services' ]);
 
 window.routes = {
 
@@ -14,9 +16,14 @@ window.routes = {
 		requireLogin : false
 	},
 	'/home' : {
-		templateUrl : 'html/home.html',
-		controller : 'HomeCtrl',
+		templateUrl : 'html/tree.html',
+		controller : 'MainCtrl',
 		requireLogin : true
+	},
+	'/error' : {
+		templateUrl : 'html/error.html',
+		controller : 'ErrorCtrl',
+		requireLogin : false
 	}
 };
 
@@ -32,7 +39,8 @@ app.config(
 		[
 				'$location',
 				'$rootScope',
-				function($location, $rootScope) {
+				'AuthenticationService',
+				function($location, $rootScope, AuthenticationService) {
 
 					$rootScope.debug = false;
 					$rootScope.isLogging = false;
@@ -42,16 +50,20 @@ app.config(
 
 						// checks if login is required on next page
 						if (next.$$route.requireLogin) {
+
 							if (!AuthenticationService.isLoggedIn()) {
+
 								$location.path("/login");
+
 							} else if ($location.path() === "/home") {
+
 								$location.path("/home");
-							} else if (SessionService.canAccess($location
-									.path())) {
-								$location.path();
+
 							} else {
-								console.warn("logged in user cant access "
+
+								console.warn("Logged user can't access "
 										+ $location.path());
+
 								$location.path("/home");
 							}
 						}
@@ -73,40 +85,61 @@ app.directive('ngEnter', function() {
 	};
 });
 
-app.directive('d3Tree', [ '$window', '$timeout', function($window, $timeout) {
+app.directive("compareTo", function() {
 
 	return {
-
-		restrict : 'A',
-
+		require : "ngModel",
 		scope : {
-			data : '='
+			otherModelValue : "=compareTo"
 		},
-		link : function(scope, element, attrs) {
+		link : function(scope, element, attributes, ngModel) {
 
-			// watch for data changes and re-render
-			scope.$watch('data', function(newVals, oldVals) {
-				return scope.render(newVals);
-			}, true);
+			ngModel.$validators.compareTo = function(modelValue) {
 
-			// Browser onresize
-			// event
-			window.onresize = function() {
-				scope.$apply();
+				return modelValue == scope.otherModelValue;
 			};
 
-			// Watch for resize
-			// event
-			scope.$watch(function() {
-				return angular.element($window)[0].innerWidth;
-			}, function() {
+			scope.$watch("otherModelValue", function() {
 
-				scope.render(scope.data);
+				ngModel.$validate();
 			});
-
-			scope.render = treeRender;
-
 		}
 	};
+});
 
-} ]);
+app.directive('d3Tree', [ '$window', 'MyFamilyService',
+		function($window, MyFamilyService) {
+
+			return {
+
+				restrict : 'A',
+
+				scope : {
+					data : '='
+				},
+				link : function(scope, element, attrs) {
+
+					scope.$watch('data', function(newVals, oldVals) {
+
+						return scope.render(newVals);
+
+					}, true);
+
+					window.onresize = function() {
+						scope.$apply();
+					};
+
+					scope.$watch(function() {
+
+						return angular.element($window)[0].innerWidth;
+
+					}, function() {
+
+						scope.render(scope.data);
+					});
+
+					scope.render = treeRender;
+				}
+			};
+
+		} ]);

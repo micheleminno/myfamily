@@ -117,9 +117,7 @@ exports.view = function(req, res) {
 							return a.id - b.id;
 						});
 
-						res.status(OK).json('documents', {
-							documents : documents
-						});
+						res.status(OK).json('documents', documents);
 					}
 				}
 			});

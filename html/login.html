@@ -7,7 +7,7 @@
 			</div>
 			<div class="col-lg-10 col-md-10 col-sm-10">
 				<h2>
-					Family.place <br /> <small>Connect with relatives you
+					family.place <br /> <small>Connect with relatives you
 						really care about</small>
 				</h2>
 
@@ -16,77 +16,134 @@
 	</div>
 </div>
 <div class="col-lg-12 col-md-12 col-sm-12">
+
 	<div class="col-lg-4 col-md-4 col-sm-4">
 		<h2>Sign up</h2>
 
-		<form>
-			<div id="register_form">
-				<div ng-form="reg_form"
-					class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+		<form name="registrationForm" id="registrationForm" novalidate>
 
-					<h3>You</h3>
+			<h3 style="margin-top: 30px">You</h3>
 
-					<div class="row">
-						<input class="form-control register-input" ng-model="name"
-							type="text" name="name" placeholder="Name (*)" required />
+			<div class="row">
+				<input class="form-control register-input" ng-model="name"
+					type="text" name="username" placeholder="Mario Rossi" required />
+			</div>
+			<div ng-messages="registrationForm.username.$error">
+				<ng-messages-include src="html/messages.html"></ng-messages-include>
+			</div>
+
+			<div class="dropdown row">
+				<a class="dropdown-toggle birth-date-toggle-select" id="dLabel"
+					role="button" data-toggle="dropdown" data-target="#" href="">
+					<div class="input-append">
+						<input type="text" class="form-control register-input"
+							data-ng-model="birthDate" name="birthDate"
+							placeholder="Birth date"><span class="add-on"><i
+							class="icon-calendar"></i></span>
 					</div>
+				</a>
+				<ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
+					<datetimepicker data-ng-model="birthDate"
+						data-datetimepicker-config="{ dropdownSelector: '.birth-date-toggle-select', minView: 'day', startView: 'year'}"></datetimepicker>
+				</ul>
+			</div>
 
-					<div class="dropdown row">
-						<a class="dropdown-toggle birth-date-toggle-select" id="dLabel"
-							role="button" data-toggle="dropdown" data-target="#" href="">
-							<div class="input-append">
-								<input type="text" class="form-control register-input"
-									data-ng-model="birthDate" placeholder="Birth date (*)" required><span class="add-on"><i
-									class="icon-calendar"></i></span>
-							</div>
-						</a>
-						<ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
-							<datetimepicker data-ng-model="birthDate"
-								data-datetimepicker-config="{ dropdownSelector: '.birth-date-toggle-select', minView: 'day', startView: 'year'}"></datetimepicker>
-						</ul>
-					</div>
+			<div class="row">
+				<input class="form-control register-input" ng-model="email"
+					type="email" name="email" placeholder="Email" />
+			</div>
 
-					<div class="row">
-						<input class="form-control register-input" ng-model="email"
-							type="email" name="email" placeholder="Email (*)" required />
-					</div>
-				</div>
+			<div class="row">
+				<input class="form-control register-input" ng-model="password"
+					type="password" name="password" placeholder="Password" required />
+			</div>
+			<div ng-messages="registrationForm.password.$error">
+				<ng-messages-include src="html/messages.html"></ng-messages-include>
+			</div>
 
-				<div class="row">
-					<input id="btn_signup" ng-disabled="!reg_form.$valid||isDisabled"
-						style="margin-top: 20px; margin-left: 15px"
-						ng-click="register(registerName,registerSurname,registerEmail,registerPhone,registerCompany)"
-						type="submit" name="submit" value="Sign up"
-						class="btn btn-default btn-lg" />
-				</div>
+			<div class="row">
+				<input class="form-control register-input"
+					ng-model="duplicatePassword" type="password" name="confirmPassword"
+					placeholder="Confirm password" required compare-to="password" />
+			</div>
+			<div ng-messages="registrationForm.confirmPassword.$error">
+				<ng-messages-include src="html/messages.html"></ng-messages-include>
+			</div>
+
+			<h3 style="margin-top: 40px">
+				Help us to identify you <br /> <br /> <small>Maybe someone
+					already added you. We will add the following people in the family,
+					if missing. </small>
+			</h3>
+
+			<h4 style="margin-top: 40px">Your parents</h4>
+
+			<div class="row">
+				<input class="form-control register-input"
+					ng-model="firstParentName" type="text" name="name"
+					placeholder="Name" />
+			</div>
+			<div class="row">
+				<input class="form-control register-input"
+					ng-model="secondParentName" type="text" name="name"
+					placeholder="Name" />
+			</div>
+
+			<h4 style="margin-top: 20px">Your brothers or sisters (if any)</h4>
+
+			<div class="row">
+				<input class="form-control register-input"
+					ng-model="firstSiblingName" type="text" name="name"
+					placeholder="Name" />
+			</div>
+			<div class="row">
+				<input class="form-control register-input"
+					ng-model="secondSiblingName" type="text" name="name"
+					placeholder="Name" />
+			</div>
+
+			<h4 style="margin-top: 20px">Your partner (if any)</h4>
+
+			<div class="row">
+				<input class="form-control register-input" ng-model="partnerName"
+					type="text" name="name" placeholder="Name" />
+			</div>
+
+			<div class="row">
+				<input
+					style="margin-top: 40px; margin-left: 15px; margin-bottom: 20px;"
+					id="btn_signup" ng-disabled="!registrationForm.$valid"
+					ng-click="register(username, password, birthDate, email, firstParentName, secondParentName, firstSiblingname, secondSiblingName, partnerName)"
+					type="submit" name="submit" value="Sign up"
+					class="btn btn-primary btn-lg" />
 			</div>
 		</form>
 	</div>
 	<div class="col-lg-4 col-md-4 col-sm-4"></div>
 	<div class="col-lg-4 col-md-4 col-sm-4">
 
-		<h2>Sign in</h2>
+		<h2>Login</h2>
 
-		<form ng-submit="login(username, password)" form-autofill-fix>
+		<form name="loginForm" style="margin-top: 30px"
+			ng-submit="login(loginUsername, loginPassword)" form-autofill-fix>
 			<div>
 
-				<h3 class="panel-title">Username</h3>
-				<input type="email" ng-model="username" name="username"
-					class="form-control login-input" required
+				<h3 class="panel-title">Name</h3>
+				<input style="margin-top: 10px" type="text" ng-model="loginUsername"
+					name="loginUsername" class="form-control login-input" required
 					ng-keydown="submitFormOnEnter($event)" style="height: 40px">
 
 				<h3 class="panel-title" style="margin-top: 20px">Password</h3>
-				<input type="password" ng-model="password" name="userPassword"
+				<input style="margin-top: 10px" type="password"
+					ng-model="loginPassword" name="loginPassword"
 					class="form-control login-input" required
 					ng-keydown="submitFormOnEnter($event)" style="height: 40px">
 
+				<button class="btn btn-primary btn-lg"
+					ng-disabled="!loginForm.$valid" id="btn_login"
+					style="margin-top: 20px" type="submit">Login</button>
 
-				<button class="btn btn-default" id="btn_login"
-					style="margin-top: 20px" type="submit" analytics-on="click"
-					analytics-category="navigation" analytics-event="login"
-					analytics-label="{{username}}">Login</button>
-
-				<div style="margin-top: 10px; padding-left: 170px;">
+				<div style="margin-top: 10px; padding-left: 220px;">
 					<a href="#">Forgot your password?</a>
 				</div>
 			</div>

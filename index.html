@@ -1,18 +1,58 @@
-<html>
+<!DOCTYPE html>
+
+<html data-ng-app="main">
 
 <head>
 
-<title>MyFamily server</title>
+<title>My Family</title>
 <meta charset="UTF-8" />
+
+<script src="bower_components/jquery/dist/jquery.js"></script>
+<script src="bower_components/moment/moment.js"></script>
+<script src="bower_components/angular/angular.js"></script>
+<script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
+<script
+	src="bower_components/angular-bootstrap-datetimepicker/src/js/datetimepicker.js"></script>
+<script src="bower_components/angular-bootstrap/ui-bootstrap.js"></script>
+<script src="bower_components/angular-route/angular-route.js"></script>
+<script src="bower_components/angular-cookies/angular-cookies.js"></script>
+<script src="bower_components/angular-messages/angular-messages.js"></script>
+<script src="bower_components/d3/d3.js"></script>
+<script src="bower_components/d3-context-menu/js/d3-context-menu.js"></script>
+
+
+<script src="js/app.js" charset="utf-8"></script>
+<script src="js/tree-render.js" charset="utf-8"></script>
+
+<script src="js/controllers/mainController.js" charset="utf-8"></script>
+<script src="js/controllers/loginController.js" charset="utf-8"></script>
+<script src="js/controllers/errorController.js" charset="utf-8"></script>
+
+<script src="js/init.js" charset="utf-8"></script>
+<script src="js/myfamily-service.js"></script>
+<script src="js/user-services.js"></script>
+
+
+<link href="css/style.css" rel="stylesheet">
+
+<link href="bower_components/bootstrap/dist/css/bootstrap.css"
+	rel="stylesheet" />
+<link rel="stylesheet"
+	href="bower_components/angular-bootstrap-datetimepicker/src/css/datetimepicker.css" />
+
+<link href="bower_components/d3-context-menu/css/d3-context-menu.css"
+	rel="stylesheet" />
+
+
+<link rel="shortcut icon" href="img/favicon.ico" type="image/x-icon" />
+
 </head>
 
 <body>
 
-	<h1>
-		Server works! 
-	</h1>
-	
-	<h3>Listening...</h3>
+	<div class="view-container">
+		<div ng-view class="view-frame"></div>
+	</div>
 
 </body>
 

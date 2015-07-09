@@ -15,6 +15,21 @@ app.service('MyFamilyService', function($http, $q) {
 		return deferred.promise;
 	};
 
+	this.isRegisteredUser = function(username, credentials) {
+
+		var deferred = $q.defer();
+
+		$http.get(
+				serverUrl + '/user/isRegistered?user=' + username
+						+ '&credentials=' + credentials).success(
+				function(data) {
+
+					deferred.resolve(data.registeredUser);
+				});
+
+		return deferred.promise;
+	};
+
 	this.getGraphView = function(userId, viewId) {
 
 		var deferred = $q.defer();
@@ -32,11 +47,42 @@ app.service('MyFamilyService', function($http, $q) {
 
 		var deferred = $q.defer();
 
-		$http.post(serverUrl + "/" + userId + "/events", JSON.stringify(nodes))
-				.success(function(events) {
+		var httpPostConfig = {
 
-					deferred.resolve(events);
-				});
+			url : serverUrl + "/" + userId + "/events",
+			method : "POST",
+			data : JSON.stringify(nodes),
+			headers : {
+				'Content-Type' : 'application/json'
+			}
+		};
+
+		$http(httpPostConfig).success(function(events) {
+
+			deferred.resolve(events);
+		});
+
+		return deferred.promise;
+	};
+
+	this.getDocuments = function(userId, nodes) {
+
+		var deferred = $q.defer();
+
+		var httpPostConfig = {
+
+			url : serverUrl + "/documents" + "/" + userId,
+			method : "POST",
+			data : JSON.stringify(nodes),
+			headers : {
+				'Content-Type' : 'application/json'
+			}
+		};
+
+		$http(httpPostConfig).success(function(documents) {
+
+			deferred.resolve(documents);
+		});
 
 		return deferred.promise;
 	};

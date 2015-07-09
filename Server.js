@@ -5,6 +5,7 @@ var multer = require("multer");
 var cors = require("cors");
 var bodyParser = require('body-parser');
 
+var user = require('./node_code/user.js');
 var document = require('./node_code/document.js');
 var graph = require('./node_code/graph.js');
 var view = require('./node_code/view.js');
@@ -56,8 +57,11 @@ app.listen(8091, function() {
 
 app.get('/', function(req, res) {
 
-	res.sendfile('index.html');
+	res.sendfile('server_index.html');
 });
+
+// User
+app.get('/user/isRegistered', user.isRegistered);
 
 // Documents
 app.get('/documents', document.list);

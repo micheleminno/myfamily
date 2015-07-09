@@ -26,9 +26,10 @@
 				</a>
 
 					<ul class="dropdown-menu" role="menu">
-						<li ng-repeat="view in views"><a href="#" ng-click="updateView(view)">{{view.label}}</a></li>
+						<li ng-repeat="view in views"><a href=""
+							ng-click="updateView(view)">{{view.label}}</a></li>
 						<li class="divider"></li>
-						<li><a href="#">Custom view</a></li>
+						<li><a href="">Custom view</a></li>
 					</ul></li>
 
 				<li><a href="mockup/memory.pdf">Explore</a></li>
@@ -43,48 +44,30 @@
 
 				<li><a href="mockup/upload.pdf">Upload</a></li>
 
-				<li class="dropdown"><a href="#" id="notifications"
+				<li class="dropdown"><a href="" id="notifications"
 					class="dropdown-toggle" data-toggle="dropdown" role="button"
 					aria-expanded="false"> Notifications <span
 						class="caret myCaret"></span></a>
 					<ul class="dropdown-menu" role="menu" id="notifications-list">
+					<li ng-repeat="notification in notifications"><a href=""
+							>{{notification.label}}</a></li>
 					</ul></li>
 
-				<li class="dropdown"><a href="#" id="logged-user"
+				<li class="dropdown"><a href="" id="logged-user"
 					class="dropdown-toggle" data-toggle="dropdown" role="button"
 					aria-expanded="false"> </a>
 					<ul class="dropdown-menu" role="menu">
 						<li><a href="mockup/profile.pdf">Profile</a></li>
 						<li><a href="#">Settings</a></li>
 						<li class="divider"></li>
-						<li><a href="#">Logout</a></li>
+						<li><a href="" ng-click="logout()">Logout</a></li>
 					</ul></li>
-
-				<li id="login-dropdown" class="dropdown"><a href=""
-					id="login-expandable" class="dropdown-toggle"
-					data-toggle="dropdown" role="button" aria-expanded="false"
-					ng-click="showLogin = true;">Login as<span
-						class="caret myCaret"></span>
-				</a></li>
 			</ul>
 		</div>
 	</div>
 </nav>
 
 
-<form id="login-form" ng-init="showLogin = false" ng-show=showLogin
-	class="navbar-form navbar-right">
-	<div class="form-group">
-		<input type="checkbox" style="margin-bottom: 8px" id="new-user"
-			value="new-user" ng-model="isNewUser"> New user<br> <input
-			id="login-user" type="text" class="form-control" placeholder="Name"
-			ng-model="loggedUser.name">
-	</div>
-	<button id="submit-login" style="margin-top: 25px" type="submit"
-		class="btn btn-default" ng-click="login()">Login</button>
-	<button id="cancel-login" style="margin-top: 25px" type="submit"
-		class="btn btn-default" ng-click="showLogin = false">Cancel</button>
-</form>
 
 <div d3-tree data="graphData"></div>
 
