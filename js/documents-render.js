@@ -104,10 +104,10 @@ var documentsRender = function(scope, $rootScope) {
 				title : 'Remove',
 				action : function(elm, d, i) {
 
+					removeDocument(elm.id);
+
 					$.get(serverUrl + '/documents/' + elm.id + '/remove',
 							function() {
-
-								removeDocument(elm.id);
 
 								// register event
 								$.get(serverUrl + '/events/add/document/'
@@ -712,16 +712,15 @@ var documentsRender = function(scope, $rootScope) {
 
 	function removeDocument(docId) {
 
-		svg.selectAll(".docContainer .myCursor-pointer-move").filter(
-				function() {
+		svg.selectAll(".docContainer > image").filter(function() {
 
-					var sel = d3.select(this);
+			var sel = d3.select(this);
 
-					var document = sel[0][0];
-					var id = document.attributes.id.nodeValue;
-					return id == docId;
+			var document = sel[0][0];
+			var id = document.attributes.id.nodeValue;
+			return id == docId;
 
-				}).remove();
+		}).remove();
 	}
 
 	function isAlreadyTagged(nodeId, taggedAreaId) {
