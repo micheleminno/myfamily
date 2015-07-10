@@ -107,25 +107,42 @@ app.directive("compareTo", function() {
 	};
 });
 
-app.directive('d3Tree', [ '$window', 'MyFamilyService',
-		function($window, MyFamilyService) {
+app.directive('d3Tree', [ '$window', '$rootScope', 'MyFamilyService',
+		function($window, $rootScope, MyFamilyService) {
 
 			return {
 
 				restrict : 'A',
 
 				scope : {
-					data : '='
+					graph : '=',
+					documents : '=',
+					notifications : '='
 				},
 				link : function(scope, element, attrs) {
 
-					scope.$watch('data', function(newVals, oldVals) {
+					scope.server = MyFamilyService;
 
-						return scope.render(newVals);
+					scope.$watch('graph', function(newVals, oldVals) {
+
+						return scope.renderGraph(scope, $rootScope);
+
+					}, true);
+
+					scope.$watch('documents', function(newVals, oldVals) {
+
+						return scope.renderDocuments(scope, $rootScope);
+
+					}, true);
+
+					scope.$watch('notifications', function(newVals, oldVals) {
+
+						return scope.renderNotifications(scope, $rootScope);
 
 					}, true);
 
 					window.onresize = function() {
+
 						scope.$apply();
 					};
 
@@ -135,10 +152,12 @@ app.directive('d3Tree', [ '$window', 'MyFamilyService',
 
 					}, function() {
 
-						scope.render(scope.data);
+						scope.renderGraph(scope, $rootScope);
 					});
 
-					scope.render = treeRender;
+					scope.renderGraph = graphRender;
+					scope.renderDocuments = documentsRender;
+					scope.renderNotifications = notificationsRender;
 				}
 			};
 

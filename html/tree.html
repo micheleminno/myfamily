@@ -49,13 +49,12 @@
 					aria-expanded="false"> Notifications <span
 						class="caret myCaret"></span></a>
 					<ul class="dropdown-menu" role="menu" id="notifications-list">
-					<li ng-repeat="notification in notifications"><a href=""
-							>{{notification.label}}</a></li>
+						<li ng-repeat="notification in notifications"><a href="">{{notification.label}}</a></li>
 					</ul></li>
 
 				<li class="dropdown"><a href="" id="logged-user"
 					class="dropdown-toggle" data-toggle="dropdown" role="button"
-					aria-expanded="false"> </a>
+					aria-expanded="false"> {{username}} <span class="caret myCaret"></span></a>
 					<ul class="dropdown-menu" role="menu">
 						<li><a href="mockup/profile.pdf">Profile</a></li>
 						<li><a href="#">Settings</a></li>
@@ -69,7 +68,8 @@
 
 
 
-<div d3-tree data="graphData"></div>
+<div d3-tree graph="graphData" documents="documentsData"
+	notifications="notificationsData"></div>
 
 
 <iframe id="upload_target" name="upload_target" src="#"
@@ -133,7 +133,8 @@
 			</div>
 			<div class="modal-footer">
 				<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
-				<button class="btn btn-primary" id="uploadDocument">Upload</button>
+				<button class="btn btn-primary" id="uploadDocument"
+					ng-click="uploadNewDocument()">Upload</button>
 			</div>
 		</div>
 	</div>

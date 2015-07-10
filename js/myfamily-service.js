@@ -91,14 +91,71 @@ app.service('MyFamilyService', function($http, $q) {
 
 		var deferred = $q.defer();
 
-		$http.get($.get(serverUrl + '/graph/addPerson?name=' + name).success(
+		$http.get(serverUrl + '/graph/addPerson?name=' + name).success(
 				function(data) {
 
 					if (data) {
 
 						deferred.resolve(data.personId);
 					}
-				}));
+				});
+
+		return deferred.promise;
+	};
+
+	this.addNode = function(type, userId, otherNodeId, otherNodeRole) {
+
+		var deferred = $q.defer();
+
+		$http.get(
+				serverUrl + "/" + userId + '/graph/add?type=' + type + '&'
+						+ otherNodeRole + '=' + otherNodeId).success(
+
+		function(data) {
+
+			if (data) {
+
+				deferred.resolve(data);
+			}
+		});
+
+		return deferred.promise;
+	};
+
+	this.removeNode = function(userId, nodeId) {
+
+		var deferred = $q.defer();
+
+		$http.get(serverUrl + "/" + userId + '/graph/remove/' + nodeId)
+				.success(
+
+				function(data) {
+
+					if (data) {
+
+						deferred.resolve(data);
+					}
+				});
+
+		return deferred.promise;
+	};
+
+	this.addDocument = function(fileName, title, date, tagged, owner) {
+
+		var deferred = $q.defer();
+
+		$http.get(
+				serverUrl + "/documents/add/document?file=" + fileName
+						+ "&title=" + title + "&date=" + date + "&tagged="
+						+ JSON.stringify(tagged) + '&owner=' + owner).success(
+
+		function(data) {
+
+			if (data) {
+
+				deferred.resolve(data);
+			}
+		});
 
 		return deferred.promise;
 	};
