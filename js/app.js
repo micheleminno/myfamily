@@ -107,37 +107,39 @@ app.directive("compareTo", function() {
 	};
 });
 
-app.directive('d3Tree', [ '$window', '$rootScope', 'MyFamilyService',
-		function($window, $rootScope, MyFamilyService) {
+app.directive('d3Tree', [
+		'$window',
+		'MyFamilyService',
+		function($window, MyFamilyService) {
 
 			return {
 
 				restrict : 'A',
 
-				scope : {
-					graph : '=',
-					documents : '=',
-					notifications : '='
-				},
+				scope : false,
+			
+				controller : 'MainCtrl',
+				
 				link : function(scope, element, attrs) {
 
-					scope.server = MyFamilyService;
+					scope.$watch('graphData', function(newVals, oldVals) {
 
-					scope.$watch('graph', function(newVals, oldVals) {
-
-						return scope.renderGraph(scope, $rootScope);
+						return scope.renderGraph(scope, scope.graphData,
+								scope.configurationData, MyFamilyService, scope.svg);
 
 					}, true);
 
-					scope.$watch('documents', function(newVals, oldVals) {
+					scope.$watch('documentsData', function(newVals, oldVals) {
 
-						return scope.renderDocuments(scope, $rootScope);
+						return scope.renderDocuments(scope, scope.documentsData, scope.graphData,
+								scope.configurationData, MyFamilyService, scope.svg);
 
 					}, true);
 
 					scope.$watch('notifications', function(newVals, oldVals) {
 
-						return scope.renderNotifications(scope, $rootScope);
+						return scope.renderNotifications(scope.notifications,
+								scope.configuration, MyFamilyService);
 
 					}, true);
 
@@ -152,7 +154,8 @@ app.directive('d3Tree', [ '$window', '$rootScope', 'MyFamilyService',
 
 					}, function() {
 
-						scope.renderGraph(scope, $rootScope);
+						scope.renderGraph(scope.graph, scope.configuration,
+								MyFamilyService);
 					});
 
 					scope.renderGraph = graphRender;

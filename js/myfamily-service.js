@@ -2,6 +2,8 @@ app.service('MyFamilyService', function($http, $q) {
 
 	var serverUrl = 'http://localhost:8091';
 
+	// User
+
 	this.getUser = function(name) {
 
 		var deferred = $q.defer();
@@ -30,63 +32,6 @@ app.service('MyFamilyService', function($http, $q) {
 		return deferred.promise;
 	};
 
-	this.getGraphView = function(userId, viewId) {
-
-		var deferred = $q.defer();
-
-		$http.get(serverUrl + "/" + userId + "/graph/view?view=" + viewId)
-				.success(function(graphView) {
-
-					deferred.resolve(graphView);
-				});
-
-		return deferred.promise;
-	};
-
-	this.getNotifications = function(userId, nodes) {
-
-		var deferred = $q.defer();
-
-		var httpPostConfig = {
-
-			url : serverUrl + "/" + userId + "/events",
-			method : "POST",
-			data : JSON.stringify(nodes),
-			headers : {
-				'Content-Type' : 'application/json'
-			}
-		};
-
-		$http(httpPostConfig).success(function(events) {
-
-			deferred.resolve(events);
-		});
-
-		return deferred.promise;
-	};
-
-	this.getDocuments = function(userId, nodes) {
-
-		var deferred = $q.defer();
-
-		var httpPostConfig = {
-
-			url : serverUrl + "/documents" + "/" + userId,
-			method : "POST",
-			data : JSON.stringify(nodes),
-			headers : {
-				'Content-Type' : 'application/json'
-			}
-		};
-
-		$http(httpPostConfig).success(function(documents) {
-
-			deferred.resolve(documents);
-		});
-
-		return deferred.promise;
-	};
-
 	this.addUser = function(name) {
 
 		var deferred = $q.defer();
@@ -98,6 +43,21 @@ app.service('MyFamilyService', function($http, $q) {
 
 						deferred.resolve(data.personId);
 					}
+				});
+
+		return deferred.promise;
+	};
+
+	// Graph
+
+	this.getGraphView = function(userId, viewId) {
+
+		var deferred = $q.defer();
+
+		$http.get(serverUrl + "/" + userId + "/graph/view?view=" + viewId)
+				.success(function(graphView) {
+
+					deferred.resolve(graphView);
 				});
 
 		return deferred.promise;
@@ -135,6 +95,67 @@ app.service('MyFamilyService', function($http, $q) {
 
 						deferred.resolve(data);
 					}
+				});
+
+		return deferred.promise;
+	};
+
+	// Notifications
+
+	this.getNotifications = function(userId, nodes) {
+
+		var deferred = $q.defer();
+
+		var httpPostConfig = {
+
+			url : serverUrl + "/" + userId + "/events",
+			method : "POST",
+			data : JSON.stringify(nodes),
+			headers : {
+				'Content-Type' : 'application/json'
+			}
+		};
+
+		$http(httpPostConfig).success(function(events) {
+
+			deferred.resolve(events);
+		});
+
+		return deferred.promise;
+	};
+
+	// Documents
+
+	this.getDocuments = function(userId, nodes) {
+
+		var deferred = $q.defer();
+
+		var httpPostConfig = {
+
+			url : serverUrl + "/documents" + "/" + userId,
+			method : "POST",
+			data : JSON.stringify(nodes),
+			headers : {
+				'Content-Type' : 'application/json'
+			}
+		};
+
+		$http(httpPostConfig).success(function(documents) {
+
+			deferred.resolve(documents);
+		});
+
+		return deferred.promise;
+	};
+
+	this.getDocument = function(docId) {
+
+		var deferred = $q.defer();
+
+		$http.get(serverUrl + "/documents/" + docId).success(
+				function(document) {
+
+					deferred.resolve(document);
 				});
 
 		return deferred.promise;

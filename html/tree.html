@@ -68,8 +68,7 @@
 
 
 
-<div d3-tree graph="graphData" documents="documentsData"
-	notifications="notificationsData"></div>
+<div d3-tree></div>
 
 
 <iframe id="upload_target" name="upload_target" src="#"
@@ -92,6 +91,7 @@
 			<div class="modal-body">
 
 				<h4>Select document in your local disk</h4>
+
 				<iframe id="upload_target" name="upload_target" src="#"
 					style="display: none;"></iframe>
 
@@ -121,14 +121,19 @@
 							Add <span class="caret"></span>
 						</button>
 
-						<ul id="add-taggedPersons" class="dropdown-menu"
+						<ul id="add-taggablePersons" class="dropdown-menu"
 							aria-labelledby="dropdownMenuTagged">
+							<li ng-repeat="taggableUser in taggableUsers"><a href=""
+								ng-click="addInTaggedUsers(taggableUser)">{{taggableUser.name}}</a></li>
 						</ul>
 					</div>
 
 				</div>
 				<br />
 				<ul style="margin-top: 16px" id="add-taggedArea" name="taggedArea"></ul>
+				<li ng-repeat="taggedUser in taggedUsers"><a href=""
+					ng-click="">{{taggedUser.name}}</a><a style="margin-left: 5px" href=""
+					ng-click="removeFromTaggedUsers(taggedUser)">(remove)</a></li>
 
 			</div>
 			<div class="modal-footer">

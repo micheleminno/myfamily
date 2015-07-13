@@ -1,14 +1,14 @@
 var serverUrl = 'http://localhost:8091';
 var commons = window.commons || {};
 
-var graphRender = function(scope, $rootScope) {
+var graphRender = function(scope, graph, configuration, server, svg) {
 
-	if (!scope.graph) {
+	if (!graph) {
 
 		return;
 	}
 
-	var svg = null;
+	var svgParent = null;
 	var container = null;
 	var force = null;
 	var nodeDrag = null;
@@ -19,34 +19,35 @@ var graphRender = function(scope, $rootScope) {
 
 		var zoom = d3.behavior.zoom().scaleExtent([ .5, 4 ]).on("zoom", zoomed);
 
-		svg = d3.select("body").append("svg").attr("width", $rootScope.width)
-				.attr("height", $rootScope.height).append("g").attr(
-						"transform", "translate(300, 100)scale(.4)").attr(
-						"class", "myCursor-zoom-move");
+		svgParent = d3.select("body").append("svg").attr("width",
+				configuration.width).attr("height", configuration.height)
+				.append("g").attr("transform", "translate(300, 100)scale(.4)")
+				.attr("class", "myCursor-zoom-move");
 
-		svg.on("click", clickSvg);
+		svgParent.on("click", clickSvg);
 
-		svg.append("circle").attr("r", $rootScope.width * 10).attr("class",
-				"lens").style("pointer-events", "all").call(zoom);
+		svgParent.append("circle").attr("r", configuration.width * 10).attr(
+				"class", "lens").style("pointer-events", "all").call(zoom);
 
-		svg.append("rect").attr("class", "ground").attr("width", 600).attr(
-				"height", 200).attr("x", -700).attr("y", 1100).attr("cursor",
-				"pointer");
+		svgParent.append("rect").attr("class", "ground").attr("width", 600)
+				.attr("height", 200).attr("x", -700).attr("y", 1100).attr(
+						"cursor", "pointer");
 
-		svg.append("text").attr('class', "nodeLabel").attr("y", 1080).attr("x",
-				-650).text("Heritage");
+		svgParent.append("text").attr('class', "nodeLabel").attr("y", 1080)
+				.attr("x", -650).text("Heritage");
 
-		svg.append("rect").attr("class", "ground").attr("width", 500).attr(
-				"height", 200).attr("x", 1900).attr("y", 1100).attr("cursor",
-				"pointer");
+		svgParent.append("rect").attr("class", "ground").attr("width", 500)
+				.attr("height", 200).attr("x", 1900).attr("y", 1100).attr(
+						"cursor", "pointer");
 
-		svg.append("text").attr('class', "nodeLabel").attr("y", 1080).attr("x",
-				2220).text("Heritage");
+		svgParent.append("text").attr('class', "nodeLabel").attr("y", 1080)
+				.attr("x", 2220).text("Heritage");
 
-		container = svg.append("g");
+		container = svgParent.append("g");
 
-		force = d3.layout.force().size([ $rootScope.width, $rootScope.height ])
-				.gravity(0).charge(function(d) {
+		force = d3.layout.force().size(
+				[ configuration.width, configuration.height ]).gravity(0)
+				.charge(function(d) {
 					if (d.person) {
 						return -2000 / d.level;
 					} else {
@@ -65,17 +66,17 @@ var graphRender = function(scope, $rootScope) {
 		}).on("dragstart", nodeDragstarted).on("drag", nodeDragged).on(
 				"dragend", nodeDragended);
 
-		$rootScope.link = container.selectAll(".link");
-		$rootScope.node = container.selectAll(".node");
+		svg.link = container.selectAll(".link");
+		svg.node = container.selectAll(".node");
 	}
 
 	function updateGraph() {
 
-		scope.server.getGraphView(scope.graph.userId, scope.graph.viewId).then(
+		server.getGraphView(graph.userId, graph.viewId).then(
 				function(graphView) {
 
-					scope.graph.nodes = graphView.nodes;
-					scope.graph.links = graphView.links;
+					graph.nodes = graphView.nodes;
+					graph.links = graphView.links;
 				});
 	}
 
@@ -84,8 +85,8 @@ var graphRender = function(scope, $rootScope) {
 				title : 'Add family as a parent',
 				action : function(elm, d, i) {
 
-					scope.server.addNode('family', scope.graph.userId,
-							d.originalId, 'source').then(function() {
+					server.addNode('family', graph.userId, d.originalId,
+							'source').then(function() {
 
 						updateGraph();
 					});
@@ -95,8 +96,8 @@ var graphRender = function(scope, $rootScope) {
 				title : 'Add family as a child',
 				action : function(elm, d, i) {
 
-					scope.server.addNode('family', scope.graph.userId,
-							d.originalId, 'target').then(function() {
+					server.addNode('family', graph.userId, d.originalId,
+							'target').then(function() {
 
 						updateGraph();
 					});
@@ -106,8 +107,8 @@ var graphRender = function(scope, $rootScope) {
 				title : 'Remove',
 				action : function(elm, d, i) {
 
-					scope.server.removeNode(scope.graph.userId, d.originalId)
-							.then(function() {
+					server.removeNode(graph.userId, d.originalId).then(
+							function() {
 
 								updateGraph();
 							});
@@ -119,8 +120,8 @@ var graphRender = function(scope, $rootScope) {
 				title : 'Add parent',
 				action : function(elm, d, i) {
 
-					scope.server.addNode('person', scope.graph.userId,
-							d.originalId, 'target').then(function() {
+					server.addNode('person', graph.userId, d.originalId,
+							'target').then(function() {
 
 						updateGraph();
 					});
@@ -130,8 +131,8 @@ var graphRender = function(scope, $rootScope) {
 				title : 'Add child',
 				action : function(elm, d, i) {
 
-					scope.server.addNode('person', scope.graph.userId,
-							d.originalId, 'source').then(function() {
+					server.addNode('person', graph.userId, d.originalId,
+							'source').then(function() {
 
 						updateGraph();
 					});
@@ -141,8 +142,8 @@ var graphRender = function(scope, $rootScope) {
 				title : 'Remove',
 				action : function(elm, d, i) {
 
-					scope.server.removeNode(scope.graph.userId, d.originalId)
-							.then(function() {
+					server.removeNode(graph.userId, d.originalId).then(
+							function() {
 
 								updateGraph();
 							});
@@ -155,15 +156,14 @@ var graphRender = function(scope, $rootScope) {
 
 		if (viewId != 4) {
 
-			svg.on('contextmenu', null);
+			svgParent.on('contextmenu', null);
 		}
 
-		force.nodes(scope.graph.nodes).links(scope.graph.links).start();
+		force.nodes(graph.nodes).links(graph.links).start();
 
-		$rootScope.link = $rootScope.link.data(scope.graph.links).enter()
-				.append("path");
+		svg.link = svg.link.data(graph.links).enter().append("path");
 
-		$rootScope.link.each(function(d) {
+		svg.link.each(function(d) {
 
 			currentLink = d3.select(this);
 			currentLink.attr("class", "link").attr("stroke-width", function(d) {
@@ -227,10 +227,9 @@ var graphRender = function(scope, $rootScope) {
 							});
 		};
 
-		$rootScope.node = $rootScope.node.data(scope.graph.nodes).enter()
-				.append("g");
+		svg.node = svg.node.data(graph.nodes).enter().append("g");
 
-		$rootScope.node
+		svg.node
 				.each(function(d) {
 
 					currentNode = d3.select(this);
@@ -245,25 +244,25 @@ var graphRender = function(scope, $rootScope) {
 									.contextMenu(onPersonMenu));
 						}
 
-						var defs = currentNode.append('svg:defs');
+						var defs = currentNode.append('svgParent:defs');
 
-						clipPath = defs.append("svg:clipPath").attr("id",
+						clipPath = defs.append("svgParent:clipPath").attr("id",
 								"clipPath_" + d.originalId);
 
 						var circleSize = commons.getCircleSize(d,
-								scope.graph.userLabel);
-						var nodeClass = commons.getNodeClass(d,
-								scope.graph.userLabel);
+								graph.userLabel);
+						var nodeClass = commons
+								.getNodeClass(d, graph.userLabel);
 
 						clipPath.append("circle").attr("class", nodeClass)
 								.attr("r", circleSize).attr("id",
 										"circle_" + d.originalId);
 
-						currentNode.append("svg:use").attr("xlink:href",
+						currentNode.append("svgParent:use").attr("xlink:href",
 								"#" + "circle_" + d.originalId);
 
 						currentNode
-								.append("svg:image")
+								.append("svgParent:image")
 								.attr("class", "profile-image")
 								.attr(
 										"xlink:href",
@@ -288,7 +287,7 @@ var graphRender = function(scope, $rootScope) {
 							return d.label;
 						}).call(commons.makeEditable);
 
-						if (d.originalId == $rootScope.selectedNodeId) {
+						if (d.originalId == svg.selectedNodeId) {
 
 							commons.selectNode(this, d);
 						}
@@ -310,36 +309,35 @@ var graphRender = function(scope, $rootScope) {
 					}
 				});
 
-		$rootScope.streamNode = svg.append("g").attr("cursor", "auto");
+		svg.streamNode = svgParent.append("g").attr("cursor", "auto");
 
-		$rootScope.streamNode.append("circle").attr("r", 30).attr("cx",
-				$rootScope.streamX - 67).attr("cy", $rootScope.streamY + 50)
-				.attr("class", "navigator");
+		svg.streamNode.append("circle").attr("r", 30).attr("cx",
+				configuration.streamX - 67).attr("cy",
+				configuration.streamY + 50).attr("class", "navigator");
 
-		$rootScope.streamNode.append("text").attr("class",
-				"navigator-arrow left-arrow")
-				.attr("x", $rootScope.streamX - 88).attr("y",
-						$rootScope.streamY + 65).text("<").attr("cursor",
-						"pointer");
+		svg.streamNode.append("text").attr("class",
+				"navigator-arrow left-arrow").attr("x",
+				configuration.streamX - 88).attr("y",
+				configuration.streamY + 65).text("<").attr("cursor", "pointer");
 
-		$rootScope.streamNode.append("circle").attr("r", 30).attr("cx",
-				$rootScope.streamX + $rootScope.streamWidth + 66).attr("cy",
-				$rootScope.streamY + 45).attr("class", "navigator");
+		svg.streamNode.append("circle").attr("r", 30).attr("cx",
+				configuration.streamX + configuration.streamWidth + 66).attr(
+				"cy", configuration.streamY + 45).attr("class", "navigator");
 
-		$rootScope.streamNode.append("text").attr("class",
+		svg.streamNode.append("text").attr("class",
 				"navigator-arrow right-arrow").attr("x",
-				$rootScope.streamX + $rootScope.streamWidth + 50).attr("y",
-				$rootScope.streamY + 60).text(">").attr("cursor", "pointer");
+				configuration.streamX + configuration.streamWidth + 50).attr(
+				"y", configuration.streamY + 60).text(">").attr("cursor",
+				"pointer");
 
-		$rootScope.streamNode.append("rect").attr("width",
-				$rootScope.streamWidth).attr("height", $rootScope.streamHeight)
-				.attr("x", $rootScope.streamX).attr("y", $rootScope.streamY)
+		svg.streamNode.append("rect").attr("width", configuration.streamWidth)
+				.attr("height", configuration.streamHeight).attr("x",
+						configuration.streamX).attr("y", configuration.streamY)
 				.attr("rx", 20).attr("ry", 20).attr("class", "data-stream");
 
 	}
 
-	drawTree(scope.graph.userId, scope.graph.userLabel, scope.graph.viewId,
-			scope.graph.viewLabel);
+	drawTree(graph.userId, graph.userLabel, graph.viewId, graph.viewLabel);
 
 	var diagonal = d3.svg.diagonal().source(function(d) {
 
@@ -362,33 +360,33 @@ var graphRender = function(scope, $rootScope) {
 
 	function tick() {
 
-		$rootScope.link.attr("d", diagonal);
+		svg.link.attr("d", diagonal);
 
-		$rootScope.node.selectAll(".node").attr("cx", function(d) {
+		svg.node.selectAll(".node").attr("cx", function(d) {
 			return d.x;
 		}).attr("cy", function(d) {
 			return d.y;
 		});
 
-		$rootScope.node.selectAll(".nodeLabel").attr("x", function(d) {
+		svg.node.selectAll(".nodeLabel").attr("x", function(d) {
 			return d.x - 25;
 		}).attr("y", function(d) {
-			return d.y + commons.getCircleSize(d, scope.graph.userLabel);
+			return d.y + commons.getCircleSize(d, graph.userLabel);
 		});
 
-		$rootScope.node.selectAll(".my-nodeLabel").attr("x", function(d) {
+		svg.node.selectAll(".my-nodeLabel").attr("x", function(d) {
 			return d.x - 45;
 		}).attr("y", function(d) {
-			return d.y + commons.getCircleSize(d, scope.graph.userLabel);
+			return d.y + commons.getCircleSize(d, graph.userLabel);
 		});
 
-		$rootScope.node.selectAll(".profile-image").attr("x", function(d) {
-			return d.x - commons.getCircleSize(d, scope.graph.userLabel);
+		svg.node.selectAll(".profile-image").attr("x", function(d) {
+			return d.x - commons.getCircleSize(d, graph.userLabel);
 		}).attr("y", function(d) {
-			return d.y - commons.getCircleSize(d, scope.graph.userLabel);
+			return d.y - commons.getCircleSize(d, graph.userLabel);
 		});
 
-		$rootScope.node.selectAll("ellipse").attr("cx", function(d) {
+		svg.node.selectAll("ellipse").attr("cx", function(d) {
 			return d.x;
 		}).attr("cy", function(d) {
 			return d.y;
@@ -415,13 +413,13 @@ var graphRender = function(scope, $rootScope) {
 
 	function profileImageUploadContinueExecution() {
 
-		svg.selectAll(".profile-image").filter(function(d) {
+		svgParent.selectAll(".profile-image").filter(function(d) {
 
 			return d.originalId == nodeIdToUpdate;
 
 		}).attr("xlink:href", "./docs/" + fileName);
 
-		svg.selectAll(".profile-image--selected").attr("xlink:href",
+		svgParent.selectAll(".profile-image--selected").attr("xlink:href",
 				"./docs/" + fileName);
 	}
 
@@ -431,15 +429,15 @@ var graphRender = function(scope, $rootScope) {
 			return;
 		}
 
-		$rootScope.selectedNodeId = null;
+		svg.selectedNodeId = null;
 
-		var sel = svg.selectAll(".selection");
+		var sel = svgParent.selectAll(".selection");
 		sel.remove();
 
-		var actions = svg.selectAll(".action");
+		var actions = svgParent.selectAll(".action");
 		actions.remove();
 
-		svg.selectAll(".tree-leaf").style("pointer-events", "all");
+		svgParent.selectAll(".tree-leaf").style("pointer-events", "all");
 	}
 
 	function zoomed() {
@@ -452,18 +450,18 @@ var graphRender = function(scope, $rootScope) {
 
 		d3.select(this).classed("fixed", d.fixed = true);
 
-		if (!$rootScope.selectedNodeId) {
+		if (!configuration.selectedNodeId) {
 			d3.event.sourceEvent.stopPropagation();
 			d3.select(this).classed("dragging", true);
 		}
 
-		var actions = svg.selectAll(".action");
+		var actions = svgParent.selectAll(".action");
 		actions.remove();
 	}
 
 	function nodeDragged(d) {
 
-		if (!$rootScope.selectedNodeId) {
+		if (!configuration.selectedNodeId) {
 			d3.select(this).attr("x", d.x = d3.event.x).attr("y",
 					d.y = d3.event.y);
 		}
@@ -471,12 +469,12 @@ var graphRender = function(scope, $rootScope) {
 
 	function nodeDragended(d) {
 
-		if (!$rootScope.selectedNodeId) {
+		if (!svg.selectedNodeId) {
 			d3.select(this).classed("dragging", false);
 
-			$.get(serverUrl + '/' + scope.graph.userId + '/view/'
-					+ scope.graph.viewId + '/update?node=' + d.originalId
-					+ '&x=' + d.x + '&y=' + d.y);
+			$.get(serverUrl + '/' + graph.userId + '/view/' + graph.viewId
+					+ '/update?node=' + d.originalId + '&x=' + d.x + '&y='
+					+ d.y);
 		}
 	}
 };

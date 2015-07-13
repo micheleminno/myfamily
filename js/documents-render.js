@@ -1,9 +1,10 @@
 var serverUrl = 'http://localhost:8091';
 var commons = window.commons || {};
 
-var documentsRender = function(scope, $rootScope) {
+var documentsRender = function(scope, documents, graph, configuration, server,
+		svg) {
 
-	if (!scope.documents) {
+	if (!documents) {
 
 		return;
 	}
@@ -12,11 +13,34 @@ var documentsRender = function(scope, $rootScope) {
 		title : 'Add document',
 		action : function(elm, d, i) {
 
-			$('#add-taggedArea').html('');
-			$('#add-taggedArea').append(
-					'<li id="' + d.originalId + '">' + d.label + '</li>');
+			var loggedUser = {
+				id : d.originalId,
+				name : d.label
+			};
 
-			fillTaggedPersons($rootScope.nodes, 'add');
+			scope.taggableUsers = [];
+			scope.taggedUsers = [];
+			scope.taggedUsers.push(loggedUser);
+
+			for (nodeIndex in graph.nodes) {
+
+				var node = graph.nodes[nodeIndex];
+				var currentUser = {
+					id : node.originalId,
+					name : node.label
+				};
+
+				var taggedUsersIds = scope.taggedUsers.map(function(user) {
+					return user.id;
+				});
+
+				if (node.person && taggedUsersIds.indexOf(currentUser.id) == -1) {
+
+					scope.taggableUsers.push(currentUser);
+				}
+			}
+
+			scope.$apply();
 
 			$('#addDocumentModal').modal('show');
 		}
@@ -34,8 +58,16 @@ var documentsRender = function(scope, $rootScope) {
 		title : 'Add document',
 		action : function(elm, d, i) {
 
-			$('#add-taggedArea').html('');
-			$('#add-taggedArea').append('<li id="-1">Heritage</li>');
+			var heritageNode = {
+				id : -1,
+				name : "Heritage"
+			};
+
+			scope.taggableUsers = [];
+			scope.taggedUsers = [];
+			scope.taggedUsers.push(heritageNode);
+
+			scope.$apply();
 
 			$('#addDocumentModal #tagged').hide();
 			$('#addDocumentModal').modal('show');
@@ -47,9 +79,9 @@ var documentsRender = function(scope, $rootScope) {
 				title : 'Edit',
 				action : function(elm, d, i) {
 
-					$
-							.get(
-									serverUrl + '/documents/' + elm.id,
+					server
+							.getDocument(elm.id)
+							.then(
 									function(data) {
 
 										if (data.document != -1) {
@@ -57,25 +89,21 @@ var documentsRender = function(scope, $rootScope) {
 											$('#edit-taggedArea').html('');
 
 											var tagged = data.document.tagged;
+											scope.taggedUsers = [];
 											for ( var taggedIndex in tagged) {
 
 												tag = tagged[taggedIndex];
 												if (tag.id != -1) {
-													$('#edit-taggedArea')
-															.append(
-																	'<li id="'
-																			+ tag.id
-																			+ '">'
-																			+ tag.label
-																			+ '<a id="remove-'
-																			+ tag.id
-																			+ '" style="margin-left: 5px" href="">(remove)</a>'
-																			+ '</li>');
+
+													var taggedUser = {
+														id : tag.id,
+														name : tag.label
+													};
+
+													scope.taggedUsers
+															.push(taggedUser);
 												}
 											}
-
-											fillTaggedPersons($rootScope.nodes,
-													'edit');
 
 											if (d) {
 												$('#edit-nodeId').text(
@@ -98,6 +126,7 @@ var documentsRender = function(scope, $rootScope) {
 													'show');
 										}
 									});
+
 				}
 			},
 			{
@@ -118,14 +147,14 @@ var documentsRender = function(scope, $rootScope) {
 				}
 			} ];
 
-	var svg = null;
+	var svgParent = null;
 
 	function drawTree(userId, userLabel, viewId, viewLabel) {
 
-		svg = d3.select("svg");
-		svg.selectAll(".ground").on("click", groundClicked);
+		svgParent = d3.select("svg");
+		svgParent.selectAll(".ground").on("click", groundClicked);
 
-		$rootScope.node.each(function(d) {
+		svg.node.each(function(d) {
 
 			currentNode = d3.select(this);
 
@@ -135,23 +164,23 @@ var documentsRender = function(scope, $rootScope) {
 			}
 		});
 
-		svg.selectAll(".left-arrow").on("click", backMain);
-		svg.selectAll(".right-arrow").on("click", forwardMain);
+		svgParent.selectAll(".left-arrow").on("click", backMain);
+		svgParent.selectAll(".right-arrow").on("click", forwardMain);
 
 		fillStream();
 	}
 
-	drawTree(scope.documents.userId, scope.documents.userLabel,
-			scope.documents.viewId, scope.documents.viewLabel);
+	drawTree(documents.userId, documents.userLabel, documents.viewId,
+			documents.viewLabel);
 
 	function fillStream() {
 
-		var documentsSize = scope.documents.length;
+		var documentsSize = documents.length;
 
 		if (documentsSize > 0) {
 
 			currentPage = Math.floor(documentsSize
-					/ ($rootScope.docRowSize + 1));
+					/ (configuration.docRowSize + 1));
 			maxPage = currentPage;
 			populateThumbnails(currentPage, true);
 		}
@@ -159,27 +188,29 @@ var documentsRender = function(scope, $rootScope) {
 
 	function populateThumbnails(currentPage, back) {
 
-		var minIndex = currentPage * $rootScope.docRowSize;
+		var minIndex = currentPage * configuration.docRowSize;
 
-		for (docIndex in scope.documents) {
+		for (docIndex in documents) {
 
-			var doc = scope.documents[docIndex];
+			var doc = documents[docIndex];
 			doc.index = parseInt(docIndex);
 		}
 
-		var currentDocuments = scope.documents.filter(function(d) {
+		var currentDocuments = documents.filter(function(d) {
 
 			return d.index >= minIndex
-					&& d.index < minIndex + $rootScope.docRowSize;
+					&& d.index < minIndex + configuration.docRowSize;
 		});
 
-		var doc = $rootScope.streamNode.selectAll(".doc");
+		var doc = svg.streamNode.selectAll(".doc");
 		var sel = doc.data(currentDocuments, function(d) {
 			return d.index;
 		});
 
-		var oldTarget = back ? $rootScope.streamWidth : $rootScope.streamX;
-		var newTarget = back ? $rootScope.streamX : $rootScope.streamWidth;
+		var oldTarget = back ? configuration.streamWidth
+				: configuration.streamX;
+		var newTarget = back ? configuration.streamX
+				: configuration.streamWidth;
 
 		var newDelay = function(d) {
 			return back ? (currentDocuments.length - (d.index - minIndex))
@@ -202,8 +233,8 @@ var documentsRender = function(scope, $rootScope) {
 							return d.file.substr(-4) === ".pdf" ? "./docs/default_pdf.png"
 									: "./docs/" + d.file;
 						}).attr("width", 100).attr("height",
-						$rootScope.streamHeight).attr("y", $rootScope.streamY)
-				.attr("index", function(d) {
+						configuration.streamHeight).attr("y",
+						configuration.streamY).attr("index", function(d) {
 					return d.index;
 				}).attr("id", function(d) {
 					return d.id;
@@ -221,7 +252,7 @@ var documentsRender = function(scope, $rootScope) {
 				.duration(duration).delay(newDelay).ease("linear").attr(
 						"x",
 						function(d) {
-							return $rootScope.streamX + (d.index - minIndex)
+							return configuration.streamX + (d.index - minIndex)
 									* 100;
 						});
 
@@ -235,9 +266,9 @@ var documentsRender = function(scope, $rootScope) {
 			return;
 		}
 
-		svg.selectAll(".docText").remove();
-		svg.selectAll(".docText-small").remove();
-		svg.selectAll(".zoomedDoc").remove();
+		svgParent.selectAll(".docText").remove();
+		svgParent.selectAll(".docText-small").remove();
+		svgParent.selectAll(".zoomedDoc").remove();
 
 		var selection = d3.select(this);
 
@@ -283,11 +314,11 @@ var documentsRender = function(scope, $rootScope) {
 
 	function closeDocClicked() {
 
-		svg.selectAll(".zoomedDoc").remove();
-		svg.selectAll(".frame").remove();
-		svg.selectAll(".docText").remove();
-		svg.selectAll(".docText-small").remove();
-		svg.selectAll(".closeDoc").remove();
+		svgParent.selectAll(".zoomedDoc").remove();
+		svgParent.selectAll(".frame").remove();
+		svgParent.selectAll(".docText").remove();
+		svgParent.selectAll(".docText-small").remove();
+		svgParent.selectAll(".closeDoc").remove();
 
 		d3.event.stopPropagation();
 	}
@@ -435,21 +466,21 @@ var documentsRender = function(scope, $rootScope) {
 		doc.x.baseVal.value -= 50;
 		doc.y.baseVal.value -= 50;
 
-		if (!$rootScope.selectedNodeId
+		if (!svg.selectedNodeId
 				|| doc.attributes.url.nodeValue.substr(-4) === ".pdf") {
 
 			parent.append("text").attr("class", "thumbnailText").attr("x",
 					doc.x.baseVal.value).attr("y", doc.y.baseVal.value - 20)
 					.text(doc.attributes.title.nodeValue);
 
-			if (!$rootScope.selectedNodeId) {
+			if (!svg.selectedNodeId) {
 
 				parent.append("text").attr("class", "thumbnailText").attr("x",
 						doc.x.baseVal.value).attr("y",
 						doc.y.baseVal.value + 235).text(
 						doc.attributes.date.nodeValue);
 
-				$rootScope.node.classed("node--tagged", function(n) {
+				svg.node.classed("node--tagged", function(n) {
 
 					if (d.node) {
 
@@ -470,8 +501,8 @@ var documentsRender = function(scope, $rootScope) {
 
 	function thumbnailMouseouted(d) {
 
-		svg.selectAll(".thumbnailText").remove();
-		svg.selectAll(".thumbnail-frame").remove();
+		svgParent.selectAll(".thumbnailText").remove();
+		svgParent.selectAll(".thumbnail-frame").remove();
 
 		var selection = d3.select(this);
 		var doc = selection[0][0];
@@ -481,15 +512,15 @@ var documentsRender = function(scope, $rootScope) {
 		doc.x.baseVal.value += 50;
 		doc.y.baseVal.value += 50;
 
-		$rootScope.node.classed("node--tagged", false);
+		svg.node.classed("node--tagged", false);
 	}
 
 	function thumbnailClicked(d) {
 
-		svg.selectAll(".docText").remove();
-		svg.selectAll(".docText-small").remove();
-		svg.selectAll(".zoomedDoc").remove();
-		svg.selectAll(".frame").remove();
+		svgParent.selectAll(".docText").remove();
+		svgParent.selectAll(".docText-small").remove();
+		svgParent.selectAll(".zoomedDoc").remove();
+		svgParent.selectAll(".frame").remove();
 
 		var selection = d3.select(this);
 
@@ -542,14 +573,14 @@ var documentsRender = function(scope, $rootScope) {
 				'contextmenu',
 				d3.contextMenu(onHeritageMenu, function() {
 
-					$rootScope.uploadedDocumentPosition = [ this.event.x + 800,
+					svg.uploadedDocumentPosition = [ this.event.x + 800,
 							this.event.y + 800 ];
 				}));
 
 		selectedNode.append("text").attr('class', "label--selected").attr("y",
 				1130).attr("x", -650).text("Heritage");
 
-		$rootScope.selectedNodeId = -1;
+		svg.selectedNodeId = -1;
 
 		var centerX = -200;
 		var centerY = 1100;
@@ -620,50 +651,50 @@ var documentsRender = function(scope, $rootScope) {
 
 	commons.selectNode = function(clickedNode, d) {
 
-		$rootScope.selectedNode = d3.select(clickedNode).moveToFront().append(
-				"g").attr("class", "selection")
-				.style("pointer-events", "click");
+		svg.selectedNode = d3.select(clickedNode).moveToFront().append("g")
+				.attr("class", "selection").style("pointer-events", "click");
 
-		$rootScope.centerX = $rootScope.width / 10;
-		$rootScope.centerY = $rootScope.height / 1.7;
-		$rootScope.maxRowSize = 10;
+		configuration.centerX = configuration.width / 10;
+		configuration.centerY = configuration.height / 1.7;
+		configuration.maxRowSize = 10;
 
-		$rootScope.selectedNode.append("circle").attr('r', 615).attr("cx",
-				$rootScope.centerX).attr("cy", $rootScope.centerY).attr(
+		svg.selectedNode.append("circle").attr('r', 615).attr("cx",
+				configuration.centerX).attr("cy", configuration.centerY).attr(
 				'class', "node--selected").on("click", profileNodeClicked)
 				.attr("cursor", "auto").on(
 						'contextmenu',
 						d3.contextMenu(onSelectedNodeMenu, function() {
 
-							$rootScope.uploadedDocumentPosition = [
-									this.event.x, this.event.y ];
+							svg.uploadedDocumentPosition = [ this.event.x,
+									this.event.y ];
 						}));
 
-		var profileContainer = $rootScope.selectedNode.append("g").on(
-				"mouseover", profileMouseovered).on("mouseout",
-				profileMouseouted).on("click", profileNodeClicked);
+		var profileContainer = svg.selectedNode.append("g").on("mouseover",
+				profileMouseovered).on("mouseout", profileMouseouted).on(
+				"click", profileNodeClicked);
 
 		profileContainer.append("rect").attr("width", 220).attr("height", 220)
 				.attr('class', "profile-frame").attr("x",
-						$rootScope.centerX - 155).attr("y", -10);
+						configuration.centerX - 155).attr("y", -10);
 
 		var imagePath = d.img == "" ? "./docs/default_profile.jpg" : "./docs/"
 				+ d.img;
 
 		profileContainer.append("image").attr("width", 200).attr("height", 200)
 				.attr('class', "profile-image--selected").attr("x",
-						$rootScope.centerX - 145).attr("y", 0).attr(
+						configuration.centerX - 145).attr("y", 0).attr(
 						"xlink:href", imagePath).on("click",
 						profileImageClicked).attr("cursor", "auto").append(
 						"title").text("Click to upload a new profile image");
 
-		$rootScope.selectedNode.append("text").attr('class', "label--selected")
-				.attr("y", -50).attr("x", $rootScope.centerX - 230).text(
-						d.label).call(commons.makeEditable);
+		svg.selectedNode.append("text").attr('class', "label--selected").attr(
+				"y", -50).attr("x", configuration.centerX - 230).text(d.label)
+				.call(commons.makeEditable);
 
 		placeDocuments(serverUrl + "/documents?node=" + d.originalId
-				+ "&relation=tagged", $rootScope.selectedNode, d.originalId,
-				$rootScope.centerX, $rootScope.centerY, $rootScope.maxRowSize);
+				+ "&relation=tagged", svg.selectedNode, d.originalId,
+				configuration.centerX, configuration.centerY,
+				configuration.maxRowSize);
 	};
 
 	function clickNode(d) {
@@ -672,7 +703,7 @@ var documentsRender = function(scope, $rootScope) {
 			return;
 		}
 
-		$rootScope.selectedNodeId = d.originalId;
+		svg.selectedNodeId = d.originalId;
 
 		commons.selectNode(this, d);
 
@@ -683,7 +714,7 @@ var documentsRender = function(scope, $rootScope) {
 
 		d3.event.sourceEvent.stopPropagation();
 
-		svg.selectAll(".thumbnailText").remove();
+		svgParent.selectAll(".thumbnailText").remove();
 		d3.select(this).classed("dragging", true);
 	}
 
@@ -712,7 +743,7 @@ var documentsRender = function(scope, $rootScope) {
 
 	function removeDocument(docId) {
 
-		svg.selectAll(".docContainer > image").filter(function() {
+		svgParent.selectAll(".docContainer > image").filter(function() {
 
 			var sel = d3.select(this);
 
@@ -732,52 +763,5 @@ var documentsRender = function(scope, $rootScope) {
 		});
 
 		return tagged.indexOf(nodeId) > -1;
-	}
-
-	function fillTaggedPersons(nodes, mode) {
-
-		$('#' + mode + '-taggedPersons').html('');
-
-		for (nodeIndex in nodes) {
-
-			var node = $rootScope.nodes[nodeIndex];
-			if (node.person
-					&& !isAlreadyTagged(node.originalId, '#' + mode
-							+ '-taggedArea')) {
-
-				$('#' + mode + '-taggedPersons').append(
-						'<li id="' + node.originalId + '"><a href="">'
-								+ node.label + '</a></li>');
-			}
-		}
-
-		$('#' + mode + '-taggedArea li a').click(function() {
-
-			personId = $(this).attr('id');
-
-			$('#' + mode + '-taggedArea li#' + personId.slice(-1)).remove();
-
-			fillTaggedPersons($rootScope.nodes, mode);
-		});
-
-		$('#' + mode + '-taggedPersons li')
-				.on(
-						'click',
-						function() {
-
-							personId = $(this).attr('id');
-							personLabel = $(this).find('a').text();
-							$('#' + mode + '-taggedArea')
-									.append(
-											'<li id="'
-													+ personId
-													+ '">'
-													+ personLabel
-													+ '<a id="remove-'
-													+ personId
-													+ '" style="margin-left: 5px" href="">(remove)</a></li>');
-
-							fillTaggedPersons($rootScope.nodes, mode);
-						});
 	}
 };

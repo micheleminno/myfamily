@@ -1,8 +1,8 @@
 var serverUrl = 'http://localhost:8091';
 
-var notificationsRender = function(scope, $rootScope) {
+var notificationsRender = function(notifications, configuration, server) {
 
-	if (!scope.notifications) {
+	if (!notifications) {
 
 		return;
 	}
