@@ -9,69 +9,87 @@ var mainController = controllers
 					 * docs in this user view who are not already read by this
 					 * user.
 					 */
-					function fillNotifications(events, graphView) {
+					function fillNotifications(callback) {
 
-						$scope.graphData.events = events;
+						var data = {
+							nodes : $scope.graph.nodes
+						};
 
-						$scope.notifications = [];
+						MyFamilyService
+								.getEvents($scope.graph.userId, data)
+								.then(
+										function(events) {
 
-						$.each(events, function(i, item) {
+											var newEventIds = events
+													.filter(
+															function(event) {
+																return event.status != 1;
+															}).map(
+															function(item) {
+																return item.id;
+															});
 
-							var label = item.description + " of "
-									+ item.entity_type + " " + item.entity
-									+ " on " + item.date;
+											MyFamilyService
+													.addNotifications(
+															$scope.graph.userId,
+															newEventIds)
+													.then(
+															function() {
 
-							$scope.notifications.push({
-								label : label
-							});
+																MyFamilyService
+																		.getUnreadNotifications(
+																				$scope.graph.userId)
+																		.then(
+																				function(
+																						notifications) {
 
-						});
+																					$scope.graph.notifications = notifications;
+
+																					if (callback) {
+																						callback();
+																					}
+																				});
+															});
+										});
 					}
 
 					/*
 					 * Populate documents: get all documents visible by userId
 					 * in the specified user view.
 					 */
-					function fillDocuments(userId, nodes, callback) {
+					function fillDocuments(callback) {
 
 						var data = {
-							nodes : nodes
+							nodes : $scope.graph.nodes
 						};
 
-						MyFamilyService.getViewDocuments(userId, data).then(
-								function(documentsData) {
+						MyFamilyService.getViewDocuments($scope.graph.userId,
+								data).then(function(documentsData) {
 
-									$scope.graph.documents = documentsData;
-									$scope.graphData = $scope.graph;
+							$scope.graph.documents = documentsData;
 
-									if (callback) {
-										callback();
-									}
-								});
+							if (callback) {
+								callback();
+							}
+						});
 					}
 
 					/*
 					 * Populate graph: get all nodes and links visible by userId
 					 * in the specified user view.
 					 */
-					function fillGraph(userId, viewId, callback) {
+					function fillGraph(callback) {
 
-						MyFamilyService
-								.getGraphView(userId, viewId)
-								.then(
-										function(graphData) {
+						MyFamilyService.getGraphView($scope.graph.userId,
+								$scope.graph.viewId).then(function(graphData) {
 
-											graphData.userId = $scope.userId;
-											graphData.userLabel = $scope.username;
-											graphData.viewId = $scope.selectedView.id;
-											graphData.viewLabel = $scope.selectedView.label;
+							$scope.graph.nodes = graphData.nodes;
+							$scope.graph.links = graphData.links;
 
-											$scope.graph = graphData;
-
-											if (callback) {
-												callback();
-											}
-										});
+							if (callback) {
+								callback();
+							}
+						});
 					}
 
 					$scope.initViews = function() {
@@ -94,7 +112,6 @@ var mainController = controllers
 						} ];
 
 						$scope.selectedView = $scope.views[4];
-
 					};
 
 					$scope.initD3Config = function() {
@@ -114,24 +131,28 @@ var mainController = controllers
 						$scope.svg = {};
 					};
 
-					$scope.drawGraph = function(userId, viewId, callback) {
+					$scope.drawGraph = function(callback) {
 
-						fillGraph(userId, viewId, function() {
+						fillGraph(function() {
 
-							fillDocuments($scope.userId, $scope.graph.nodes,
-									function() {
+							fillDocuments(function() {
 
-										if (callback) {
-											callback();
-										}
-									});
+								fillNotifications(function() {
+
+									$scope.graphData = $scope.graph;
+
+									if (callback) {
+										callback();
+									}
+								});
+							});
 						});
 					};
 
 					$scope.updateView = function(view) {
 
 						$scope.selectedView = view;
-						$scope.drawGraph($scope.userId, view.id);
+						$scope.drawGraph();
 					};
 
 					$scope.logout = function() {
@@ -155,7 +176,7 @@ var mainController = controllers
 						MyFamilyService
 								.addDocument(fileName, $scope.addTitle,
 										$scope.addDate, $scope.taggedUsers,
-										$scope.userId)
+										$scope.graph.userId)
 								.then(
 										function(addedDoc) {
 
@@ -176,18 +197,18 @@ var mainController = controllers
 												MyFamilyService
 														.updateDocumentPosition(
 																addedDoc.id,
-																tagged[0],
+																$scope.taggedUsers[0]['id'],
 																addedDoc.position.x,
 																addedDoc.position.y);
 
-												MyFamilyService.registerEvent(
-														'document',
-														addedDoc.id,
-														'creation', tagged[0]);
+												MyFamilyService
+														.registerEvent(
+																'document',
+																addedDoc.id,
+																'creation',
+																$scope.taggedUsers[0]['id']);
 
-												fillDocuments(
-														$scope.graphData.userId,
-														$scope.graphData.nodes);
+												$scope.drawGraph();
 
 											} else {
 												console
@@ -257,5 +278,10 @@ var mainController = controllers
 						if (indexUserToRemove > -1) {
 							$scope.taggedUsers.splice(indexUserToRemove, 1);
 						}
+					};
+					
+					$scope.markAsRead = function(notification) {
+						
+						MyFamilyService.markNotificationAsRead(notification.id);
 					};
 				});

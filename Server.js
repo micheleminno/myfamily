@@ -10,6 +10,7 @@ var document = require('./node_code/document.js');
 var graph = require('./node_code/graph.js');
 var view = require('./node_code/view.js');
 var event = require('./node_code/event.js');
+var notification = require('./node_code/notification.js');
 
 var app = express();
 
@@ -99,6 +100,10 @@ app.get('/graph/addPerson', graph.addPerson);
 // Views
 app.get('/:user/view/:view/update', view.updateNode);
 
-//Events
+// Events
 app.get('/events/add/:entityType/:entityId', event.add);
 app.post('/:user/events', event.list);
+
+// Notifications
+app.post('/:user/notifications/add', notification.add);
+app.get('/:user/notifications', notification.list);

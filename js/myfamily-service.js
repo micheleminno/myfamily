@@ -145,9 +145,9 @@ app.service('MyFamilyService',
 				return deferred.promise;
 			};
 
-			// Notifications
+			// Events
 
-			this.getNotifications = function(userId, nodes) {
+			this.getEvents = function(userId, nodes) {
 
 				var deferred = $q.defer();
 
@@ -176,7 +176,7 @@ app.service('MyFamilyService',
 
 				$http.get($.get(
 						serverUrl + '/events/add/' + entityType + '/'
-								+ entityId + "?type=' + eventType + '&node="
+								+ entityId + '?type=' + eventType + '&node='
 								+ nodeId).success(
 
 				function(data) {
@@ -188,6 +188,67 @@ app.service('MyFamilyService',
 				}));
 
 				return deferred.promise;
+			};
+
+			// Notifications
+
+			this.getUnreadNotifications = function(userId) {
+
+				var deferred = $q.defer();
+
+				$http.get($.get(serverUrl + '/' + userId + '/notifications')
+						.success(
+
+								function(data) {
+
+									if (data) {
+
+										var notifications = data.map(function(
+												item) {
+											return {
+												id : item.id,
+												label : item.description
+														+ " of "
+														+ item.entity_type
+														+ " " + item.entity
+														+ " on " + item.date
+											};
+										});
+
+										deferred.resolve(notifications);
+									}
+								}));
+
+				return deferred.promise;
+			};
+
+			this.addNotifications = function(userId, eventIds) {
+
+				var deferred = $q.defer();
+
+				var httpPostConfig = {
+
+					url : serverUrl + '/' + userId + '/notifications/add/',
+					method : "POST",
+					data : {
+						eventIds : eventIds
+					},
+					headers : {
+						'Content-Type' : 'application/json'
+					}
+				};
+
+				$http(httpPostConfig).success(function(data) {
+
+					deferred.resolve(data);
+				});
+
+				return deferred.promise;
+			};
+
+			this.markNotificationAsRead = function(notificationId) {
+
+				// TODO
 			};
 
 			// Documents

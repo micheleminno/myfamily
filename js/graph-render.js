@@ -65,11 +65,6 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 		svg.node = container.selectAll(".node");
 	}
 
-	function updateGraph() {
-
-		scope.drawGraph(graph.userId, graph.viewId);
-	}
-
 	var onPersonMenu = [
 			{
 				title : 'Add family as a parent',
@@ -78,7 +73,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 					server.addNode('family', graph.userId, d.originalId,
 							'source').then(function() {
 
-						updateGraph();
+						scope.drawGraph();
 					});
 				}
 			},
@@ -89,7 +84,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 					server.addNode('family', graph.userId, d.originalId,
 							'target').then(function() {
 
-						updateGraph();
+						scope.drawGraph();
 					});
 				}
 			},
@@ -100,7 +95,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 					server.removeNode(graph.userId, d.originalId).then(
 							function() {
 
-								updateGraph();
+								scope.drawGraph();
 							});
 				}
 			} ];
@@ -113,7 +108,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 					server.addNode('person', graph.userId, d.originalId,
 							'target').then(function() {
 
-						updateGraph();
+						scope.drawGraph();
 					});
 				}
 			},
@@ -124,7 +119,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 					server.addNode('person', graph.userId, d.originalId,
 							'source').then(function() {
 
-						updateGraph();
+						scope.drawGraph();
 					});
 				}
 			},
@@ -135,7 +130,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 					server.removeNode(graph.userId, d.originalId).then(
 							function() {
 
-								updateGraph();
+								scope.drawGraph();
 							});
 				}
 			} ];
@@ -199,48 +194,49 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 	function makeEditable(d) {
 
-		this.on("mouseover", function() {
-			d3.select(this).style("fill", "red");
-		}).on("mouseout", function() {
-			d3.select(this).style("fill", null);
-		}).on(
-				"click",
-				function(d) {
+		this
+				.on("mouseover", function() {
+					d3.select(this).style("fill", "red");
+				})
+				.on("mouseout", function() {
+					d3.select(this).style("fill", null);
+				})
+				.on(
+						"click",
+						function(d) {
 
-					var oldName = d.label;
-					var result = prompt('Enter a new name', d.name);
+							if (d.label.toUpperCase() == graph.userLabel
+									.toUpperCase()) {
 
-					if (result) {
+								alert("If you want to change your name go to the setting menu");
 
-						var node = d3.select(this.parentNode.parentNode);
-						var selection = node.selectAll(".nodeLabel");
+							} else {
 
-						if (selection[0].length == 0
-								&& node.selectAll(".my-nodeLabel")) {
+								var result = prompt('Enter a new name', d.name);
 
-							alert("Change your name from the setting menu");
+								if (result) {
 
-							selection = node.selectAll(".my-nodeLabel");
-							var label = selection[0][0];
-							label.textContent = oldName;
+									var node = d3
+											.select(this.parentNode.parentNode);
+									var selection = node
+											.selectAll(".nodeLabel");
 
-						} else {
+									var label = selection[0][0];
+									label.textContent = result;
 
-							var label = selection[0][0];
-							label.textContent = result;
+									d.label = result;
+									var selection = d3.select(this);
+									var label = selection[0][0];
+									label.textContent = result;
 
-							d.label = result;
-							var selection = d3.select(this);
-							var label = selection[0][0];
-							label.textContent = result;
+									server.updateNode(d.originalId,
+											graph.userId, 'label', result);
+								}
 
-							server.updateNode(d.originalId, userId, 'label',
-									result);
-						}
-					}
+							}
 
-					d3.event.stopPropagation();
-				});
+							d3.event.stopPropagation();
+						});
 	}
 
 	function drawTree(userId, userLabel, viewId, viewLabel) {
@@ -446,20 +442,18 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 		});
 	}
 
-	var nodeIdToUpdate = null;
-	var fileName = null;
-
 	$('#profile-img-upload').change(
 			function() {
 
 				$('#uploadProfileImageForm').attr(
 						'action',
-						serverUrl + "/" + userId + '/graph/profileImage/'
-								+ nodeIdToUpdate);
+						serverUrl + "/" + graph.userId + '/graph/profileImage/'
+								+ svg.nodeIdToUpdate);
 				$('#uploadProfileImageForm').submit();
 
 				var filePath = $(this).val();
-				fileName = filePath.substring(filePath.lastIndexOf("\\") + 1);
+				svg.fileName = filePath
+						.substring(filePath.lastIndexOf("\\") + 1);
 
 				setTimeout(profileImageUploadContinueExecution, 500);
 			});
@@ -468,12 +462,12 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 		svgRoot.selectAll(".profile-image").filter(function(d) {
 
-			return d.originalId == nodeIdToUpdate;
+			return d.originalId == svg.nodeIdToUpdate;
 
-		}).attr("xlink:href", "./docs/" + fileName);
+		}).attr("xlink:href", "./docs/" + svg.fileName);
 
 		svgRoot.selectAll(".profile-image--selected").attr("xlink:href",
-				"./docs/" + fileName);
+				"./docs/" + svg.fileName);
 	}
 
 	function clickSvg(d) {
@@ -556,7 +550,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 	function profileImageClicked(d) {
 
-		nodeIdToUpdate = d.originalId;
+		svg.nodeIdToUpdate = d.originalId;
 
 		$('#profile-img-upload').val(null);
 		$('#profile-img-upload').click();
@@ -791,6 +785,8 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 								server.registerEvent('document', elm.id,
 										'removal', d.originalId);
+
+								scope.drawGraph();
 							});
 				}
 			} ];

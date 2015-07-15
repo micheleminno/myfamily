@@ -107,46 +107,55 @@ app.directive("compareTo", function() {
 	};
 });
 
-app.directive('d3Tree', [
-		'$window',
-		'MyFamilyService',
-		'AuthenticationService',
-		function($window, MyFamilyService, AuthenticationService) {
+app.directive('d3Tree',
+		[
+				'$window',
+				'MyFamilyService',
+				'AuthenticationService',
+				function($window, MyFamilyService, AuthenticationService) {
 
-			return {
+					return {
 
-				restrict : 'A',
+						restrict : 'A',
 
-				scope : false,
+						scope : false,
 
-				controller : 'MainCtrl',
+						controller : 'MainCtrl',
 
-				link : function(scope, element, attrs) {
+						link : function(scope, element, attrs) {
 
-					scope.username = AuthenticationService.getUsername();
-					scope.userId = AuthenticationService.getUserId();
+							scope.initViews(scope);
 
-					scope.initViews(scope);
-					scope.initD3Config();
+							scope.graph = {};
+							scope.graph.userId = AuthenticationService
+									.getUserId();
+							scope.graph.userLabel = AuthenticationService
+									.getUsername();
+							scope.graph.viewId = scope.selectedView.id;
+							scope.graph.viewLabel = scope.selectedView.label;
 
-					scope.drawGraph(scope.userId, 4, function() {
+							scope.initD3Config();
 
-						scope.$watch('graphData', function(newVals, oldVals) {
+							scope.drawGraph(function() {
 
-							return scope.renderGraph(scope, scope.graphData,
-									scope.configurationData, MyFamilyService,
-									scope.svg);
+								scope.$watch('graphData', function(newVals,
+										oldVals) {
 
-						}, true);
-					});
+									return scope.renderGraph(scope,
+											scope.graphData,
+											scope.configurationData,
+											MyFamilyService, scope.svg);
 
-					window.onresize = function() {
+								}, true);
+							});
 
-						scope.$apply();
+							window.onresize = function() {
+
+								scope.$apply();
+							};
+
+							scope.renderGraph = graphRender;
+						}
 					};
 
-					scope.renderGraph = graphRender;
-				}
-			};
-
-		} ]);
+				} ]);

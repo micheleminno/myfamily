@@ -225,3 +225,14 @@
 	color: red;
 	margin-bottom: 40px;
 }
+
+.numberCircle {
+	margin-left: 3px;
+	border-radius: 50%;
+	behavior: url(PIE.htc); /* remove if you don't care about IE8 */
+	padding: 5px;
+	background: red;
+	color: white;
+	text-align: center;
+	font-weight: bold;
+}

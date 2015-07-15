@@ -46,15 +46,18 @@
 
 				<li class="dropdown"><a href="" id="notifications"
 					class="dropdown-toggle" data-toggle="dropdown" role="button"
-					aria-expanded="false"> Notifications <span
-						class="caret myCaret"></span></a>
+					aria-expanded="false"> Notifications <span class="numberCircle"
+						ng-show="graph.notifications.length > 0">&nbsp;{{graph.notifications.length}}&nbsp;</span>
+				</a>
 					<ul class="dropdown-menu" role="menu" id="notifications-list">
-						<li ng-repeat="notification in notifications"><a href="">{{notification.label}}</a></li>
+						<li ng-repeat="notification in graph.notifications"><a
+							href="" ng-click="markAsRead(notification)">{{notification.label}}</a></li>
 					</ul></li>
 
 				<li class="dropdown"><a href="" id="logged-user"
 					class="dropdown-toggle" data-toggle="dropdown" role="button"
-					aria-expanded="false"> {{username}} <span class="caret myCaret"></span></a>
+					aria-expanded="false"> {{graph.userLabel}} <span
+						class="caret myCaret"></span></a>
 					<ul class="dropdown-menu" role="menu">
 						<li><a href="mockup/profile.pdf">Profile</a></li>
 						<li><a href="#">Settings</a></li>

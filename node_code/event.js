@@ -105,7 +105,7 @@ exports.add = function(req, res) {
 };
 
 /*
- * Get all unread events about a set of nodes for a specific user.
+ * Get all events about a set of nodes for a specific user.
  */
 exports.list = function(req, res) {
 
@@ -120,7 +120,7 @@ exports.list = function(req, res) {
 
 		requests++;
 
-		var query = "SELECT e.id, e.description, e.entity, e.entity_type, e.date FROM events as e LEFT JOIN notifications as n ON e.id = n.event "
+		var query = "SELECT e.id, e.description, e.entity, e.entity_type, e.date, n.status FROM events as e LEFT JOIN notifications as n ON e.id = n.event "
 				+ "LEFT JOIN tags as t ON e.entity = t.document "
 				+ "WHERE e.node = "
 				+ node.originalId

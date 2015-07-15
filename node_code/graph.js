@@ -1356,7 +1356,7 @@ exports.updateProfileImage = function(req, res) {
 
 								if (previousImage && previousImage != "") {
 
-									fs.unlinkSync(__dirname + "/docs/"
+									fs.unlinkSync(__dirname + "/../docs/"
 											+ previousImage);
 
 									console.log("Previous image "
