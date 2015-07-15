@@ -4,9 +4,6 @@ var mainController = controllers
 				function($scope, $location, MyFamilyService,
 						AuthenticationService) {
 
-					$scope.username = AuthenticationService.getUsername();
-					$scope.userId = AuthenticationService.getUserId();
-
 					/*
 					 * Populate notifications: get all events about nodes or
 					 * docs in this user view who are not already read by this
@@ -35,24 +32,22 @@ var mainController = controllers
 					 * Populate documents: get all documents visible by userId
 					 * in the specified user view.
 					 */
-					function fillDocuments(userId, nodes) {
+					function fillDocuments(userId, nodes, callback) {
 
 						var data = {
 							nodes : nodes
 						};
 
-						MyFamilyService
-								.getDocuments(userId, data)
-								.then(
-										function(documentsData) {
+						MyFamilyService.getViewDocuments(userId, data).then(
+								function(documentsData) {
 
-											documentsData.userId = $scope.userId;
-											documentsData.userLabel = $scope.username;
-											documentsData.viewId = $scope.selectedView.id;
-											documentsData.viewLabel = $scope.selectedView.label;
+									$scope.graph.documents = documentsData;
+									$scope.graphData = $scope.graph;
 
-											$scope.documentsData = documentsData;
-										});
+									if (callback) {
+										callback();
+									}
+								});
 					}
 
 					/*
@@ -71,14 +66,38 @@ var mainController = controllers
 											graphData.viewId = $scope.selectedView.id;
 											graphData.viewLabel = $scope.selectedView.label;
 
-											$scope.graphData = graphData;
+											$scope.graph = graphData;
 
-											callback();
-
+											if (callback) {
+												callback();
+											}
 										});
 					}
 
-					initD3Config = function() {
+					$scope.initViews = function() {
+
+						$scope.views = [ {
+							id : 0,
+							label : 'Family as a child'
+						}, {
+							id : 1,
+							label : 'Family as a parent'
+						}, {
+							id : 2,
+							label : 'Pedigree'
+						}, {
+							id : 3,
+							label : 'Descendants'
+						}, {
+							id : 4,
+							label : 'Extended family'
+						} ];
+
+						$scope.selectedView = $scope.views[4];
+
+					};
+
+					$scope.initD3Config = function() {
 
 						var configurationData = {};
 
@@ -95,18 +114,24 @@ var mainController = controllers
 						$scope.svg = {};
 					};
 
-					fillGraph($scope.userId, 4, function() {
+					$scope.drawGraph = function(userId, viewId, callback) {
 
-						fillDocuments($scope.userId, $scope.graphData.nodes);
-					});
+						fillGraph(userId, viewId, function() {
 
-					initViews($scope);
-					initD3Config();
+							fillDocuments($scope.userId, $scope.graph.nodes,
+									function() {
+
+										if (callback) {
+											callback();
+										}
+									});
+						});
+					};
 
 					$scope.updateView = function(view) {
 
 						$scope.selectedView = view;
-						fillGraph($scope.userId, view.id);
+						$scope.drawGraph($scope.userId, view.id);
 					};
 
 					$scope.logout = function() {
@@ -123,20 +148,13 @@ var mainController = controllers
 						$('#uploadDocumentForm').submit();
 
 						var filePath = $('#document-upload').val();
+
 						fileName = filePath.substring(filePath
 								.lastIndexOf("\\") + 1);
 
-						var title = $('#title').val();
-						var date = $('#date').val();
-
-						var tagged = [];
-						$('#add-taggedArea > li').each(function() {
-
-							tagged.push(parseInt(this.id));
-						});
-
 						MyFamilyService
-								.addDocument(fileName, title, date, tagged,
+								.addDocument(fileName, $scope.addTitle,
+										$scope.addDate, $scope.taggedUsers,
 										$scope.userId)
 								.then(
 										function(addedDoc) {
@@ -149,31 +167,23 @@ var mainController = controllers
 												// Display new document
 
 												addedDoc.position = {
-													x : $scope.configurationData.uploadedDocumentPosition[0],
-													y : $scope.configurationData.uploadedDocumentPosition[1]
+													x : $scope.svg.uploadedDocumentPosition[0],
+													y : $scope.svg.uploadedDocumentPosition[1]
 												};
 
-												$scope.configurationData.uploadedDocumentPosition = [];
+												$scope.svg.uploadedDocumentPosition = [];
 
-												// update position on db
-												$
-														.get(serverUrl
-																+ '/documents/'
-																+ addedDoc.id
-																+ '/updatePosition?node='
-																+ tagged[0]
-																+ '&x='
-																+ addedDoc.position.x
-																+ '&y='
-																+ addedDoc.position.y);
+												MyFamilyService
+														.updateDocumentPosition(
+																addedDoc.id,
+																tagged[0],
+																addedDoc.position.x,
+																addedDoc.position.y);
 
-												// register event
-												$
-														.get(serverUrl
-																+ '/events/add/document/'
-																+ addedDoc.id
-																+ "?type=creation&node="
-																+ tagged[0]);
+												MyFamilyService.registerEvent(
+														'document',
+														addedDoc.id,
+														'creation', tagged[0]);
 
 												fillDocuments(
 														$scope.graphData.userId,
@@ -184,6 +194,23 @@ var mainController = controllers
 														.log("Document not added!");
 											}
 										});
+					};
+
+					$scope.updateDocument = function() {
+
+						$('#editDocumentModal').modal('hide');
+
+						MyFamilyService.updateDocument($scope.editDocId,
+								$scope.editTitle, $scope.editDate,
+								$scope.taggedUsers).then(
+								function() {
+
+									if ($scope.taggedUsers
+											.indexOf($scope.nodeId) > -1) {
+
+										removeDocument($scope.docId);
+									}
+								});
 					};
 
 					$scope.addInTaggedUsers = function(taggableUser) {

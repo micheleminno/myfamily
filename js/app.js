@@ -110,57 +110,42 @@ app.directive("compareTo", function() {
 app.directive('d3Tree', [
 		'$window',
 		'MyFamilyService',
-		function($window, MyFamilyService) {
+		'AuthenticationService',
+		function($window, MyFamilyService, AuthenticationService) {
 
 			return {
 
 				restrict : 'A',
 
 				scope : false,
-			
+
 				controller : 'MainCtrl',
-				
+
 				link : function(scope, element, attrs) {
 
-					scope.$watch('graphData', function(newVals, oldVals) {
+					scope.username = AuthenticationService.getUsername();
+					scope.userId = AuthenticationService.getUserId();
 
-						return scope.renderGraph(scope, scope.graphData,
-								scope.configurationData, MyFamilyService, scope.svg);
+					scope.initViews(scope);
+					scope.initD3Config();
 
-					}, true);
+					scope.drawGraph(scope.userId, 4, function() {
 
-					scope.$watch('documentsData', function(newVals, oldVals) {
+						scope.$watch('graphData', function(newVals, oldVals) {
 
-						return scope.renderDocuments(scope, scope.documentsData, scope.graphData,
-								scope.configurationData, MyFamilyService, scope.svg);
+							return scope.renderGraph(scope, scope.graphData,
+									scope.configurationData, MyFamilyService,
+									scope.svg);
 
-					}, true);
-
-					scope.$watch('notifications', function(newVals, oldVals) {
-
-						return scope.renderNotifications(scope.notifications,
-								scope.configuration, MyFamilyService);
-
-					}, true);
+						}, true);
+					});
 
 					window.onresize = function() {
 
 						scope.$apply();
 					};
 
-					scope.$watch(function() {
-
-						return angular.element($window)[0].innerWidth;
-
-					}, function() {
-
-						scope.renderGraph(scope.graph, scope.configuration,
-								MyFamilyService);
-					});
-
 					scope.renderGraph = graphRender;
-					scope.renderDocuments = documentsRender;
-					scope.renderNotifications = notificationsRender;
 				}
 			};
 

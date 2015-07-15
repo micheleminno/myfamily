@@ -103,12 +103,12 @@
 				<h4 style="margin-top: 30px">Info</h4>
 				<div style="display: inline-block">
 					<p style="display: inline; margin-right: 20px">Title:</p>
-					<input type="text" id="title" name="title">
+					<input type="text" id="title" ng-model="addTitle" name="title">
 				</div>
 				<div style="margin-bottom: 10px"></div>
 				<div style="display: inline-block">
 					<p style="display: inline; margin-right: 20px">Date:</p>
-					<input type="date" id="date" name="date">
+					<input type="date" id="date" name="date" ng-model="addDate">
 				</div>
 				<div style="margin-bottom: 20px"></div>
 				<div id="tagged" style="display: inline-block">
@@ -132,8 +132,8 @@
 				<br />
 				<ul style="margin-top: 16px" id="add-taggedArea" name="taggedArea"></ul>
 				<li ng-repeat="taggedUser in taggedUsers"><a href=""
-					ng-click="">{{taggedUser.name}}</a><a style="margin-left: 5px" href=""
-					ng-click="removeFromTaggedUsers(taggedUser)">(remove)</a></li>
+					ng-click="">{{taggedUser.name}}</a><a style="margin-left: 5px"
+					href="" ng-click="removeFromTaggedUsers(taggedUser)">(remove)</a></li>
 
 			</div>
 			<div class="modal-footer">
@@ -156,17 +156,18 @@
 			</div>
 			<div class="modal-body">
 
-				<h4 id="edit-file"></h4>
-				<p id="edit-docId" style="visibility: hidden"></p>
-				<p id="edit-nodeId" style="visibility: hidden"></p>
+				<h4 id="edit-file">{{editFileName}}</h4>
+				<p id="edit-docId" style="visibility: hidden">{{editDocId}}</p>
+				<p id="edit-nodeId" style="visibility: hidden">{{editNodeId}}</p>
 				<div style="display: inline-block">
 					<p style="display: inline; margin-right: 20px">Title:</p>
-					<input type="text" id="edit-title" name="title">
+					<input type="text" id="edit-title" ng-model="editTitle"
+						name="title">
 				</div>
 				<div style="margin-bottom: 10px"></div>
 				<div style="display: inline-block">
 					<p style="display: inline; margin-right: 20px">Date:</p>
-					<input type="date" id="edit-date" name="date">
+					<input type="date" id="edit-date" ng-model="editDate" name="date">
 				</div>
 				<div style="margin-bottom: 20px"></div>
 				<div id="tagged" style="display: inline-block">
@@ -179,19 +180,25 @@
 							Add <span class="caret"></span>
 						</button>
 
-						<ul id="edit-taggedPersons" class="dropdown-menu"
+						<ul id="edit-taggablePersons" class="dropdown-menu"
 							aria-labelledby="dropdownMenuTagged">
+							<li ng-repeat="taggableUser in taggableUsers"><a href=""
+								ng-click="addInTaggedUsers(taggableUser)">{{taggableUser.name}}</a></li>
 						</ul>
 					</div>
 
 				</div>
 				<br />
 				<ul style="margin-top: 16px" id="edit-taggedArea" name="taggedArea"></ul>
+				<li ng-repeat="taggedUser in taggedUsers"><a href=""
+					ng-click="">{{taggedUser.name}}</a><a style="margin-left: 5px"
+					href="" ng-click="removeFromTaggedUsers(taggedUser)">(remove)</a></li>
 
 			</div>
 			<div class="modal-footer">
 				<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
-				<button class="btn btn-primary" id="updateDocument">Update</button>
+				<button class="btn btn-primary" id="updateDocument"
+					ng-click="updateDocument()">Update</button>
 			</div>
 		</div>
 	</div>
