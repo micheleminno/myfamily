@@ -196,7 +196,7 @@ app.service('MyFamilyService',
 
 				var deferred = $q.defer();
 
-				$http.get($.get(serverUrl + '/' + userId + '/notifications')
+				$http.get($.get(serverUrl + '/' + userId + '/notifications/unread')
 						.success(
 
 								function(data) {
@@ -248,7 +248,21 @@ app.service('MyFamilyService',
 
 			this.markNotificationAsRead = function(notificationId) {
 
-				// TODO
+				var deferred = $q.defer();
+
+				$http.get($.get(
+						serverUrl + '/notifications/' + notificationId
+								+ '/setStatus/?status=read').success(
+
+				function(data) {
+
+					if (data) {
+
+						deferred.resolve(data);
+					}
+				}));
+
+				return deferred.promise;
 			};
 
 			// Documents

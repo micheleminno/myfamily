@@ -96,9 +96,17 @@ exports.add = function(req, res) {
 exports.list = function(req, res) {
 
 	var userId = req.param('user');
+	var status = req.param('status');
 
-	var query = "SELECT * FROM notifications JOIN events ON notifications.event = events.id WHERE user = "
-			+ userId;
+	var binaryStatus = 1;
+	
+	if (status == 'read') {
+
+		binaryStatus = 0;
+	}
+
+	var query = "SELECT n.id, e.description, e.entity, e.entity_type, e.date FROM notifications as n JOIN events as e ON n.event = e.id WHERE n.user = "
+			+ userId + " AND n.status = " + binaryStatus;
 
 	console.log(query);
 
@@ -120,6 +128,57 @@ exports.list = function(req, res) {
 				}
 
 				res.status(OK).json('notifications', notifications);
+			}
+		});
+	});
+};
+
+/*
+ * Change the status of a notification
+ */
+exports.setStatus = function(req, res) {
+
+	var notificationId = req.param('notification');
+	var status = req.query.status;
+
+	var binaryStatus = 1;
+	if (status == 'read') {
+
+		binaryStatus = 0;
+	}
+
+	var updateNotificationQuery = 'UPDATE notifications SET status = '
+			+ binaryStatus + ' WHERE id = ' + notificationId;
+
+	console.log(updateNotificationQuery);
+
+	req.getConnection(function(err, connection) {
+
+		connection.query(updateNotificationQuery, function(err, rows) {
+
+			if (err) {
+
+				console.log("Error Selecting : %s ", err);
+
+			} else {
+
+				if (rows.affectedRows > 0) {
+
+					console.log("Notification " + notificationId + " updated");
+
+					res.status(OK).json('result', {
+						"msg" : "Notification " + notificationId + " updated"
+					});
+
+				} else {
+
+					console.log("Notification " + notificationId
+							+ " not updated");
+
+					res.status(NOK).json('result', {
+						"msg" : "Notification " + notificationId + " not found"
+					});
+				}
 			}
 		});
 	});

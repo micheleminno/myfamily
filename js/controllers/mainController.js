@@ -155,9 +155,17 @@ var mainController = controllers
 						$scope.drawGraph();
 					};
 
+					function resetData() {
+					
+						d3.select("svg").remove();
+						$scope.graphData = null;
+					};
+					
 					$scope.logout = function() {
 
 						AuthenticationService.clearCredentials();
+						resetData();
+						
 						$location.path('/login');
 					};
 
@@ -279,9 +287,13 @@ var mainController = controllers
 							$scope.taggedUsers.splice(indexUserToRemove, 1);
 						}
 					};
-					
+
 					$scope.markAsRead = function(notification) {
-						
-						MyFamilyService.markNotificationAsRead(notification.id);
+
+						MyFamilyService.markNotificationAsRead(notification.id)
+								.then(function() {
+
+									$scope.drawGraph();
+								});
 					};
 				});

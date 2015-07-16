@@ -106,4 +106,5 @@ app.post('/:user/events', event.list);
 
 // Notifications
 app.post('/:user/notifications/add', notification.add);
-app.get('/:user/notifications', notification.list);
+app.get('/:user/notifications/:status', notification.list);
+app.get('/notifications/:notification/setStatus', notification.setStatus);

@@ -3,6 +3,11 @@ var commons = window.commons || {};
 
 var graphRender = function(scope, graph, configuration, server, svg) {
 
+	if(!graph) {
+		
+		return;
+	}
+	
 	var svgRoot = null;
 	var container = null;
 	var force = null;
