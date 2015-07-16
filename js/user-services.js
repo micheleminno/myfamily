@@ -47,12 +47,12 @@ angular
 							};
 
 							this.storeCredentials = function(
-									loggedInCredentials, theUsername, theUserId) {
+									loggedInCredentials, username, userId) {
 
 								$cookies.putObject('credentials', {
 									credentials : loggedInCredentials,
-									username : theUsername,
-									userId : theUserId
+									username : username,
+									userId : userId
 								});
 							};
 

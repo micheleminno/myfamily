@@ -62,7 +62,9 @@ app.get('/', function(req, res) {
 });
 
 // User
-app.get('/user/isRegistered', user.isRegistered);
+app.get('/user/getRegistered', user.getRegistered);
+app.get('/user/register', user.register);
+app.get('/user/update', user.update);
 
 // Documents
 app.get('/documents', document.list);

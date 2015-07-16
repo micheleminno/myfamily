@@ -25,7 +25,7 @@
 			<h3 style="margin-top: 30px">You</h3>
 
 			<div class="row">
-				<input class="form-control register-input" ng-model="name"
+				<input class="form-control register-input" ng-model="username"
 					type="text" name="username" placeholder="Mario Rossi" required />
 			</div>
 			<div ng-messages="registrationForm.username.$error">
@@ -50,7 +50,10 @@
 
 			<div class="row">
 				<input class="form-control register-input" ng-model="email"
-					type="email" name="email" placeholder="Email" />
+					type="email" name="email" placeholder="Email" required />
+			</div>
+			<div ng-messages="registrationForm.email.$error">
+				<ng-messages-include src="html/messages.html"></ng-messages-include>
 			</div>
 
 			<div class="row">
@@ -113,8 +116,7 @@
 				<input
 					style="margin-top: 40px; margin-left: 15px; margin-bottom: 20px;"
 					id="btn_signup" ng-disabled="!registrationForm.$valid"
-					ng-click="register(username, password, birthDate, email, firstParentName, secondParentName, firstSiblingname, secondSiblingName, partnerName)"
-					type="submit" name="submit" value="Sign up"
+					ng-click="register()" type="submit" name="submit" value="Sign up"
 					class="btn btn-primary btn-lg" />
 			</div>
 		</form>
@@ -148,5 +150,67 @@
 				</div>
 			</div>
 		</form>
+	</div>
+</div>
+
+<div id="identifyUserModal" class="modal fade" tabindex="-1"
+	role="dialog" aria-labelledby="identifyUserModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"
+					aria-hidden="true">×</button>
+				<h3 id="identifyUserModalLabel">We found someone called
+					'{{username}}'</h3>
+			</div>
+			<div class="modal-body">
+
+				<ul id="potentialMatchesList">
+					<li ng-repeat="potentialUser in potentialUsers"><img
+						ng-src="docs/{{potentialUser.img}}" style="height: 60px;">
+
+						<button class="btn btn-primary" style="margin-left: 20px"
+							ng-click="useThisAsUser(potentialUser.id)">Yes, it's me</button></li>
+				</ul>
+
+			</div>
+
+			<div class="modal-footer">
+				<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+				<button class="btn btn-primary" ng-click="registerNewUser()">No,
+					there's no me</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div id="alreadyRegisteredModal" class="modal fade" tabindex="-1"
+	role="dialog" aria-labelledby="alreadyRegisteredModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"
+					aria-hidden="true">×</button>
+				<h3 id="alreadyRegisteredModalLabel">You are already registered</h3>
+			</div>
+
+			<div class="modal-body">
+
+				<h5 ng-show="alreadyRegisteredWithNode">You are already
+					registered with another password</h5>
+				<h5 ng-show="!alreadyRegisteredWithNode">You are already
+					registered with the same password</h5>
+			</div>
+
+			<div class="modal-footer">
+				<button class="btn" ng-show="!alreadyRegisteredWithNode"
+					data-dismiss="modal" aria-hidden="true">Cancel</button>
+				<button class="btn btn-primary" ng-show="!alreadyRegisteredWithNode"
+					ng-click="login(username, password)">Login</button>
+
+				<button class="btn" ng-show="alreadyRegisteredWithNode"
+					data-dismiss="modal" aria-hidden="true">Close</button>
+			</div>
+		</div>
 	</div>
 </div>
