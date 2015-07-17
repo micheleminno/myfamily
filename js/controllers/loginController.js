@@ -118,17 +118,32 @@ var loginController = controllers
 
 												MyFamilyService
 														.getUsers(
-																$scope.username)
+																$scope.username,
+																$scope.firstParentName,
+																$scope.secondParentName,
+																$scope.firstSiblingName,
+																$scope.secondSiblingName,
+																$scope.partnerName)
 														.then(
 																function(users) {
 
 																	if (users.length > 0) {
 
 																		$scope.potentialUsers = users;
-																		$(
-																				'#identifyUserModal')
-																				.modal(
-																						'show');
+
+																		if (users.length == 1) {
+
+																			$(
+																					'#identifyUserModal')
+																					.modal(
+																							'show');
+																		} else {
+
+																			$(
+																					'#moreInfoModal')
+																					.modal(
+																							'show');
+																		}
 
 																	} else {
 

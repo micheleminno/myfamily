@@ -693,6 +693,32 @@ function insertLink(source, target, req, callback) {
 	});
 };
 
+function getDefaultLabel(isPerson, sourceIndex, targetIndex) {
+
+	var label;
+
+	if (isPerson) {
+
+		if (sourceIndex) {
+
+			label = "New child";
+
+		} else if (targetIndex) {
+
+			label = "New parent";
+
+		} else {
+
+			label = "New person";
+		}
+	} else {
+
+		label = "New family node";
+	}
+
+	return label;
+};
+
 exports.addNode = function(req, res) {
 
 	var type = req.query.type;
@@ -710,24 +736,12 @@ exports.addNode = function(req, res) {
 	}
 
 	var isPerson = type == "person" ? true : false;
-	var label;
 
-	if (isPerson) {
+	var label = req.query.label;
 
-		if (sourceIndex) {
+	if (!label) {
 
-			label = "New child";
-
-		} else if (targetIndex) {
-
-			label = "New parent";
-		} else {
-
-			label = "New person";
-		}
-	} else {
-
-		label = "New family node";
+		label = getDefaultLabel(isPerson, sourceIndex, targetIndex);
 	}
 
 	insertNode(label, isPerson, req, function(insertedId) {
@@ -744,7 +758,8 @@ exports.addNode = function(req, res) {
 				if (linkInserted) {
 
 					res.status(OK).json('result', {
-						"msg" : "graph updated"
+						"msg" : "graph updated",
+						"newNode" : insertedId
 					});
 				} else {
 
@@ -760,7 +775,8 @@ exports.addNode = function(req, res) {
 				if (linkInserted) {
 
 					res.status(OK).json('result', {
-						"msg" : "graph updated"
+						"msg" : "graph updated",
+						"newNode" : insertedId
 					});
 				} else {
 
@@ -773,7 +789,8 @@ exports.addNode = function(req, res) {
 		} else {
 
 			res.status(OK).json('result', {
-				"msg" : "graph updated"
+				"msg" : "graph updated",
+				"newNode" : insertedId
 			});
 		}
 	});
@@ -1345,36 +1362,78 @@ exports.updateProfileImage = function(req, res) {
 
 	console.log(req.files);
 
-	getCurrentImage(node, req,
-			function(previousImage) {
+	getCurrentImage(node, req, function(previousImage) {
 
-				updateNodeInDB(node, 'img',
-						req.files['profile-img-upload']['originalname'], req,
-						function(updated) {
+		updateNodeInDB(node, 'img',
+				req.files['profile-img-upload']['originalname'], req, function(
+						updated) {
 
-							if (updated) {
+					if (updated) {
 
-								if (previousImage && previousImage != "") {
+						if (previousImage && previousImage != "") {
 
-									fs.unlinkSync(__dirname + "/../docs/"
-											+ previousImage);
+							fs.unlinkSync(__dirname + "/../docs/"
+									+ previousImage);
 
-									console.log("Previous image "
-											+ previousImage + " removed");
-								}
+							console.log("Previous image " + previousImage
+									+ " removed");
+						}
 
-								res.end("Profile image uploaded.");
-							}
-						});
-			});
+						res.end("Profile image uploaded.");
+					}
+				});
+	});
 };
 
 exports.namesakes = function(req, res) {
 
 	var name = req.query.name;
+	var firstParentName = req.query.firstParentName;
+	var secondParentName = req.query.secondParentName;
+	var firstSiblingName = req.query.firstSiblingName;
+	var secondSiblingName = req.query.secondSiblingName;
+	var partnerName = req.query.partnerName;
+
 	var namesakes = [];
 
-	var selectNamesakes = "SELECT * FROM nodes WHERE label = '" + name + "'";
+	var selectNamesakes = "SELECT n1.label as username, n1.id as id, n1.img as img, n2.label as familyWithPartnerName, "
+			+ "n3.label as partnerName, n4.label as originalFamilyName, n5.label as firstParentName, "
+			+ "n6.label as secondParentName, n7.label as firstSiblingName, n8.label as secondSiblingName "
+			+ "FROM nodes as n1 LEFT JOIN links as l1 ON n1.id = l1.source LEFT JOIN nodes as n2 ON l1.target = n2.id "
+			+ "LEFT JOIN links as l2 ON n2.id = l2.target LEFT JOIN nodes as n3 ON l2.source = n3.id "
+			+ "LEFT JOIN links as l3 ON n1.id = l3.target LEFT JOIN nodes as n4 ON l3.source = n4.id "
+			+ "LEFT JOIN links as l4 ON n4.id = l4.target LEFT JOIN nodes as n5 ON l4.source = n5.id "
+			+ "LEFT JOIN links as l5 ON n4.id = l5.target LEFT JOIN nodes as n6 ON l5.source = n6.id "
+			+ "LEFT JOIN links as l6 ON n4.id = l6.source LEFT JOIN nodes as n7 ON l6.target = n7.id "
+			+ "LEFT JOIN links as l7 ON n4.id = l7.source LEFT JOIN nodes as n8 ON l7.target = n8.id "
+			+ "WHERE (n1.label != n3.label OR n3.label IS NULL) AND (n1.label != n7.label OR n7.label IS NULL) "
+			+ "AND (n1.label != n8.label OR n8.label IS NULL) AND n5.label != n6.label "
+			+ "AND n1.label = '" + name + "'";
+
+	if (firstParentName) {
+
+		selectNamesakes += " AND n5.label = '" + firstParentName + "' ";
+	}
+
+	if (secondParentName) {
+
+		selectNamesakes += " AND n6.label = '" + secondParentName + "' ";
+	}
+
+	if (firstSiblingName) {
+
+		selectNamesakes += " AND n7.label = '" + firstSiblingName + "'";
+	}
+
+	if (secondSiblingName) {
+
+		selectNamesakes += " AND n8.label = '" + secondSiblingName + "'";
+	}
+
+	if (partnerName) {
+
+		selectNamesakes += " AND n3.label = '" + partnerName + "'";
+	}
 
 	console.log(selectNamesakes);
 
@@ -1391,7 +1450,20 @@ exports.namesakes = function(req, res) {
 				for (rowIndex in rows) {
 
 					var row = rows[rowIndex];
-					namesakes.push(row);
+					var user = {
+						id : row.id,
+						username : row.username,
+						img : row.img
+					};
+
+					var namesakeIds = namesakes.map(function(user) {
+						return user.id;
+					});
+
+					if (namesakeIds.indexOf(user.id) == -1) {
+
+						namesakes.push(user);
+					}
 				}
 
 				res.status(OK).json('namesakes', namesakes);

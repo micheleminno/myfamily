@@ -37,15 +37,73 @@ app
 
 					// User
 
-					this.getUsers = function(name) {
+					function addComponentToFamily(userId, familyNodeId,
+							partnerName, asParent, deferred) {
+
+						var familyNodeRole = null;
+
+						if (asParent) {
+
+							familyNodeRole = 'target';
+
+						} else {
+
+							familyNodeRole = 'source';
+						}
+
+						internalAddNode('person', userId, familyNodeId,
+								familyNodeRole, partnerName).then(
+								function(data) {
+
+									if (data.newNode) {
+
+										deferred.resolve("Relative "
+												+ data.newNode + " added");
+									} else {
+										deferred.resolve("Relative "
+												+ data.newNode + " not added");
+									}
+								});
+					}
+
+					this.getUsers = function(username, firstParentName,
+							secondParentName, firstSiblingName,
+							secondSiblingName, partnerName) {
 
 						var deferred = $q.defer();
 
-						$http.get(serverUrl + "/graph/namesakes?name=" + name)
-								.success(function(namesakes) {
+						var url = serverUrl + "/graph/namesakes?name="
+								+ username;
 
-									deferred.resolve(namesakes);
-								});
+						if (firstParentName) {
+
+							url += '&firstParentName=' + firstParentName;
+						}
+
+						if (secondParentName) {
+
+							url += '&secondParentName=' + secondParentName;
+						}
+
+						if (firstSiblingName) {
+
+							url += '&firstSiblingName=' + firstSiblingName;
+						}
+
+						if (secondSiblingName) {
+
+							url += '&secondSiblingName=' + secondSiblingName;
+						}
+
+						if (partnerName) {
+
+							url += '&partnerName=' + partnerName;
+						}
+
+						$http.get(url).success(function(namesakes) {
+
+							deferred.resolve(namesakes);
+						});
 
 						return deferred.promise;
 					};
@@ -63,21 +121,80 @@ app
 								&& angular.isUndefined(partnerName)) {
 
 							deferred.resolve("No relative to add");
-						} else if (!angular.isUndefined(partnerName)) {
-
-							this.addNode('family', userId, userId, 'source')
-									.then(function() {
-
-										deferred.resolve("Family node added");
-									});
 
 						} else {
 
-							this.addNode('family', userId, userId, 'target')
-									.then(function() {
+							if (!angular.isUndefined(partnerName)) {
 
-										deferred.resolve("Family node added");
-									});
+								// Family user + partner
+
+								internalAddNode('family', userId, userId,
+										'source').then(
+										function(data) {
+
+											var familyNodeId = data.newNode;
+
+											addComponentToFamily(userId,
+													familyNodeId, partnerName,
+													true, deferred);
+										});
+							}
+
+							if (!angular.isUndefined(secondParentName)
+									|| !angular.isUndefined(firstSiblingName)
+									|| !angular.isUndefined(secondSiblingName)
+									|| !angular.isUndefined(partnerName)) {
+
+								// Family user + parents + brothers/sisters
+
+								internalAddNode('family', userId, userId,
+										'target')
+										.then(
+												function(data) {
+
+													var familyNodeId = data.newNode;
+
+													if (!angular
+															.isUndefined(firstParentName)) {
+
+														addComponentToFamily(
+																userId,
+																familyNodeId,
+																firstParentName,
+																true, deferred);
+													}
+
+													if (!angular
+															.isUndefined(secondParentName)) {
+
+														addComponentToFamily(
+																userId,
+																familyNodeId,
+																secondParentName,
+																true, deferred);
+													}
+
+													if (!angular
+															.isUndefined(firstSiblingName)) {
+
+														addComponentToFamily(
+																userId,
+																familyNodeId,
+																firstSiblingName,
+																false, deferred);
+													}
+
+													if (!angular
+															.isUndefined(secondSiblingName)) {
+
+														addComponentToFamily(
+																userId,
+																familyNodeId,
+																secondSiblingName,
+																false, deferred);
+													}
+												});
+							}
 						}
 
 						return deferred.promise;
@@ -225,15 +342,21 @@ app
 						return deferred.promise;
 					};
 
-					this.addNode = function(type, userId, otherNodeId,
-							otherNodeRole) {
+					var internalAddNode = function(type, userId, otherNodeId,
+							otherNodeRole, label) {
 
 						var deferred = $q.defer();
 
-						$http.get(
-								serverUrl + "/" + userId + '/graph/add?type='
-										+ type + '&' + otherNodeRole + '='
-										+ otherNodeId).success(
+						var url = serverUrl + "/" + userId + '/graph/add?type='
+								+ type + '&' + otherNodeRole + '='
+								+ otherNodeId;
+
+						if (label) {
+
+							url += '&label=' + label;
+						}
+
+						$http.get(url).success(
 
 						function(data) {
 
@@ -244,6 +367,13 @@ app
 						});
 
 						return deferred.promise;
+					};
+
+					this.addNode = function(type, userId, otherNodeId,
+							otherNodeRole) {
+
+						return internalAddNode(type, userId, otherNodeId,
+								otherNodeRole);
 					};
 
 					this.removeNode = function(userId, nodeId) {

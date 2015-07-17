@@ -76,7 +76,9 @@
 			<h3 style="margin-top: 40px">
 				Help us to identify you <br /> <br /> <small>Maybe someone
 					already added you. We will add the following people in the family,
-					if missing. </small>
+					if missing. <br> <br> You can add more people after the
+					registration.
+				</small>
 			</h3>
 
 			<h4 style="margin-top: 40px">Your parents</h4>
@@ -210,6 +212,30 @@
 
 				<button class="btn" ng-show="alreadyRegisteredWithNode"
 					data-dismiss="modal" aria-hidden="true">Close</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div id="moreInfoModal" class="modal fade" tabindex="-1" role="dialog"
+	aria-labelledby="moreInfoModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"
+					aria-hidden="true">×</button>
+				<h3 id="moreInfoModalLabel">We found more than one matching
+					person</h3>
+			</div>
+
+			<div class="modal-body">
+
+				<h5>Add more components of your family and try again!</h5>
+			</div>
+
+			<div class="modal-footer">
+
+				<button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
 			</div>
 		</div>
 	</div>
