@@ -101,8 +101,7 @@ exports.register = function(req, res) {
 
 							} else {
 
-								console.log("New user with id " + maxId
-										+ " not inserted");
+								console.log("New user not inserted");
 
 								res.status(OK).json('result', {
 									"newUser" : null

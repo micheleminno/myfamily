@@ -569,59 +569,84 @@ exports.view = function(req, res) {
 
 function insertNode(label, isPerson, req, callback) {
 
-	req.getConnection(function(err, connection) {
+	req
+			.getConnection(function(err, connection) {
 
-		connection.query("SELECT MAX(id) as maxId from nodes", function(err,
-				rows) {
+				connection
+						.query(
+								"SELECT MAX(id) as maxId from nodes",
+								function(err, rows) {
 
-			if (err) {
+									if (err) {
 
-				console.log("Error Selecting : %s ", err);
+										console.log("Error Selecting : %s ",
+												err);
 
-			} else {
+									} else {
 
-				if (rows.length > 0) {
+										if (rows.length > 0) {
 
-					var maxId = parseInt(rows[0]['maxId']) + 1;
+											var currentMaxId = rows[0]['maxId'];
+											var maxId = currentMaxId != null ? parseInt(currentMaxId) + 1
+													: 0;
 
-					var insertNodeQuery = "INSERT INTO nodes VALUES(" + maxId
-							+ ", '" + label + "', '', " + isPerson + ")";
+											var insertNodeQuery = "INSERT INTO nodes VALUES("
+													+ maxId
+													+ ", '"
+													+ label
+													+ "', '', "
+													+ isPerson
+													+ ")";
 
-					console.log(insertNodeQuery);
+											console.log(insertNodeQuery);
 
-					req.getConnection(function(err, connection) {
+											req
+													.getConnection(function(
+															err, connection) {
 
-						connection.query(insertNodeQuery, function(err, rows) {
+														connection
+																.query(
+																		insertNodeQuery,
+																		function(
+																				err,
+																				rows) {
 
-							if (err) {
+																			if (err) {
 
-								console.log("Error Inserting : %s ", err);
+																				console
+																						.log(
+																								"Error Inserting : %s ",
+																								err);
 
-							} else {
+																			} else {
 
-								if (rows.affectedRows > 0) {
+																				if (rows.affectedRows > 0) {
 
-									console.log("New node with id " + maxId
-											+ " inserted");
-									callback(maxId);
+																					console
+																							.log("New node with id "
+																									+ maxId
+																									+ " inserted");
+																					callback(maxId);
 
-								} else {
+																				} else {
 
-									console.log("New node with id " + maxId
-											+ " not inserted");
-									callback(-1);
-								}
-							}
-						});
-					});
+																					console
+																							.log("New node with id "
+																									+ maxId
+																									+ " not inserted");
+																					callback(-1);
+																				}
+																			}
+																		});
+													});
 
-				} else {
+										} else {
 
-					callback(-1);
-				}
-			}
-		});
-	});
+											callback(-1);
+										}
+									}
+								});
+			});
 };
 
 function updateNodeInDB(nodeIndex, field, value, req, callback) {

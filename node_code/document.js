@@ -659,7 +659,9 @@ function insertDocument(title, date, file, owner, tagged, req, callback) {
 
 										if (rows.length > 0) {
 
-											var maxId = parseInt(rows[0]['maxId']) + 1;
+											var currentMaxId = rows[0]['maxId'];
+											var maxId = currentMaxId != null ? parseInt(currentMaxId) + 1
+													: 0;
 
 											var insertQuery = "INSERT INTO documents VALUES("
 													+ maxId
