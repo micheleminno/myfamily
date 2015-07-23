@@ -168,7 +168,7 @@ var mainController = controllers
 					$scope.uploadNewDocument = function() {
 
 						$('#uploadDocumentForm').attr('action',
-								serverUrl + '/documents/upload');
+								MyFamilyService.getServerUrl() + '/documents/upload');
 
 						$('#uploadDocumentForm').submit();
 
