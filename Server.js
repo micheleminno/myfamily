@@ -34,13 +34,13 @@ app.use(connection);
 
 var multerConfig = {
 
-	dest : './docs/',
+	dest :  __dirname + '/docs/',
 	rename : function(fieldname, filename) {
 		return filename;
 	},
 
 	onFileUploadStart : function(file) {
-		console.log(file.originalname + ' upload is starting...');
+		console.log(file.originalname + ' uploading to ' + file.path);
 	},
 
 	onFileUploadComplete : function(file) {

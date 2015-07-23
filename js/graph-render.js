@@ -1,17 +1,18 @@
-var serverUrl = 'http://localhost:8091';
 var commons = window.commons || {};
 
 var graphRender = function(scope, graph, configuration, server, svg) {
 
-	if(!graph) {
-		
+	if (!graph) {
+
 		return;
 	}
-	
+
 	var svgRoot = null;
 	var container = null;
 	var force = null;
 	var nodeDrag = null;
+	var defaultProfileImg = "default_profile.jpg";
+	var defaultDocumentImg = "default_pdf.png";
 
 	function init() {
 
@@ -292,8 +293,8 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 						var circleSize = commons.getCircleSize(d,
 								graph.user.label);
-						var nodeClass = commons
-								.getNodeClass(d, graph.user.label);
+						var nodeClass = commons.getNodeClass(d,
+								graph.user.label);
 
 						clipPath.append("circle").attr("class", nodeClass)
 								.attr("r", circleSize).attr("id",
@@ -302,18 +303,18 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 						currentNode.append("svgRoot:use").attr("xlink:href",
 								"#" + "circle_" + d.originalId);
 
-						currentNode
-								.append("svgRoot:image")
-								.attr("class", "profile-image")
-								.attr(
-										"xlink:href",
-										function(d) {
-											return d.img == "" ? "./docs/default_profile.jpg"
-													: "./docs/" + d.img;
-										}).attr("width", circleSize * 2).attr(
-										"height", circleSize * 2).attr("x", 0)
-								.attr("y", 0).attr("clip-path",
-										"url(#clipPath_" + d.originalId + ")");
+						currentNode.append("svgRoot:image").attr("class",
+								"profile-image").attr(
+								"xlink:href",
+								function(d) {
+									return d.img == "" ? server
+											.getFilePath(defaultProfileImg)
+											: server.getFilePath(d.img);
+
+								}).attr("width", circleSize * 2).attr("height",
+								circleSize * 2).attr("x", 0).attr("y", 0).attr(
+								"clip-path",
+								"url(#clipPath_" + d.originalId + ")");
 
 						currentNode.append("text").attr(
 								"class",
@@ -452,8 +453,8 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 				$('#uploadProfileImageForm').attr(
 						'action',
-						serverUrl + "/" + graph.user.id + '/graph/profileImage/'
-								+ svg.nodeIdToUpdate);
+						server.getServerUrl() + "/" + graph.user.id
+								+ '/graph/profileImage/' + svg.nodeIdToUpdate);
 				$('#uploadProfileImageForm').submit();
 
 				var filePath = $(this).val();
@@ -469,10 +470,10 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 			return d.originalId == svg.nodeIdToUpdate;
 
-		}).attr("xlink:href", "./docs/" + svg.fileName);
+		}).attr("xlink:href", server.getFilePath(svg.fileName));
 
 		svgRoot.selectAll(".profile-image--selected").attr("xlink:href",
-				"./docs/" + svg.fileName);
+				server.getFilePath(svg.fileName));
 	}
 
 	function clickSvg(d) {
@@ -590,8 +591,8 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 				.attr('class', "profile-frame").attr("x",
 						configuration.centerX - 155).attr("y", -10);
 
-		var imagePath = d.img == "" ? "./docs/default_profile.jpg" : "./docs/"
-				+ d.img;
+		var imagePath = d.img == "" ? server.getFilePath(defaultProfileImg)
+				: server.getFilePath(d.img);
 
 		profileContainer.append("image").attr("width", 200).attr("height", 200)
 				.attr('class', "profile-image--selected").attr("x",
@@ -693,8 +694,8 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 		if (!svg.selectedNodeId) {
 			d3.select(this).classed("dragging", false);
 
-			server.updateNodePosition(d.originalId, graph.user.id, graph.view.id,
-					d.x, d.y);
+			server.updateNodePosition(d.originalId, graph.user.id,
+					graph.view.id, d.x, d.y);
 		}
 	}
 
@@ -835,17 +836,16 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 		var duration = 300;
 
-		sel
-				.enter()
-				.append("image")
-				.attr("class", "doc")
-				.attr(
-						"xlink:href",
-						function(d) {
-							return d.file.substr(-4) === ".pdf" ? "./docs/default_pdf.png"
-									: "./docs/" + d.file;
-						}).attr("width", 100).attr("height",
-						configuration.streamHeight).attr("y",
+		sel.enter().append("image").attr("class", "doc").attr(
+				"xlink:href",
+				function(d) {
+
+					return d.file.substr(-4) === ".pdf" ? server
+							.getFilePath(defaultDocumentImg) : server
+							.getFilePath(d.file);
+
+				}).attr("width", 100)
+				.attr("height", configuration.streamHeight).attr("y",
 						configuration.streamY).attr("index", function(d) {
 					return d.index;
 				}).attr("id", function(d) {
@@ -853,7 +853,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 				}).attr("title", function(d) {
 					return d.title;
 				}).attr("url", function(d) {
-					return "./docs/" + d.file;
+					return server.getFilePath(d.file);
 				}).attr("date", function(d) {
 
 					return commons.getDate(d.date);
@@ -963,18 +963,16 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 			y = defaultY;
 		}
 
-		docNode
-				.attr("width", 100)
-				.attr("id", doc.id)
-				.attr("title", doc.title)
-				.attr("url", "./docs/" + doc.file)
-				.attr("date", commons.getDate(doc.date))
-				.attr("height", 80)
-				.attr(
+		docNode.attr("width", 100).attr("id", doc.id).attr("title", doc.title)
+				.attr("url", server.getFilePath(doc.file)).attr("date",
+						commons.getDate(doc.date)).attr("height", 80).attr(
 						"xlink:href",
 						function() {
-							return doc.file.substr(-4) === ".pdf" ? "./docs/default_pdf.png"
-									: "./docs/" + doc.file;
+
+							return doc.file.substr(-4) === ".pdf" ? server
+									.getFilePath(defaultDocumentImg) : server
+									.getFilePath(doc.file);
+
 						}).attr("class", function() {
 
 					return "myCursor-pointer-move";
