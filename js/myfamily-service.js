@@ -4,7 +4,7 @@ app
 				function($http, $q) {
 
 					var serverUrl = 'http://localhost:8091';
-					var docDestination = './docs/';
+					var docDestination = 'docs/';
 
 					this.getServerUrl = function() {
 
@@ -13,7 +13,8 @@ app
 
 					this.getFilePath = function(fileName) {
 
-						return docDestination + fileName;
+						var path = window.location.pathname;
+						return path + docDestination + fileName;
 					};
 
 					// Send Mail
