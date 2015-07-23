@@ -16,7 +16,7 @@ var mainController = controllers
 						};
 
 						MyFamilyService
-								.getEvents($scope.graph.userId, data)
+								.getEvents($scope.graph.user.id, data)
 								.then(
 										function(events) {
 
@@ -31,19 +31,19 @@ var mainController = controllers
 
 											MyFamilyService
 													.addNotifications(
-															$scope.graph.userId,
+															$scope.graph.user.id,
 															newEventIds)
 													.then(
 															function() {
 
 																MyFamilyService
 																		.getUnreadNotifications(
-																				$scope.graph.userId)
+																				$scope.graph.user.id)
 																		.then(
 																				function(
-																						notifications) {
+																						resultData) {
 
-																					$scope.graph.notifications = notifications;
+																					$scope.graph.notifications = resultData;
 
 																					if (callback) {
 																						callback();
@@ -63,10 +63,10 @@ var mainController = controllers
 							nodes : $scope.graph.nodes
 						};
 
-						MyFamilyService.getViewDocuments($scope.graph.userId,
-								data).then(function(documentsData) {
+						MyFamilyService.getViewDocuments($scope.graph.user.id,
+								data).then(function(resultData) {
 
-							$scope.graph.documents = documentsData;
+							$scope.graph.documents = resultData;
 
 							if (callback) {
 								callback();
@@ -80,16 +80,17 @@ var mainController = controllers
 					 */
 					function fillGraph(callback) {
 
-						MyFamilyService.getGraphView($scope.graph.userId,
-								$scope.graph.viewId).then(function(graphData) {
+						MyFamilyService.getGraphView($scope.graph.user.id,
+								$scope.graph.view.id).then(
+								function(resultData) {
 
-							$scope.graph.nodes = graphData.nodes;
-							$scope.graph.links = graphData.links;
+									$scope.graph.nodes = resultData.nodes;
+									$scope.graph.links = resultData.links;
 
-							if (callback) {
-								callback();
-							}
-						});
+									if (callback) {
+										callback();
+									}
+								});
 					}
 
 					$scope.initViews = function() {
@@ -110,8 +111,6 @@ var mainController = controllers
 							id : 4,
 							label : 'Extended family'
 						} ];
-
-						$scope.selectedView = $scope.views[4];
 					};
 
 					$scope.initD3Config = function() {
@@ -131,7 +130,7 @@ var mainController = controllers
 						$scope.svg = {};
 					};
 
-					$scope.drawGraph = function(callback) {
+					$scope.drawGraph = function() {
 
 						fillGraph(function() {
 
@@ -140,10 +139,6 @@ var mainController = controllers
 								fillNotifications(function() {
 
 									$scope.graphData = $scope.graph;
-
-									if (callback) {
-										callback();
-									}
 								});
 							});
 						});
@@ -151,21 +146,22 @@ var mainController = controllers
 
 					$scope.updateView = function(view) {
 
-						$scope.selectedView = view;
+						$scope.graph.view = view;
 						$scope.drawGraph();
 					};
 
 					function resetData() {
-					
+
 						d3.select("svg").remove();
 						$scope.graphData = null;
-					};
-					
+					}
+					;
+
 					$scope.logout = function() {
 
 						AuthenticationService.clearCredentials();
 						resetData();
-						
+
 						$location.path('/login');
 					};
 
@@ -184,7 +180,7 @@ var mainController = controllers
 						MyFamilyService
 								.addDocument(fileName, $scope.addTitle,
 										$scope.addDate, $scope.taggedUsers,
-										$scope.graph.userId)
+										$scope.graph.user.id)
 								.then(
 										function(addedDoc) {
 

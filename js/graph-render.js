@@ -75,7 +75,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 				title : 'Add family as a parent',
 				action : function(elm, d, i) {
 
-					server.addNode('family', graph.userId, d.originalId,
+					server.addNode('family', graph.user.id, d.originalId,
 							'source').then(function() {
 
 						scope.drawGraph();
@@ -86,7 +86,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 				title : 'Add family as a child',
 				action : function(elm, d, i) {
 
-					server.addNode('family', graph.userId, d.originalId,
+					server.addNode('family', graph.user.id, d.originalId,
 							'target').then(function() {
 
 						scope.drawGraph();
@@ -97,7 +97,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 				title : 'Remove',
 				action : function(elm, d, i) {
 
-					server.removeNode(graph.userId, d.originalId).then(
+					server.removeNode(graph.user.id, d.originalId).then(
 							function() {
 
 								scope.drawGraph();
@@ -110,7 +110,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 				title : 'Add parent',
 				action : function(elm, d, i) {
 
-					server.addNode('person', graph.userId, d.originalId,
+					server.addNode('person', graph.user.id, d.originalId,
 							'target').then(function() {
 
 						scope.drawGraph();
@@ -121,7 +121,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 				title : 'Add child',
 				action : function(elm, d, i) {
 
-					server.addNode('person', graph.userId, d.originalId,
+					server.addNode('person', graph.user.id, d.originalId,
 							'source').then(function() {
 
 						scope.drawGraph();
@@ -132,7 +132,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 				title : 'Remove',
 				action : function(elm, d, i) {
 
-					server.removeNode(graph.userId, d.originalId).then(
+					server.removeNode(graph.user.id, d.originalId).then(
 							function() {
 
 								scope.drawGraph();
@@ -210,7 +210,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 						"click",
 						function(d) {
 
-							if (d.label.toUpperCase() == graph.userLabel
+							if (d.label.toUpperCase() == graph.user.label
 									.toUpperCase()) {
 
 								alert("If you want to change your name go to the setting menu");
@@ -235,7 +235,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 									label.textContent = result;
 
 									server.updateNode(d.originalId,
-											graph.userId, 'label', result);
+											graph.user.id, 'label', result);
 								}
 
 							}
@@ -244,11 +244,11 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 						});
 	}
 
-	function drawTree(userId, userLabel, viewId, viewLabel) {
+	function drawTree(user, view) {
 
 		init();
 
-		if (viewId != 4) {
+		if (view.id != 4) {
 
 			svgRoot.on('contextmenu', null);
 		}
@@ -279,7 +279,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 						currentNode.on("click", clickNode);
 
-						if (viewId == 4) {
+						if (view.id == 4) {
 
 							currentNode.on('contextmenu', d3
 									.contextMenu(onPersonMenu));
@@ -291,9 +291,9 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 								"clipPath_" + d.originalId);
 
 						var circleSize = commons.getCircleSize(d,
-								graph.userLabel);
+								graph.user.label);
 						var nodeClass = commons
-								.getNodeClass(d, graph.userLabel);
+								.getNodeClass(d, graph.user.label);
 
 						clipPath.append("circle").attr("class", nodeClass)
 								.attr("r", circleSize).attr("id",
@@ -318,7 +318,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 						currentNode.append("text").attr(
 								"class",
 								function(d) {
-									if (d.label.toUpperCase() == userLabel
+									if (d.label.toUpperCase() == user.label
 											.toUpperCase()) {
 										return "my-nodeLabel";
 									} else {
@@ -334,7 +334,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 						}
 					} else {
 
-						if (viewId == 4) {
+						if (view.id == 4) {
 
 							currentNode.on('contextmenu', d3
 									.contextMenu(onFamilyMenu));
@@ -391,7 +391,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 		}
 	}
 
-	drawTree(graph.userId, graph.userLabel, graph.viewId, graph.viewLabel);
+	drawTree(graph.user, graph.view);
 
 	var diagonal = d3.svg.diagonal().source(function(d) {
 
@@ -425,19 +425,19 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 		svg.node.selectAll(".nodeLabel").attr("x", function(d) {
 			return d.x - 25;
 		}).attr("y", function(d) {
-			return d.y + commons.getCircleSize(d, graph.userLabel);
+			return d.y + commons.getCircleSize(d, graph.user.label);
 		});
 
 		svg.node.selectAll(".my-nodeLabel").attr("x", function(d) {
 			return d.x - 45;
 		}).attr("y", function(d) {
-			return d.y + commons.getCircleSize(d, graph.userLabel);
+			return d.y + commons.getCircleSize(d, graph.user.label);
 		});
 
 		svg.node.selectAll(".profile-image").attr("x", function(d) {
-			return d.x - commons.getCircleSize(d, graph.userLabel);
+			return d.x - commons.getCircleSize(d, graph.user.label);
 		}).attr("y", function(d) {
-			return d.y - commons.getCircleSize(d, graph.userLabel);
+			return d.y - commons.getCircleSize(d, graph.user.label);
 		});
 
 		svg.node.selectAll("ellipse").attr("cx", function(d) {
@@ -452,7 +452,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 				$('#uploadProfileImageForm').attr(
 						'action',
-						serverUrl + "/" + graph.userId + '/graph/profileImage/'
+						serverUrl + "/" + graph.user.id + '/graph/profileImage/'
 								+ svg.nodeIdToUpdate);
 				$('#uploadProfileImageForm').submit();
 
@@ -693,7 +693,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 		if (!svg.selectedNodeId) {
 			d3.select(this).classed("dragging", false);
 
-			server.updateNodePosition(d.originalId, graph.userId, graph.viewId,
+			server.updateNodePosition(d.originalId, graph.user.id, graph.view.id,
 					d.x, d.y);
 		}
 	}
@@ -961,7 +961,6 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 			x = defaultX;
 			y = defaultY;
-
 		}
 
 		docNode
