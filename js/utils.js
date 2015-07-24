@@ -1,16 +1,16 @@
 var commons = window.commons || {};
 
-commons.getCircleSize = function(d, userLabel) {
+commons.getCircleSize = function(thisLabel, thisLevel, userLabel) {
 
 	var circleSize;
 
-	if (d.label.toUpperCase() == userLabel.toUpperCase()) {
+	if (thisLabel.toUpperCase() == userLabel.toUpperCase()) {
 
-		circleSize = (125 / d.level) * 1.5;
+		circleSize = (125 / thisLevel) * 1.5;
 
 	} else {
 
-		circleSize = 125 / d.level;
+		circleSize = 125 / thisLevel;
 	}
 
 	return circleSize;
@@ -43,20 +43,13 @@ commons.getDate = function(dateString) {
 	if (!dateString || dateString == '') {
 
 		return "No date";
+
 	} else {
-		var date = new Date(dateString.substring(0, dateString.indexOf('T')));
-		return date.toDateString();
-	}
-};
 
-commons.getFormattedDate = function(dateString) {
+		dateString = dateString.substring(0, dateString.indexOf('T'));
+		var newDateString = moment(dateString, 'YYYY-MM-DD').format(
+				'MMMM Do YYYY');
 
-	if (!dateString || dateString == '') {
-
-		return "";
-	} else {
-		// yyyy-mm-dd
-		var originalFormat = dateString.substring(0, dateString.indexOf('T'));
-		return originalFormat;
+		return newDateString;
 	}
 };

@@ -48,6 +48,12 @@
 	opacity: .8;
 }
 
+.tagSelection {
+	
+	fill: yellow;
+	opacity: .5;
+}
+
 .nodeLabel {
 	fill: brown;
 	font-size: 25px;
@@ -96,11 +102,6 @@
 .navigator-arrow--selected {
 	font-size: 30px;
 	font-weight: bold;
-}
-
-.node--tagged .node {
-	opacity: 1;
-	stroke: yellow;
 }
 
 .profile-image {

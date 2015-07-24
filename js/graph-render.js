@@ -272,7 +272,9 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 		svg.node
 				.each(function(d) {
 
-					currentNode = d3.select(this);
+					currentNode = d3.select(this).attr("id", d.originalId)
+							.attr("x", d.x).attr("y", d.y).attr("label",
+									d.label).attr("level", d.level);
 
 					currentNode.call(nodeDrag);
 
@@ -291,8 +293,8 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 						clipPath = defs.append("svgRoot:clipPath").attr("id",
 								"clipPath_" + d.originalId);
 
-						var circleSize = commons.getCircleSize(d,
-								graph.user.label);
+						var circleSize = commons.getCircleSize(d.label,
+								d.level, graph.user.label);
 						var nodeClass = commons.getNodeClass(d,
 								graph.user.label);
 
@@ -425,23 +427,43 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 		svg.node.selectAll(".nodeLabel").attr("x", function(d) {
 			return d.x - 25;
-		}).attr("y", function(d) {
-			return d.y + commons.getCircleSize(d, graph.user.label);
-		});
+		}).attr(
+				"y",
+				function(d) {
+					return d.y
+							+ commons.getCircleSize(d.label, d.level,
+									graph.user.label);
+				});
 
 		svg.node.selectAll(".my-nodeLabel").attr("x", function(d) {
 			return d.x - 45;
-		}).attr("y", function(d) {
-			return d.y + commons.getCircleSize(d, graph.user.label);
-		});
+		}).attr(
+				"y",
+				function(d) {
+					return d.y
+							+ commons.getCircleSize(d.label, d.level,
+									graph.user.label);
+				});
 
-		svg.node.selectAll(".profile-image").attr("x", function(d) {
-			return d.x - commons.getCircleSize(d, graph.user.label);
-		}).attr("y", function(d) {
-			return d.y - commons.getCircleSize(d, graph.user.label);
-		});
+		svg.node.selectAll(".profile-image").attr(
+				"x",
+				function(d) {
+
+					return d.x
+							- commons.getCircleSize(d.label, d.level,
+									graph.user.label);
+
+				}).attr(
+				"y",
+				function(d) {
+
+					return d.y
+							- commons.getCircleSize(d.label, d.level,
+									graph.user.label);
+				});
 
 		svg.node.selectAll("ellipse").attr("cx", function(d) {
+
 			return d.x;
 		}).attr("cy", function(d) {
 			return d.y;
@@ -520,15 +542,17 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 		rect = container.children[0];
 
-		rect.width.baseVal.value = 660;
-		rect.height.baseVal.value = 660;
+		rect.setAttribute("width", 660);
+		rect.setAttribute("height", 660);
+
 		rect.x.baseVal.value -= 170;
 		rect.y.baseVal.value -= 150;
 
 		image = container.children[1];
 
-		image.width.baseVal.value = 600;
-		image.height.baseVal.value = 600;
+		image.setAttribute("width", 600);
+		image.setAttribute("height", 600);
+
 		image.x.baseVal.value -= 150;
 		image.y.baseVal.value -= 130;
 	}
@@ -541,15 +565,17 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 		rect = container.children[0];
 
-		rect.width.baseVal.value = 220;
-		rect.height.baseVal.value = 220;
+		rect.setAttribute("width", 220);
+		rect.setAttribute("height", 220);
+
 		rect.x.baseVal.value += 170;
 		rect.y.baseVal.value += 150;
 
 		image = container.children[1];
 
-		image.width.baseVal.value = 200;
-		image.height.baseVal.value = 200;
+		image.setAttribute("width", 200);
+		image.setAttribute("height", 200);
+
 		image.x.baseVal.value += 150;
 		image.y.baseVal.value += 130;
 	}
@@ -605,7 +631,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 				"y", -50).attr("x", configuration.centerX - 230).text(d.label)
 				.call(makeEditable);
 
-		placeDocuments(d.originalId, "tagged", svg.selectedNode, d.originalId,
+		placeDocuments(d.originalId, "tagged", svg.selectedNode,
 				configuration.centerX, configuration.centerY,
 				configuration.maxRowSize);
 	}
@@ -656,8 +682,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 		var centerY = 1100;
 		var maxRowSize = 40;
 
-		placeDocuments(-1, "tagged", selectedNode, -1, centerX, centerY,
-				maxRowSize);
+		placeDocuments(-1, "tagged", selectedNode, centerX, centerY, maxRowSize);
 
 		d3.event.stopPropagation();
 	}
@@ -770,8 +795,16 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 											scope.editDocId = data.document.id;
 											scope.editFileName = data.document.file;
 											scope.editTitle = data.document.title;
-											scope.editDate = commons
-													.getFormattedDate(data.document.date);
+
+											if (data.document.date.lastIndexOf(
+													'0000', 0) === 0) {
+
+												scope.editDate = '2015-01-01 00:00:00';
+
+											} else {
+
+												scope.editDate = data.document.date;
+											}
 
 											$('#editDocumentModal').modal(
 													'show');
@@ -783,8 +816,6 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 			{
 				title : 'Remove',
 				action : function(elm, d, i) {
-
-					removeDocument(elm.id);
 
 					server.removeDocument(elm.id).then(
 							function() {
@@ -890,30 +921,29 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 		var doc = selection[0][0];
 
-		if (doc.attributes.url.nodeValue.substr(-4) === ".pdf") {
+		if (doc.getAttribute("url").substr(-4) === ".pdf") {
 
-			window.open(siteUrl + doc.attributes.url.nodeValue.substr(1),
-					'_blank');
+			window.open("../" + doc.getAttribute("url").substr(1), '_blank');
 
 		} else {
 
 			grandParent.append("rect").attr("class", "frame").attr("width",
 					1205).attr("height", 1014).attr("xlink:href",
-					doc.href.baseVal).attr("x", 997.5).attr("y", -182).on(
-					"click", zoomedDocClicked).attr("cursor", "auto");
+					doc.getAttribute("href")).attr("x", 997.5).attr("y", -182)
+					.on("click", zoomedDocClicked).attr("cursor", "auto");
 
 			grandParent.append("image").attr("class", "zoomedDoc")
 					.moveToFront().attr("width", 1200).attr("height", 1010)
-					.attr("xlink:href", doc.href.baseVal).attr("x", 1000).attr(
-							"y", -180).on("click", zoomedDocClicked).attr(
-							"cursor", "auto");
+					.attr("xlink:href", doc.getAttribute("href")).attr("x",
+							1000).attr("y", -180).on("click", zoomedDocClicked)
+					.attr("cursor", "auto");
 
 			grandParent.append("text").attr("class", "docText").attr("x", 1800)
-					.attr("y", 900).text(doc.attributes.title.nodeValue);
+					.attr("y", 900).text(doc.getAttribute("title"));
 
 			grandParent.append("text").attr("class", "docText-small").attr("x",
 					1800).attr("y", 1000).text(
-					"(on " + doc.attributes.date.nodeValue + ")");
+					"(on " + doc.getAttribute("date") + ")");
 
 			grandParent.append("text").attr("class", "closeDoc")
 					.attr("x", 2125).attr("y", -220).text("[close]").attr(
@@ -983,13 +1013,16 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 		docNode.on('contextmenu', d3.contextMenu(onDocumentMenu));
 	}
 
-	function placeDocuments(nodeId, relationType, selectedNode, nodeIndex,
-			centerX, centerY, maxRowSize) {
+	function placeDocuments(nodeId, relationType, selectedNode, centerX,
+			centerY, maxRowSize) {
 
 		server.getNodeDocuments(nodeId, relationType).then(
 				function(data) {
 
 					var documents = data.documents;
+
+					scope.graphData.selectedNode = {};
+					scope.graphData.selectedNode.documents = data.documents;
 
 					var container = selectedNode.append("g").attr("class",
 							"docContainer");
@@ -1022,39 +1055,48 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 		var parent = d3.select(this.parentNode);
 
-		doc.width.baseVal.value = 200;
-		doc.height.baseVal.value = 200;
+		doc.setAttribute("width", 200);
+		doc.setAttribute("height", 200);
 		doc.x.baseVal.value -= 50;
 		doc.y.baseVal.value -= 50;
 
 		if (!svg.selectedNodeId
-				|| doc.attributes.url.nodeValue.substr(-4) === ".pdf") {
+				|| doc.getAttribute("url").substr(-4) === ".pdf") {
 
 			parent.append("text").attr("class", "thumbnailText").attr("x",
-					doc.x.baseVal.value).attr("y", doc.y.baseVal.value - 20)
-					.text(doc.attributes.title.nodeValue);
+					doc.getAttribute("x")).attr("y", doc.y.baseVal.value - 20)
+					.text(doc.getAttribute("title"));
 
 			if (!svg.selectedNodeId) {
 
 				parent.append("text").attr("class", "thumbnailText").attr("x",
-						doc.x.baseVal.value).attr("y",
+						doc.getAttribute("x")).attr("y",
 						doc.y.baseVal.value + 235).text(
-						doc.attributes.date.nodeValue);
+						doc.getAttribute("date"));
 
-				svg.node.classed("node--tagged", function(n) {
+				svg.node[0].forEach(function(n) {
 
 					if (d.node) {
 
 						for (nodeIndex in d.node) {
 
 							var taggedNode = d.node[nodeIndex];
-							if (taggedNode == n.originalId) {
-								return true;
+							if (taggedNode == n.id) {
+
+								var currentNode = d3.select(n);
+								var circleSize = commons.getCircleSize(n
+										.getAttribute("label"), n
+										.getAttribute("level"),
+										graph.user.label);
+
+								currentNode.append("circle").attr("r",
+										circleSize + 100).attr("class",
+										"tagSelection").attr("cx",
+										n.getAttribute("x")).attr("cy",
+										n.getAttribute("y"));
 							}
 						}
 					}
-
-					return false;
 				});
 			}
 		}
@@ -1068,12 +1110,13 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 		var selection = d3.select(this);
 		var doc = selection[0][0];
 
-		doc.width.baseVal.value = 100;
-		doc.height.baseVal.value = 100;
+		doc.setAttribute("width", 100);
+		doc.setAttribute("height", 100);
+
 		doc.x.baseVal.value += 50;
 		doc.y.baseVal.value += 50;
 
-		svg.node.classed("node--tagged", false);
+		svgRoot.selectAll(".tagSelection").remove();
 	}
 
 	function thumbnailClicked(d) {
@@ -1091,29 +1134,29 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 		var doc = selection[0][0];
 
-		if (doc.attributes.url.nodeValue.substr(-4) === ".pdf") {
+		if (doc.getAttribute("url").substr(-4) === ".pdf") {
 
-			window.open(siteUrl + doc.attributes.url.nodeValue.substr(1),
-					'_blank');
+			window.open("../" + doc.getAttribute("url").substr(1), '_blank');
 
 		} else {
 
 			parent = parent.append("g").attr("class", "selection");
 
 			parent.append("rect").attr("class", "frame").attr("width", 1205)
-					.attr("height", 1014).attr("xlink:href", doc.href.baseVal)
-					.attr("x", 997.5).attr("y", -182);
+					.attr("height", 1014).attr("xlink:href",
+							doc.getAttribute("href")).attr("x", 997.5).attr(
+							"y", -182);
 			parent.append("image").attr("class", "zoomedDoc").moveToFront()
 					.attr("width", 1200).attr("height", 1010).attr(
-							"xlink:href", doc.href.baseVal).attr("x", 1000)
-					.attr("y", -180);
+							"xlink:href", doc.getAttribute("href")).attr("x",
+							1000).attr("y", -180);
 
 			parent.append("text").attr("class", "docText").attr("x", 1800)
-					.attr("y", 900).text(doc.attributes.title.nodeValue);
+					.attr("y", 900).text(doc.getAttribute("title"));
 
 			parent.append("text").attr("class", "docText-small")
 					.attr("x", 1800).attr("y", 1000).text(
-							"(on " + doc.attributes.date.nodeValue + ")");
+							"(on " + doc.getAttribute("date") + ")");
 
 			parent.append("text").attr("class", "closeDoc").attr("x", 2125)
 					.attr("y", -220).text("[close]").attr("cursor", "pointer")
@@ -1144,25 +1187,12 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 		sel.classed("dragging", false);
 
 		var document = sel[0][0];
-		var x = document.x.baseVal.value;
-		var y = document.y.baseVal.value;
-		var id = document.attributes.id.nodeValue;
+		var x = document.getAttribute("x");
+		var y = document.getAttribute("y");
+		var id = document.id;
 
 		var nodeId = d ? d.originalId : -1;
 
 		server.updateDocumentPosition(id, nodeId, x, y);
-	}
-
-	function removeDocument(docId) {
-
-		svgRoot.selectAll(".docContainer > image").filter(function() {
-
-			var sel = d3.select(this);
-
-			var document = sel[0][0];
-			var id = document.attributes.id.nodeValue;
-			return id == docId;
-
-		}).remove();
 	}
 };

@@ -436,7 +436,7 @@ exports.update = function(req, res) {
 	if (req.query.date) {
 
 		dateQuerySegment = "date = STR_TO_DATE('" + req.query.date
-				+ "', GET_FORMAT(DATETIME, 'JIS'))";
+				+ "', '%d/%m/%Y')";
 
 	} else {
 
@@ -667,9 +667,9 @@ function insertDocument(title, date, file, owner, tagged, req, callback) {
 													+ maxId
 													+ ", '"
 													+ title
-													+ "', '"
+													+ "', STR_TO_DATE('"
 													+ date
-													+ "', '"
+													+ "', '%d/%m/%Y'), '"
 													+ file
 													+ "', "
 													+ owner

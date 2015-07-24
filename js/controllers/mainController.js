@@ -1,7 +1,7 @@
 var mainController = controllers
 		.controller(
 				"MainCtrl",
-				function($scope, $location, MyFamilyService,
+				function($scope, $location, dateFilter, MyFamilyService,
 						AuthenticationService) {
 
 					/*
@@ -143,7 +143,7 @@ var mainController = controllers
 							});
 						});
 					};
-
+					
 					$scope.updateView = function(view) {
 
 						$scope.graph.view = view;
@@ -155,7 +155,6 @@ var mainController = controllers
 						d3.select("svg").remove();
 						$scope.graphData = null;
 					}
-					;
 
 					$scope.logout = function() {
 
@@ -167,8 +166,10 @@ var mainController = controllers
 
 					$scope.uploadNewDocument = function() {
 
-						$('#uploadDocumentForm').attr('action',
-								MyFamilyService.getServerUrl() + '/documents/upload');
+						$('#uploadDocumentForm').attr(
+								'action',
+								MyFamilyService.getServerUrl()
+										+ '/documents/upload');
 
 						$('#uploadDocumentForm').submit();
 
@@ -225,18 +226,52 @@ var mainController = controllers
 
 						$('#editDocumentModal').modal('hide');
 
-						MyFamilyService.updateDocument($scope.editDocId,
-								$scope.editTitle, $scope.editDate,
-								$scope.taggedUsers).then(
-								function() {
+						MyFamilyService
+								.updateDocument($scope.editDocId,
+										$scope.editTitle, $scope.editDate,
+										$scope.taggedUsers)
+								.then(
+										function() {
 
-									if ($scope.taggedUsers
-											.indexOf($scope.nodeId) > -1) {
+											if ($scope.taggedUsers
+													.indexOf($scope.editNodeId) == -1) {
 
-										removeDocument($scope.docId);
-									}
-								});
+												for (docIndex in $scope.graphData.selectedNode.documents) {
+
+													var doc = $scope.graphData.selectedNode.documents[docIndex];
+													if (doc.id == $scope.editDocId) {
+
+														$scope.graphData.selectedNode.documents
+																.splice(
+																		docIndex,
+																		1);
+													}
+												}
+											}
+										});
 					};
+
+					$scope.editDateConfig = {
+						dropdownSelector : '.edit-date-toggle-select',
+						startView : 'year',
+						minView : 'day'
+					};
+
+					$scope.addDateConfig = {
+						dropdownSelector : '.add-date-toggle-select',
+						startView : 'year',
+						minView : 'day'
+					};
+
+					$scope.$watch('editDate', function(date) {
+
+						$scope.editDate = dateFilter(date, 'dd/MM/yyyy');
+					});
+
+					$scope.$watch('addDate', function(date) {
+
+						$scope.addDate = dateFilter(date, 'dd/MM/yyyy');
+					});
 
 					$scope.addInTaggedUsers = function(taggableUser) {
 
