@@ -799,7 +799,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 											if (data.document.date.lastIndexOf(
 													'0000', 0) === 0) {
 
-												scope.editDate = '2015-01-01 00:00:00';
+												scope.editDate = '01/01/2015';
 
 											} else {
 
