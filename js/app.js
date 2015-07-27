@@ -20,6 +20,16 @@ window.routes = {
 		controller : 'MainCtrl',
 		requireLogin : true
 	},
+	'/profile' : {
+		templateUrl : 'html/profile.html',
+		controller : 'ProfileCtrl',
+		requireLogin : true
+	},
+	'/settings' : {
+		templateUrl : 'html/settings.html',
+		controller : 'SettingsCtrl',
+		requireLogin : true
+	},
 	'/error' : {
 		templateUrl : 'html/error.html',
 		controller : 'ErrorCtrl',
@@ -55,16 +65,9 @@ app.config(
 
 								$location.path("/login");
 
-							} else if ($location.path() === "/home") {
-
-								$location.path("/home");
-
 							} else {
 
-								console.warn("Logged user can't access "
-										+ $location.path());
-
-								$location.path("/home");
+								$location.path();
 							}
 						}
 					});

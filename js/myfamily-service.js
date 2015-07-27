@@ -451,13 +451,13 @@ app
 
 					// Events
 
-					this.getEvents = function(userId, nodes) {
+					this.getEvents = function(nodes) {
 
 						var deferred = $q.defer();
 
 						var httpPostConfig = {
 
-							url : serverUrl + "/" + userId + "/events",
+							url : serverUrl + "/events",
 							method : "POST",
 							data : JSON.stringify(nodes),
 							headers : {
@@ -478,7 +478,7 @@ app
 
 						var deferred = $q.defer();
 
-						$http.get($.get(
+						$http.get(
 								serverUrl + '/events/add/' + entityType + '/'
 										+ entityId + '?type=' + eventType
 										+ '&node=' + nodeId).success(
@@ -489,7 +489,26 @@ app
 
 								deferred.resolve(data);
 							}
-						}));
+						});
+
+						return deferred.promise;
+					};
+
+					this.deleteEvents = function(entityType, entityId) {
+
+						var deferred = $q.defer();
+
+						$http.get(
+								serverUrl + '/events/remove/' + entityType
+										+ '/' + entityId).success(
+
+						function(data) {
+
+							if (data) {
+
+								deferred.resolve(data);
+							}
+						});
 
 						return deferred.promise;
 					};
@@ -500,29 +519,38 @@ app
 
 						var deferred = $q.defer();
 
-						$http.get($.get(
-								serverUrl + '/' + userId
-										+ '/notifications/unread').success(
+						$http
+								.get(
+										serverUrl + '/' + userId
+												+ '/notifications/1')
+								.success(
 
-								function(data) {
+										function(data) {
 
-									if (data) {
+											if (data) {
 
-										var notifications = data.map(function(
-												item) {
-											return {
-												id : item.id,
-												label : item.description
-														+ " of "
-														+ item.entity_type
-														+ " " + item.entity
-														+ " on " + item.date
-											};
+												var notifications = data
+														.map(function(item) {
+															return {
+
+																eventId : item.id,
+																label : item.description
+																		+ " of "
+																		+ item.entity_type
+																		+ " '"
+																		+ item.title
+																		+ "' on "
+																		+ item.date,
+																file : item.file,
+																docTitle : item.title,
+																date : item.date
+
+															};
+														});
+
+												deferred.resolve(notifications);
+											}
 										});
-
-										deferred.resolve(notifications);
-									}
-								}));
 
 						return deferred.promise;
 					};
@@ -552,13 +580,34 @@ app
 						return deferred.promise;
 					};
 
-					this.markNotificationAsRead = function(notificationId) {
+					this.deleteNotification = function(userId, eventId) {
 
 						var deferred = $q.defer();
 
-						$http.get($.get(
-								serverUrl + '/notifications/' + notificationId
-										+ '/setStatus/?status=read').success(
+						$http.get(
+								serverUrl + '/' + userId
+										+ '/notifications/remove/' + eventId)
+								.success(
+
+								function(data) {
+
+									if (data) {
+
+										deferred.resolve(data);
+									}
+								});
+
+						return deferred.promise;
+					};
+
+					this.deleteNotifications = function(userId, entityType, entityId) {
+
+						var deferred = $q.defer();
+
+						$http.get(
+								serverUrl + '/' + userId
+										+ '/notifications/remove/' + entityType
+										+ '/' + entityId).success(
 
 						function(data) {
 
@@ -566,7 +615,27 @@ app
 
 								deferred.resolve(data);
 							}
-						}));
+						});
+
+						return deferred.promise;
+					};
+
+					this.markNotificationAsRead = function(userId, eventId) {
+
+						var deferred = $q.defer();
+
+						$http.get($.get(
+								serverUrl + '/' + userId + '/notifications/'
+										+ eventId + '/setStatus?status=read')
+								.success(
+
+								function(data) {
+
+									if (data) {
+
+										deferred.resolve(data);
+									}
+								}));
 
 						return deferred.promise;
 					};
@@ -631,6 +700,11 @@ app
 						var taggedUsersIds = taggedUsers.map(function(user) {
 							return user.id;
 						});
+
+						if (!date) {
+
+							date = '01/01/2015';
+						}
 
 						$http.get(
 								serverUrl + "/documents/add/document?file="

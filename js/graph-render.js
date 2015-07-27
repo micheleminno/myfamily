@@ -11,6 +11,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 	var container = null;
 	var force = null;
 	var nodeDrag = null;
+
 	var defaultProfileImg = "default_profile.jpg";
 	var defaultDocumentImg = "default_pdf.png";
 
@@ -820,15 +821,19 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 					server.removeDocument(elm.id).then(
 							function() {
 
-								server.registerEvent('document', elm.id,
-										'removal', d.originalId);
+								server.deleteNotifications(d.originalId,
+										'document', elm.id).then(
+										function() {
 
-								scope.drawGraph();
+											server.deleteEvents('document',
+													elm.id).then(function() {
+
+												scope.drawGraph();
+											});
+										});
 							});
 				}
 			} ];
-
-	var svgRoot = d3.select("svg");
 
 	function populateThumbnails(currentPage, back) {
 
@@ -903,6 +908,44 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 				"linear").attr("x", oldTarget).remove();
 	}
 
+	function appendSelectedDocument(documentUrl, documentTitle, documentDate) {
+
+		container.moveToFront();
+
+		if (documentUrl.substr(-4) === ".pdf") {
+
+			window
+					.open("../" + svgRoot.getAttribute("url").substr(1),
+							'_blank');
+
+		} else {
+
+			docContainer = svgRoot.append("g").attr("class", "selection");
+
+			docContainer.append("rect").attr("class", "frame").attr("width",
+					1205).attr("height", 1014).attr("xlink:href", documentUrl)
+					.attr("x", 997.5).attr("y", -182).on("click",
+							zoomedDocClicked).attr("cursor", "auto");
+
+			docContainer.append("image").attr("class", "zoomedDoc")
+					.moveToFront().attr("width", 1200).attr("height", 1010)
+					.attr("xlink:href", documentUrl).attr("x", 1000).attr("y",
+							-180).on("click", zoomedDocClicked).attr("cursor",
+							"auto");
+
+			docContainer.append("text").attr("class", "docText")
+					.attr("x", 1800).attr("y", 900).text(documentTitle);
+
+			docContainer.append("text").attr("class", "docText-small").attr(
+					"x", 1800).attr("y", 1000)
+					.text("(on " + documentDate + ")");
+
+			docContainer.append("text").attr("class", "closeDoc").attr("x",
+					2125).attr("y", -220).text("[close]").attr("cursor",
+					"pointer").on("click", closeDocClicked);
+		}
+	}
+
 	function docClicked(d) {
 
 		if (d3.event.defaultPrevented) {
@@ -914,47 +957,17 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 		svgRoot.selectAll(".zoomedDoc").remove();
 
 		var selection = d3.select(this);
-
-		var grandParent = d3.select(this.parentNode.parentNode);
-
-		grandParent.moveToFront();
-
 		var doc = selection[0][0];
 
-		if (doc.getAttribute("url").substr(-4) === ".pdf") {
-
-			window.open("../" + doc.getAttribute("url").substr(1), '_blank');
-
-		} else {
-
-			grandParent.append("rect").attr("class", "frame").attr("width",
-					1205).attr("height", 1014).attr("xlink:href",
-					doc.getAttribute("href")).attr("x", 997.5).attr("y", -182)
-					.on("click", zoomedDocClicked).attr("cursor", "auto");
-
-			grandParent.append("image").attr("class", "zoomedDoc")
-					.moveToFront().attr("width", 1200).attr("height", 1010)
-					.attr("xlink:href", doc.getAttribute("href")).attr("x",
-							1000).attr("y", -180).on("click", zoomedDocClicked)
-					.attr("cursor", "auto");
-
-			grandParent.append("text").attr("class", "docText").attr("x", 1800)
-					.attr("y", 900).text(doc.getAttribute("title"));
-
-			grandParent.append("text").attr("class", "docText-small").attr("x",
-					1800).attr("y", 1000).text(
-					"(on " + doc.getAttribute("date") + ")");
-
-			grandParent.append("text").attr("class", "closeDoc")
-					.attr("x", 2125).attr("y", -220).text("[close]").attr(
-							"cursor", "pointer").on("click", closeDocClicked);
-
-		}
+		appendSelectedDocument(doc.getAttribute("url"), doc
+				.getAttribute("title"), doc.getAttribute("date"));
 
 		d3.event.stopPropagation();
 	}
 
 	function closeDocClicked() {
+
+		scope.graphData.selectedDocument = null;
 
 		svgRoot.selectAll(".zoomedDoc").remove();
 		svgRoot.selectAll(".frame").remove();
@@ -1015,6 +1028,13 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 	function placeDocuments(nodeId, relationType, selectedNode, centerX,
 			centerY, maxRowSize) {
+
+		if (scope.graphData.selectedDocument) {
+
+			appendSelectedDocument(scope.graphData.selectedDocument.url,
+					scope.graphData.selectedDocument.title,
+					scope.graphData.selectedDocument.date);
+		}
 
 		server.getNodeDocuments(nodeId, relationType).then(
 				function(data) {
@@ -1127,41 +1147,10 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 		svgRoot.selectAll(".frame").remove();
 
 		var selection = d3.select(this);
-
-		var parent = d3.select(this.parentNode);
-
-		parent.moveToFront();
-
 		var doc = selection[0][0];
 
-		if (doc.getAttribute("url").substr(-4) === ".pdf") {
-
-			window.open("../" + doc.getAttribute("url").substr(1), '_blank');
-
-		} else {
-
-			parent = parent.append("g").attr("class", "selection");
-
-			parent.append("rect").attr("class", "frame").attr("width", 1205)
-					.attr("height", 1014).attr("xlink:href",
-							doc.getAttribute("href")).attr("x", 997.5).attr(
-							"y", -182);
-			parent.append("image").attr("class", "zoomedDoc").moveToFront()
-					.attr("width", 1200).attr("height", 1010).attr(
-							"xlink:href", doc.getAttribute("href")).attr("x",
-							1000).attr("y", -180);
-
-			parent.append("text").attr("class", "docText").attr("x", 1800)
-					.attr("y", 900).text(doc.getAttribute("title"));
-
-			parent.append("text").attr("class", "docText-small")
-					.attr("x", 1800).attr("y", 1000).text(
-							"(on " + doc.getAttribute("date") + ")");
-
-			parent.append("text").attr("class", "closeDoc").attr("x", 2125)
-					.attr("y", -220).text("[close]").attr("cursor", "pointer")
-					.on("click", closeDocClicked);
-		}
+		appendSelectedDocument(doc.getAttribute("url"), doc
+				.getAttribute("title"), doc.getAttribute("date"));
 
 		d3.event.stopPropagation();
 	}

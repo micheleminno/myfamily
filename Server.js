@@ -104,9 +104,12 @@ app.get('/:user/view/:view/update', view.updateNode);
 
 // Events
 app.get('/events/add/:entityType/:entityId', event.add);
-app.post('/:user/events', event.list);
+app.get('/events/remove/:entityType/:entityId', event.remove);
+app.post('/events', event.list);
 
 // Notifications
 app.post('/:user/notifications/add', notification.add);
+app.get('/:user/notifications/remove', notification.remove);
+app.get('/:user/notifications/remove/:entityType/:entityId', notification.removeForEntity);
 app.get('/:user/notifications/:status', notification.list);
-app.get('/notifications/:notification/setStatus', notification.setStatus);
+app.get('/:user/notifications/:event/setStatus', notification.setStatus);

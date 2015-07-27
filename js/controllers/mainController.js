@@ -4,6 +4,8 @@ var mainController = controllers
 				function($scope, $location, dateFilter, MyFamilyService,
 						AuthenticationService) {
 
+					d3.select("svg").attr("opacity", 1);
+
 					/*
 					 * Populate notifications: get all events about nodes or
 					 * docs in this user view who are not already read by this
@@ -16,7 +18,7 @@ var mainController = controllers
 						};
 
 						MyFamilyService
-								.getEvents($scope.graph.user.id, data)
+								.getEvents(data)
 								.then(
 										function(events) {
 
@@ -143,7 +145,7 @@ var mainController = controllers
 							});
 						});
 					};
-					
+
 					$scope.updateView = function(view) {
 
 						$scope.graph.view = view;
@@ -319,12 +321,23 @@ var mainController = controllers
 						}
 					};
 
-					$scope.markAsRead = function(notification) {
+					$scope.showNotificationObject = function(notification) {
 
-						MyFamilyService.markNotificationAsRead(notification.id)
+						var documentUrl = MyFamilyService
+								.getFilePath(notification.file);
+
+						$scope.graphData.selectedDocument = {
+							url : documentUrl,
+							title : notification.docTitle,
+							date : notification.date
+						};
+
+						MyFamilyService.markNotificationAsRead(
+								$scope.graph.user.id, notification.eventId)
 								.then(function() {
 
 									$scope.drawGraph();
 								});
+
 					};
 				});

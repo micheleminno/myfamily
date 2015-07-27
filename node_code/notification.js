@@ -19,8 +19,8 @@ exports.add = function(req, res) {
 				req
 						.getConnection(function(err, connection) {
 
-							var insertNotificationQuery = "INSERT INTO notifications (event, user, status) VALUES("
-									+ eventId + ", " + userId + ", 1 )";
+							var insertNotificationQuery = "INSERT IGNORE INTO notifications (event, user, status) VALUES("
+									+ eventId + ", " + userId + ", 1)";
 
 							console.log(insertNotificationQuery);
 
@@ -99,14 +99,17 @@ exports.list = function(req, res) {
 	var status = req.param('status');
 
 	var binaryStatus = 1;
-	
+
 	if (status == 'read') {
 
 		binaryStatus = 0;
 	}
 
-	var query = "SELECT n.id, e.description, e.entity, e.entity_type, e.date FROM notifications as n JOIN events as e ON n.event = e.id WHERE n.user = "
-			+ userId + " AND n.status = " + binaryStatus;
+	var query = "SELECT e.id, e.description, e.entity, d.title, d.file, e.entity_type, DATE_FORMAT(e.date, '%d/%m/%Y %h:%i') as date "
+			+ "FROM notifications as n JOIN events as e ON n.event = e.id JOIN documents as d ON d.id = e.entity "
+			+ "WHERE n.user = "
+			+ userId
+			+ " AND e.entity_type = 'document' AND n.status = " + binaryStatus;
 
 	console.log(query);
 
@@ -124,6 +127,7 @@ exports.list = function(req, res) {
 
 				for ( var rowIndex in rows) {
 
+					console.log(JSON.stringify(rows[rowIndex]));
 					notifications.push(rows[rowIndex]);
 				}
 
@@ -133,12 +137,149 @@ exports.list = function(req, res) {
 	});
 };
 
+var remove = function(user, event, req, res, callback) {
+
+	var deleteNotificationQuery = "DELETE FROM notifications WHERE user = "
+			+ user + " AND event = " + event;
+
+	console.log(deleteNotificationQuery);
+
+	req.getConnection(function(err, connection) {
+
+		connection.query(deleteNotificationQuery, function(err, rows) {
+
+			if (err) {
+
+				console.log("Error Deleting : %s ", err);
+
+			} else {
+
+				var notificationId = "(" + user + ", " + event + ")";
+
+				if (rows.affectedRows > 0) {
+
+					console.log("Notification " + notificationId + " removed");
+
+					if (!callback) {
+						res.status(OK).json(
+								'result',
+								{
+									"msg" : "Notification " + notificationId
+											+ " removed"
+								});
+					} else {
+
+						callback();
+					}
+				} else {
+
+					console.log("Notification " + notificationId
+							+ " not removed");
+
+					if (!callback) {
+						res.status(NOK).json(
+								'result',
+								{
+									"msg" : "Notification " + notificationId
+											+ " not found"
+								});
+					} else {
+
+						callback();
+					}
+				}
+			}
+		});
+	});
+};
+
+/*
+ * Remove a notification
+ */
+exports.remove = function(req, res) {
+
+	var user = req.param('user');
+	var event = req.param('event');
+
+	remove(user, event, req, res);
+};
+
+/*
+ * Remove all notifications related to a specific entity
+ */
+exports.removeForEntity = function(req, res) {
+
+	var user = req.param('user');
+	var entityType = req.param('entityType');
+	var entityId = req.param('entityId');
+
+	var query = "SELECT e.id FROM events as e " + "WHERE e.entity = "
+			+ entityId + " AND e.entity_type = '" + entityType + "'";
+
+	console.log(query);
+
+	req
+			.getConnection(function(err, connection) {
+
+				connection
+						.query(
+								query,
+								function(err, rows) {
+
+									if (err) {
+
+										console.log("Error Selecting : %s ",
+												err);
+
+									} else {
+
+										var requests = 0;
+
+										for ( var rowIndex in rows) {
+
+											requests++;
+
+											var event = rows[rowIndex]['id'];
+
+											remove(
+													user,
+													event,
+													req,
+													res,
+													function() {
+
+														requests--;
+
+														if (requests == 0) {
+
+															console
+																	.log("Notifications for entity "
+																			+ entityId
+																			+ " removed");
+
+															res
+																	.status(OK)
+																	.json(
+																			'result',
+																			{
+																				"msg" : "Notifications removed for entity "
+																						+ entityId
+																			});
+														}
+													});
+										}
+									}
+								});
+			});
+};
+
 /*
  * Change the status of a notification
  */
 exports.setStatus = function(req, res) {
 
-	var notificationId = req.param('notification');
+	var userId = req.param('user');
+	var eventId = req.param('event');
 	var status = req.query.status;
 
 	var binaryStatus = 1;
@@ -148,7 +289,8 @@ exports.setStatus = function(req, res) {
 	}
 
 	var updateNotificationQuery = 'UPDATE notifications SET status = '
-			+ binaryStatus + ' WHERE id = ' + notificationId;
+			+ binaryStatus + ' WHERE user = ' + userId + " AND event = "
+			+ eventId;
 
 	console.log(updateNotificationQuery);
 
@@ -161,6 +303,8 @@ exports.setStatus = function(req, res) {
 				console.log("Error Selecting : %s ", err);
 
 			} else {
+
+				var notificationId = "(" + userId + ", " + eventId + ")";
 
 				if (rows.affectedRows > 0) {
 
