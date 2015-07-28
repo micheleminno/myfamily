@@ -25,7 +25,8 @@ var mainController = controllers
 											var newEventIds = events
 													.filter(
 															function(event) {
-																return event.status != 1;
+																return event.status != 1
+																		&& event.node != $scope.graph.user.id;
 															}).map(
 															function(item) {
 																return item.id;

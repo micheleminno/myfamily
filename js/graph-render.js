@@ -146,14 +146,14 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 		title : 'Add document',
 		action : function(elm, d, i) {
 
-			var loggedUser = {
+			scope.nodeUser = {
 				id : d.originalId,
 				name : d.label
 			};
 
 			scope.taggableUsers = [];
 			scope.taggedUsers = [];
-			scope.taggedUsers.push(loggedUser);
+			scope.taggedUsers.push(scope.nodeUser);
 
 			for (nodeIndex in graph.nodes) {
 
@@ -335,6 +335,12 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 						if (d.originalId == svg.selectedNodeId) {
 
 							selectNode(this, d);
+						} else if (scope.graphData.selectedDocument) {
+
+							appendSelectedDocument(
+									scope.graphData.selectedDocument.url,
+									scope.graphData.selectedDocument.title,
+									scope.graphData.selectedDocument.date);
 						}
 					} else {
 
@@ -505,6 +511,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 			return;
 		}
 
+		scope.graphData.selectedDocument = null;
 		svg.selectedNodeId = null;
 
 		var sel = svgRoot.selectAll(".selection");
@@ -748,6 +755,12 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 										if (data.document != -1) {
 
 											var tagged = data.document.tagged;
+
+											scope.nodeUser = {
+												id : d.originalId,
+												name : d.label
+											};
+
 											scope.taggableUsers = [];
 											scope.taggedUsers = [];
 
@@ -818,20 +831,29 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 				title : 'Remove',
 				action : function(elm, d, i) {
 
-					server.removeDocument(elm.id).then(
-							function() {
+					server
+							.removeDocument(elm.id)
+							.then(
+									function() {
 
-								server.deleteNotifications(d.originalId,
-										'document', elm.id).then(
-										function() {
+										server
+												.deleteNotifications(
+														'document', elm.id)
+												.then(
+														function() {
 
-											server.deleteEvents('document',
-													elm.id).then(function() {
+															server
+																	.deleteEvents(
+																			'document',
+																			elm.id)
+																	.then(
+																			function() {
 
-												scope.drawGraph();
-											});
-										});
-							});
+																				scope
+																						.drawGraph();
+																			});
+														});
+									});
 				}
 			} ];
 
@@ -1028,13 +1050,6 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 	function placeDocuments(nodeId, relationType, selectedNode, centerX,
 			centerY, maxRowSize) {
-
-		if (scope.graphData.selectedDocument) {
-
-			appendSelectedDocument(scope.graphData.selectedDocument.url,
-					scope.graphData.selectedDocument.title,
-					scope.graphData.selectedDocument.date);
-		}
 
 		server.getNodeDocuments(nodeId, relationType).then(
 				function(data) {

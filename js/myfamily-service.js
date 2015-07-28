@@ -600,14 +600,13 @@ app
 						return deferred.promise;
 					};
 
-					this.deleteNotifications = function(userId, entityType, entityId) {
+					this.deleteNotifications = function(entityType, entityId) {
 
 						var deferred = $q.defer();
 
 						$http.get(
-								serverUrl + '/' + userId
-										+ '/notifications/remove/' + entityType
-										+ '/' + entityId).success(
+								serverUrl + '/notifications/remove/'
+										+ entityType + '/' + entityId).success(
 
 						function(data) {
 

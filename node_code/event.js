@@ -161,7 +161,7 @@ exports.list = function(req, res) {
 
 		requests++;
 
-		var query = "SELECT e.id, e.description, e.entity, e.entity_type, e.date FROM events as e "
+		var query = "SELECT e.id, e.description, e.entity, e.entity_type, e.node, e.date FROM events as e "
 				+ "LEFT JOIN tags as t ON e.entity = t.document "
 				+ "WHERE e.node = " + node.originalId;
 

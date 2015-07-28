@@ -145,9 +145,10 @@
 				</div>
 				<br />
 				<ul style="margin-top: 16px" id="add-taggedArea" name="taggedArea"></ul>
-				<li ng-repeat="taggedUser in taggedUsers"><a href=""
-					ng-click="">{{taggedUser.name}}</a><a style="margin-left: 5px"
-					href="" ng-click="removeFromTaggedUsers(taggedUser)">(remove)</a></li>
+				<li ng-repeat="taggedUser in taggedUsers">{{taggedUser.name}}<a
+					style="margin-left: 5px" href=""
+					ng-show="taggedUser.id != nodeUser.id"
+					ng-click="removeFromTaggedUsers(taggedUser)">(remove)</a></li>
 
 			</div>
 			<div class="modal-footer">
@@ -217,9 +218,10 @@
 				</div>
 				<br />
 				<ul style="margin-top: 16px" id="edit-taggedArea" name="taggedArea"></ul>
-				<li ng-repeat="taggedUser in taggedUsers"><a href=""
-					ng-click="">{{taggedUser.name}}</a><a style="margin-left: 5px"
-					href="" ng-click="removeFromTaggedUsers(taggedUser)">(remove)</a></li>
+				<li ng-repeat="taggedUser in taggedUsers">{{taggedUser.name}}<a
+					style="margin-left: 5px" href=""
+					ng-show="taggedUser.id != nodeUser.id"
+					ng-click="removeFromTaggedUsers(taggedUser)">(remove)</a></li>
 
 			</div>
 			<div class="modal-footer">

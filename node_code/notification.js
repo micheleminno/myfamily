@@ -137,7 +137,7 @@ exports.list = function(req, res) {
 	});
 };
 
-var remove = function(user, event, req, res, callback) {
+var remove = function(user, event, req, res) {
 
 	var deleteNotificationQuery = "DELETE FROM notifications WHERE user = "
 			+ user + " AND event = " + event;
@@ -160,33 +160,54 @@ var remove = function(user, event, req, res, callback) {
 
 					console.log("Notification " + notificationId + " removed");
 
-					if (!callback) {
-						res.status(OK).json(
-								'result',
-								{
-									"msg" : "Notification " + notificationId
-											+ " removed"
-								});
-					} else {
-
-						callback();
-					}
+					res.status(OK).json('result', {
+						"msg" : "Notification " + notificationId + " removed"
+					});
 				} else {
 
 					console.log("Notification " + notificationId
 							+ " not removed");
 
-					if (!callback) {
-						res.status(NOK).json(
-								'result',
-								{
-									"msg" : "Notification " + notificationId
-											+ " not found"
-								});
-					} else {
+					res.status(NOK).json('result', {
+						"msg" : "Notification " + notificationId + " not found"
+					});
+				}
+			}
+		});
+	});
+};
 
-						callback();
-					}
+var removeForAllUsers = function(event, req, res, callback) {
+
+	var deleteNotificationsQuery = "DELETE FROM notifications WHERE event = "
+			+ event;
+
+	console.log(deleteNotificationsQuery);
+
+	req.getConnection(function(err, connection) {
+
+		connection.query(deleteNotificationsQuery, function(err, rows) {
+
+			if (err) {
+
+				console.log("Error Deleting : %s ", err);
+
+			} else {
+
+				if (rows.affectedRows > 0) {
+
+					console
+							.log("Notifications for event " + event
+									+ " removed");
+
+					callback();
+
+				} else {
+
+					console.log("Notification for event " + event
+							+ " not removed");
+
+					callback();
 				}
 			}
 		});
@@ -209,7 +230,6 @@ exports.remove = function(req, res) {
  */
 exports.removeForEntity = function(req, res) {
 
-	var user = req.param('user');
 	var entityType = req.param('entityType');
 	var entityId = req.param('entityId');
 
@@ -241,8 +261,7 @@ exports.removeForEntity = function(req, res) {
 
 											var event = rows[rowIndex]['id'];
 
-											remove(
-													user,
+											removeForAllUsers(
 													event,
 													req,
 													res,

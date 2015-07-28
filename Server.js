@@ -110,6 +110,6 @@ app.post('/events', event.list);
 // Notifications
 app.post('/:user/notifications/add', notification.add);
 app.get('/:user/notifications/remove', notification.remove);
-app.get('/:user/notifications/remove/:entityType/:entityId', notification.removeForEntity);
+app.get('/notifications/remove/:entityType/:entityId', notification.removeForEntity);
 app.get('/:user/notifications/:status', notification.list);
 app.get('/:user/notifications/:event/setStatus', notification.setStatus);
