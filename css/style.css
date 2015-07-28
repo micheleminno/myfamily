@@ -42,6 +42,10 @@
 	opacity: .2;
 }
 
+.blacklisted {
+	opacity: .2;
+}
+
 .me {
 	stroke: red;
 	fill: red;

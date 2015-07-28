@@ -17,8 +17,11 @@ exports.list = function(req, res) {
 
 	} else if (relation == 'tagged') {
 
-		query = 'SELECT * FROM tags JOIN documents ON tags.document = documents.id WHERE node = '
-				+ nodeIndex;
+		query = "SELECT d.id, d.title, t1.position, d.date, d.file, d.owner, "
+				+ "GROUP_CONCAT(t2.node SEPARATOR ', ') as taggedNodes "
+				+ "FROM tags as t1 JOIN documents as d ON t1.document = d.id "
+				+ "JOIN tags as t2 ON t2.document = d.id WHERE t1.node = "
+				+ nodeIndex + " GROUP BY d.id";
 	}
 
 	console.log(query);
@@ -37,7 +40,15 @@ exports.list = function(req, res) {
 
 				for ( var rowIndex in rows) {
 
-					documents.push(rows[rowIndex]);
+					var row = rows[rowIndex];
+
+					if (row['taggedNodes']) {
+
+						row['taggedNodes'] = JSON.parse("["
+								+ row['taggedNodes'] + "]");
+					}
+
+					documents.push(row);
 				}
 
 				res.status(OK).json('documents', {
@@ -92,7 +103,7 @@ exports.view = function(req, res) {
 						if (documentIds.indexOf(documentId) == -1) {
 
 							documentIds.push(documentId);
-							row.node = [ row.node ];
+							row.taggedNodes = [ row.node ];
 							documents.push(row);
 
 						} else {
@@ -102,7 +113,7 @@ exports.view = function(req, res) {
 								var document = documents[documentIndex];
 								if (document.id == documentId) {
 
-									document.node.push(row.node);
+									document.taggedNodes.push(row.node);
 
 									break;
 								}

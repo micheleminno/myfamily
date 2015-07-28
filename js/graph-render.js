@@ -80,7 +80,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 					server.addNode('family', graph.user.id, d.originalId,
 							'source').then(function() {
 
-						scope.drawGraph();
+						scope.drawGraph(false, true);
 					});
 				}
 			},
@@ -91,7 +91,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 					server.addNode('family', graph.user.id, d.originalId,
 							'target').then(function() {
 
-						scope.drawGraph();
+						scope.drawGraph(false, true);
 					});
 				}
 			},
@@ -115,7 +115,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 					server.addNode('person', graph.user.id, d.originalId,
 							'target').then(function() {
 
-						scope.drawGraph();
+						scope.drawGraph(false, true);
 					});
 				}
 			},
@@ -126,7 +126,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 					server.addNode('person', graph.user.id, d.originalId,
 							'source').then(function() {
 
-						scope.drawGraph();
+						scope.drawGraph(false, true);
 					});
 				}
 			},
@@ -143,6 +143,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 			} ];
 
 	var onSelectedNodeMenu = [ {
+
 		title : 'Add document',
 		action : function(elm, d, i) {
 
@@ -246,6 +247,44 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 						});
 	}
 
+	function getMenuWithBlacklistFeature(menu, isBlacklisted) {
+
+		if (!isBlacklisted) {
+
+			var addToBlacklistFeature = {
+				title : "Add to blacklist",
+				action : function(elm, d, i) {
+
+					server.addToBlackList(graph.user.id, d.originalId, 'node')
+							.then(function() {
+
+								scope.drawGraph();
+							});
+				}
+			};
+
+			menu.splice(2, 0, addToBlacklistFeature);
+
+		} else {
+
+			var removeFromBlacklistFeature = {
+				title : "Remove from blacklist",
+				action : function(elm, d, i) {
+
+					server.removeFromBlackList(graph.user.id, d.originalId,
+							'node').then(function() {
+
+						scope.drawGraph();
+					});
+				}
+			};
+
+			menu.splice(2, 0, removeFromBlacklistFeature);
+		}
+
+		return menu;
+	}
+
 	function drawTree(user, view) {
 
 		init();
@@ -283,10 +322,36 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 						currentNode.on("click", clickNode);
 
+						var isBlacklisted = scope.graphData.blacklist.nodes
+								.indexOf(d.originalId) > -1;
+
 						if (view.id == 4) {
 
+							var onPersonMenuCopy = jQuery.extend(true, [],
+									onPersonMenu);
+
+							var newMenu = getMenuWithBlacklistFeature(
+									onPersonMenuCopy, isBlacklisted);
+
 							currentNode.on('contextmenu', d3
-									.contextMenu(onPersonMenu));
+									.contextMenu(newMenu));
+						}
+
+						if (isBlacklisted) {
+
+							currentNode.attr("class", "blacklisted");
+
+							svg.link
+									.each(function(l) {
+
+										currentLink = d3.select(this);
+										if (l.source.originalId == d.originalId
+												|| l.target.originalId == d.originalId) {
+
+											currentLink.attr("class",
+													"link blacklisted");
+										}
+									});
 						}
 
 						var defs = currentNode.append('svgRoot:defs');
@@ -296,6 +361,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 						var circleSize = commons.getCircleSize(d.label,
 								d.level, graph.user.label);
+
 						var nodeClass = commons.getNodeClass(d,
 								graph.user.label);
 
@@ -334,7 +400,8 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 						if (d.originalId == svg.selectedNodeId) {
 
-							selectNode(this, d);
+							selectNode(d);
+
 						} else if (scope.graphData.selectedDocument) {
 
 							appendSelectedDocument(
@@ -531,7 +598,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 		svg.selectedNodeId = d.originalId;
 
-		selectNode(this, d);
+		selectNode(d);
 
 		d3.event.stopPropagation();
 	}
@@ -597,10 +664,10 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 		d3.event.stopPropagation();
 	}
 
-	function selectNode(clickedNode, d) {
+	function selectNode(d) {
 
-		svg.selectedNode = d3.select(clickedNode).moveToFront().append("g")
-				.attr("class", "selection").style("pointer-events", "click");
+		svg.selectedNode = container.append("g").data([ d ]).attr("class",
+				"selection").style("pointer-events", "click");
 
 		configuration.centerX = configuration.width / 10;
 		configuration.centerY = configuration.height / 1.7;
@@ -850,7 +917,9 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 																			function() {
 
 																				scope
-																						.drawGraph();
+																						.drawGraph(
+																								true,
+																								false);
 																			});
 														});
 									});
@@ -936,9 +1005,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 		if (documentUrl.substr(-4) === ".pdf") {
 
-			window
-					.open("../" + svgRoot.getAttribute("url").substr(1),
-							'_blank');
+			window.open("../" + documentUrl.substr(1), '_blank');
 
 		} else {
 
@@ -1008,46 +1075,6 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 	var docDrag = d3.behavior.drag().on("dragstart", docDragstarted).on("drag",
 			docDragged).on("dragend", docDragended);
 
-	function drawDoc(doc, container, centerX, centerY, offset, maxRowSize) {
-
-		var docNode = container.append("image");
-
-		var x, y;
-
-		if (doc.position) {
-
-			x = doc.position.x;
-			y = doc.position.y;
-
-		} else {
-
-			var defaultX = centerX / 2 - 300 + offset;
-			var defaultY = centerY + 100 * Math.floor(docIndex / maxRowSize);
-
-			x = defaultX;
-			y = defaultY;
-		}
-
-		docNode.attr("width", 100).attr("id", doc.id).attr("title", doc.title)
-				.attr("url", server.getFilePath(doc.file)).attr("date",
-						commons.getDate(doc.date)).attr("height", 80).attr(
-						"xlink:href",
-						function() {
-
-							return doc.file.substr(-4) === ".pdf" ? server
-									.getFilePath(defaultDocumentImg) : server
-									.getFilePath(doc.file);
-
-						}).attr("class", function() {
-
-					return "myCursor-pointer-move";
-				}).attr("x", x).attr("y", y).on("click", docClicked).on(
-						"mouseover", thumbnailMouseovered).on("mouseout",
-						thumbnailMouseouted).call(docDrag);
-
-		docNode.on('contextmenu', d3.contextMenu(onDocumentMenu));
-	}
-
 	function placeDocuments(nodeId, relationType, selectedNode, centerX,
 			centerY, maxRowSize) {
 
@@ -1056,20 +1083,11 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 					var documents = data.documents;
 
-					scope.graphData.selectedNode = {};
-					scope.graphData.selectedNode.documents = data.documents;
-
-					var container = selectedNode.append("g").attr("class",
-							"docContainer");
-
 					var offset = 0;
 
 					for (docIndex in documents) {
 
-						var doc = documents[docIndex];
-
-						drawDoc(doc, container, centerX, centerY, offset,
-								maxRowSize);
+						var document = documents[docIndex];
 
 						offset += 100;
 
@@ -1077,7 +1095,62 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 							offset = 0;
 						}
+
+						document.selectedNode = nodeId;
+
+						if (!document.position) {
+
+							document.position = {};
+							document.position.x = centerX / 2 - 300 + offset;
+							document.position.y = centerY + 100
+									* Math.floor(docIndex / maxRowSize);
+						}
 					}
+
+					scope.graphData.selectedNode = {};
+					scope.graphData.selectedNode.documents = data.documents;
+
+					var container = selectedNode.append("g").attr("class",
+							"docContainer");
+
+					var sel = container.selectAll("image").data(documents);
+
+					sel.enter().append("image").attr("width", 100).attr("id",
+							function(d) {
+								return d.id;
+							}).attr("title", function(d) {
+
+						return d.title;
+
+					}).attr("url", function(d) {
+
+						return server.getFilePath(d.file);
+
+					}).attr("date", function(d) {
+
+						return commons.getDate(d.date);
+
+					}).attr("x", function(d) {
+
+						return d.position.x;
+					}).attr("y", function(d) {
+
+						return d.position.y;
+					}).attr("height", 80).attr(
+							"xlink:href",
+							function(d) {
+
+								return d.file.substr(-4) === ".pdf" ? server
+										.getFilePath(defaultDocumentImg)
+										: server.getFilePath(d.file);
+
+							}).attr("class", function() {
+
+						return "myCursor-pointer-move doc";
+					}).on("click", docClicked).on("mouseover",
+							thumbnailMouseovered).on("mouseout",
+							thumbnailMouseouted).call(docDrag).on(
+							'contextmenu', d3.contextMenu(onDocumentMenu));
 				});
 	}
 
@@ -1095,44 +1168,42 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 		doc.x.baseVal.value -= 50;
 		doc.y.baseVal.value -= 50;
 
-		if (!svg.selectedNodeId
-				|| doc.getAttribute("url").substr(-4) === ".pdf") {
+		svg.node[0].forEach(function(n) {
+
+			if (d.taggedNodes) {
+
+				for (nodeIndex in d.taggedNodes) {
+
+					var taggedNode = d.taggedNodes[nodeIndex];
+
+					if (taggedNode == n.id) {
+
+						var currentNode = d3.select(n);
+						var circleSize = commons.getCircleSize(n
+								.getAttribute("label"),
+								n.getAttribute("level"), graph.user.label);
+
+						currentNode.append("circle")
+								.attr("r", circleSize + 100).attr("class",
+										"tagSelection").attr("cx",
+										n.getAttribute("x")).attr("cy",
+										n.getAttribute("y"));
+					}
+				}
+			}
+		});
+
+		if (!d.selectedNode || doc.getAttribute("url").substr(-4) == ".pdf") {
 
 			parent.append("text").attr("class", "thumbnailText").attr("x",
 					doc.getAttribute("x")).attr("y", doc.y.baseVal.value - 20)
-					.text(doc.getAttribute("title"));
+					.text(d.title);
 
-			if (!svg.selectedNodeId) {
-
+			if (!d.selectedNode) {
 				parent.append("text").attr("class", "thumbnailText").attr("x",
 						doc.getAttribute("x")).attr("y",
 						doc.y.baseVal.value + 235).text(
 						doc.getAttribute("date"));
-
-				svg.node[0].forEach(function(n) {
-
-					if (d.node) {
-
-						for (nodeIndex in d.node) {
-
-							var taggedNode = d.node[nodeIndex];
-							if (taggedNode == n.id) {
-
-								var currentNode = d3.select(n);
-								var circleSize = commons.getCircleSize(n
-										.getAttribute("label"), n
-										.getAttribute("level"),
-										graph.user.label);
-
-								currentNode.append("circle").attr("r",
-										circleSize + 100).attr("class",
-										"tagSelection").attr("cx",
-										n.getAttribute("x")).attr("cy",
-										n.getAttribute("y"));
-							}
-						}
-					}
-				});
 			}
 		}
 	}

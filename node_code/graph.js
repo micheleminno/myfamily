@@ -42,7 +42,6 @@ function finalise(graph, viewIndex, user, req, res, callback) {
 
 		callback(graphViewWithPositions, res);
 	});
-
 };
 
 function getNode(nodeIndex, req, callback) {

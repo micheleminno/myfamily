@@ -793,4 +793,63 @@ app
 						return deferred.promise;
 					};
 
+					// Black lists
+
+					this.addToBlackList = function(userId, blockedNodeId, type) {
+
+						var deferred = $q.defer();
+
+						$http.get(
+								serverUrl + '/' + userId + '/blacklists/add/'
+										+ type + '/' + blockedNodeId).success(
+
+						function(data) {
+
+							if (data) {
+
+								deferred.resolve(data);
+							}
+						});
+
+						return deferred.promise;
+					};
+					
+					this.removeFromBlackList = function(userId, blockedNodeId, type) {
+
+						var deferred = $q.defer();
+
+						$http.get(
+								serverUrl + '/' + userId + '/blacklists/remove/'
+										+ type + '/' + blockedNodeId).success(
+
+						function(data) {
+
+							if (data) {
+
+								deferred.resolve(data);
+							}
+						});
+
+						return deferred.promise;
+					};
+
+					this.getBlacklisted = function(userId, type) {
+
+						var deferred = $q.defer();
+
+						$http.get(
+								serverUrl + '/' + userId + '/blacklists/'
+										+ type).success(
+
+						function(data) {
+
+							if (data) {
+
+								deferred.resolve(data);
+							}
+						});
+
+						return deferred.promise;
+					};
+
 				});

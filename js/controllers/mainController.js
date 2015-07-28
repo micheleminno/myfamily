@@ -60,7 +60,12 @@ var mainController = controllers
 					 * Populate documents: get all documents visible by userId
 					 * in the specified user view.
 					 */
-					function fillDocuments(callback) {
+					function fillDocuments(sameDocuments, callback) {
+
+						if (sameDocuments && callback) {
+
+							callback();
+						}
 
 						var data = {
 							nodes : $scope.graph.nodes
@@ -81,19 +86,39 @@ var mainController = controllers
 					 * Populate graph: get all nodes and links visible by userId
 					 * in the specified user view.
 					 */
-					function fillGraph(callback) {
+					function fillGraph(sameGraph, callback) {
 
-						MyFamilyService.getGraphView($scope.graph.user.id,
-								$scope.graph.view.id).then(
-								function(resultData) {
+						if (sameGraph && callback) {
 
-									$scope.graph.nodes = resultData.nodes;
-									$scope.graph.links = resultData.links;
+							callback();
+						}
 
-									if (callback) {
-										callback();
-									}
-								});
+						MyFamilyService
+								.getGraphView($scope.graph.user.id,
+										$scope.graph.view.id)
+								.then(
+										function(resultData) {
+
+											$scope.graph.nodes = resultData.nodes;
+											$scope.graph.links = resultData.links;
+
+											MyFamilyService
+													.getBlacklisted(
+															$scope.graph.user.id,
+															'node')
+													.then(
+															function(
+																	blacklisted) {
+
+																$scope.graph.blacklist = {};
+																$scope.graph.blacklist.nodes = blacklisted;
+
+																if (callback) {
+
+																	callback();
+																}
+															});
+										});
 					}
 
 					$scope.initViews = function() {
@@ -133,11 +158,11 @@ var mainController = controllers
 						$scope.svg = {};
 					};
 
-					$scope.drawGraph = function() {
+					$scope.drawGraph = function(sameGraph, sameDocuments) {
 
-						fillGraph(function() {
+						fillGraph(sameGraph, function() {
 
-							fillDocuments(function() {
+							fillDocuments(sameDocuments, function() {
 
 								fillNotifications(function() {
 
@@ -216,7 +241,7 @@ var mainController = controllers
 																'creation',
 																$scope.taggedUsers[0]['id']);
 
-												$scope.drawGraph();
+												$scope.drawGraph(true, false);
 
 											} else {
 												console
@@ -337,7 +362,7 @@ var mainController = controllers
 								$scope.graph.user.id, notification.eventId)
 								.then(function() {
 
-									$scope.drawGraph();
+									$scope.drawGraph(true, true);
 								});
 
 					};
