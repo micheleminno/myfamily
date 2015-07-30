@@ -795,32 +795,88 @@ app
 
 					// Black lists
 
-					this.addToBlackList = function(userId, blockedNodeId, type) {
+					this.addToBlacklist = function(userId, blockedUserId,
+							documentId) {
 
 						var deferred = $q.defer();
 
 						$http.get(
 								serverUrl + '/' + userId + '/blacklists/add/'
-										+ type + '/' + blockedNodeId).success(
+										+ blockedUserId + '/' + documentId)
+								.success(
 
-						function(data) {
+								function(data) {
 
-							if (data) {
+									if (data) {
 
-								deferred.resolve(data);
+										deferred.resolve(data);
+									}
+								});
+
+						return deferred.promise;
+					};
+
+					this.addToBlacklist = function(userId, blockedUsers,
+							documentId) {
+
+						var deferred = $q.defer();
+
+						var httpPostConfig = {
+
+							url : serverUrl + '/' + userId + '/blacklists/add/'
+									+ documentId,
+							method : "POST",
+							data : {
+								blockedUsers : blockedUsers
+							},
+							headers : {
+								'Content-Type' : 'application/json'
 							}
+						};
+
+						$http(httpPostConfig).success(function(events) {
+
+							deferred.resolve(events);
 						});
 
 						return deferred.promise;
 					};
 					
-					this.removeFromBlackList = function(userId, blockedNodeId, type) {
+					this.updateBlacklist = function(userId, blockedUsers,
+							documentId) {
+
+						var deferred = $q.defer();
+
+						var httpPostConfig = {
+
+							url : serverUrl + '/' + userId + '/blacklists/update/'
+									+ documentId,
+							method : "POST",
+							data : {
+								blockedUsers : blockedUsers
+							},
+							headers : {
+								'Content-Type' : 'application/json'
+							}
+						};
+
+						$http(httpPostConfig).success(function(events) {
+
+							deferred.resolve(events);
+						});
+
+						return deferred.promise;
+					};
+
+					this.removeFromBlacklist = function(userId, blockedUserId,
+							documentId) {
 
 						var deferred = $q.defer();
 
 						$http.get(
-								serverUrl + '/' + userId + '/blacklists/remove/'
-										+ type + '/' + blockedNodeId).success(
+								serverUrl + '/' + userId
+										+ '/blacklists/remove/' + blockedUserId
+										+ '/' + documentId).success(
 
 						function(data) {
 
@@ -833,21 +889,42 @@ app
 						return deferred.promise;
 					};
 
-					this.getBlacklisted = function(userId, type) {
+					this.getBlacklistedNodes = function(userId) {
 
 						var deferred = $q.defer();
 
 						$http.get(
-								serverUrl + '/' + userId + '/blacklists/'
-										+ type).success(
+								serverUrl + '/' + userId + '/blacklists/nodes')
+								.success(
 
-						function(data) {
+								function(data) {
 
-							if (data) {
+									if (data) {
 
-								deferred.resolve(data);
-							}
-						});
+										deferred.resolve(data);
+									}
+								});
+
+						return deferred.promise;
+					};
+
+					this.getBlacklistingUsers = function(userId) {
+
+						var deferred = $q.defer();
+
+						$http
+								.get(
+										serverUrl + '/' + userId
+												+ '/blacklistingUsers')
+								.success(
+
+								function(data) {
+
+									if (data) {
+
+										deferred.resolve(data);
+									}
+								});
 
 						return deferred.promise;
 					};

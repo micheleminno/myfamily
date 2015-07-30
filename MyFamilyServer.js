@@ -117,6 +117,9 @@ app.get('/:user/notifications/:status', notification.list);
 app.get('/:user/notifications/:event/setStatus', notification.setStatus);
 
 // Black lists
-app.get('/:user/blacklists/add/:entityType/:blockedEntity', blacklist.add);
-app.get('/:user/blacklists/remove/:entityType/:blockedEntity', blacklist.remove);
-app.get('/:user/blacklists/:entityType', blacklist.list);
+app.get('/:user/blacklists/add/:blockedUser/:document', blacklist.add);
+app.post('/:user/blacklists/add/:document', blacklist.addMany);
+app.post('/:user/blacklists/update/:document', blacklist.update);
+app.get('/:user/blacklists/remove/:blockedUser/:document', blacklist.remove);
+app.get('/:user/blacklists/nodes', blacklist.listNodes);
+app.get('/:user/blacklistingUsers', blacklist.listBlacklistingUsers);

@@ -138,17 +138,42 @@
 						<ul id="add-taggablePersons" class="dropdown-menu"
 							aria-labelledby="dropdownMenuTagged">
 							<li ng-repeat="taggableUser in taggableUsers"><a href=""
-								ng-click="addInTaggedUsers(taggableUser)">{{taggableUser.name}}</a></li>
+								ng-click="addInUsers(taggedUsers, taggableUsers, taggableUser)">{{taggableUser.name}}</a></li>
 						</ul>
 					</div>
-
 				</div>
 				<br />
-				<ul style="margin-top: 16px" id="add-taggedArea" name="taggedArea"></ul>
-				<li ng-repeat="taggedUser in taggedUsers">{{taggedUser.name}}<a
-					style="margin-left: 5px" href=""
-					ng-show="taggedUser.id != nodeUser.id"
-					ng-click="removeFromTaggedUsers(taggedUser)">(remove)</a></li>
+				<ul style="margin-top: 16px" id="add-taggedArea" name="taggedArea">
+					<li ng-repeat="taggedUser in taggedUsers">{{taggedUser.name}}<a
+						style="margin-left: 5px" href=""
+						ng-show="taggedUser.id != nodeUser.id"
+						ng-click="removeFromUsers(taggedUsers, taggableUsers, taggedUser)">(remove)</a></li>
+				</ul>
+				<div id="excluded" style="display: inline-block; margin-top: 20px">
+					<p style="display: inline; margin-right: 20px">Persons
+						excluded:</p>
+
+					<div class="dropdown" style="display: inline; margin-right: 10px">
+						<button class="btn btn-default dropdown-toggle" type="button"
+							id="dropdownMenuExcluded" data-toggle="dropdown"
+							aria-haspopup="true" aria-expanded="true">
+							Add <span class="caret"></span>
+						</button>
+
+						<ul id="add-excludablePersons" class="dropdown-menu"
+							aria-labelledby="dropdownMenuExcluded">
+							<li ng-repeat="excludableUser in excludableUsers"><a href=""
+								ng-click="addInUsers(excludedUsers, excludableUsers, excludableUser)">{{excludableUser.name}}</a></li>
+						</ul>
+					</div>
+				</div>
+				<br />
+				<ul style="margin-top: 16px" id="add-excludedArea"
+					name="excludedArea">
+					<li ng-repeat="excludedUser in excludedUsers">{{excludedUser.name}}<a
+						style="margin-left: 5px" href=""
+						ng-click="removeFromUsers(excludedUsers, excludableUsers, excludedUser)">(remove)</a></li>
+				</ul>
 
 			</div>
 			<div class="modal-footer">
@@ -211,17 +236,45 @@
 						<ul id="edit-taggablePersons" class="dropdown-menu"
 							aria-labelledby="dropdownMenuTagged">
 							<li ng-repeat="taggableUser in taggableUsers"><a href=""
-								ng-click="addInTaggedUsers(taggableUser)">{{taggableUser.name}}</a></li>
+								ng-click="addInUsers(taggedUsers, taggableUsers, taggableUser)">{{taggableUser.name}}</a></li>
 						</ul>
 					</div>
 
 				</div>
 				<br />
-				<ul style="margin-top: 16px" id="edit-taggedArea" name="taggedArea"></ul>
-				<li ng-repeat="taggedUser in taggedUsers">{{taggedUser.name}}<a
-					style="margin-left: 5px" href=""
-					ng-show="taggedUser.id != nodeUser.id"
-					ng-click="removeFromTaggedUsers(taggedUser)">(remove)</a></li>
+				<ul style="margin-top: 16px" id="edit-taggedArea" name="taggedArea">
+					<li ng-repeat="taggedUser in taggedUsers">{{taggedUser.name}}<a
+						style="margin-left: 5px" href=""
+						ng-show="taggedUser.id != owner.id"
+						ng-click="removeFromUsers(taggedUsers, taggableUsers, taggedUser)">(remove)</a></li>
+				</ul>
+
+				<div id="excluded" style="display: inline-block; margin-top: 20px">
+					<p style="display: inline; margin-right: 20px">Persons
+						excluded:</p>
+
+					<div class="dropdown" style="display: inline; margin-right: 10px">
+						<button class="btn btn-default dropdown-toggle" type="button"
+							id="dropdownMenuExcluded" data-toggle="dropdown"
+							aria-haspopup="true" aria-expanded="true">
+							Add <span class="caret"></span>
+						</button>
+
+						<ul id="edit-excludablePersons" class="dropdown-menu"
+							aria-labelledby="dropdownMenuExcluded">
+							<li ng-repeat="excludableUser in excludableUsers"><a href=""
+								ng-click="addInUsers(excludedUsers, excludableUsers, excludableUser)">{{excludableUser.name}}</a></li>
+						</ul>
+					</div>
+				</div>
+				<br />
+				<ul style="margin-top: 16px" id="edit-excludedArea"
+					name="excludedArea">
+					<li ng-repeat="excludedUser in excludedUsers">{{excludedUser.name}}<a
+						style="margin-left: 5px" href=""
+						ng-show="excludedUser.id != nodeUser.id"
+						ng-click="removeFromUsers(excludedUsers, excludableUsers, excludedUser)">(remove)</a></li>
+				</ul>
 
 			</div>
 			<div class="modal-footer">
@@ -232,4 +285,3 @@
 		</div>
 	</div>
 </div>
-

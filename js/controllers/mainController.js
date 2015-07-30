@@ -82,6 +82,36 @@ var mainController = controllers
 						});
 					}
 
+					function loadBlacklists(callback) {
+
+						var blacklist = {};
+
+						MyFamilyService
+								.getBlacklistedNodes($scope.graph.user.id)
+								.then(
+										function(blacklisted) {
+
+											blacklist.blacklistedNodes = blacklisted;
+
+											MyFamilyService
+													.getBlacklistingUsers(
+															$scope.graph.user.id)
+													.then(
+															function(
+																	blacklisting) {
+
+																blacklist.blacklistingUsers = blacklisting;
+																$scope.graph.blacklist = blacklist;
+
+																if (callback) {
+
+																	callback();
+																}
+															});
+
+										});
+					}
+
 					/*
 					 * Populate graph: get all nodes and links visible by userId
 					 * in the specified user view.
@@ -93,32 +123,15 @@ var mainController = controllers
 							callback();
 						}
 
-						MyFamilyService
-								.getGraphView($scope.graph.user.id,
-										$scope.graph.view.id)
-								.then(
-										function(resultData) {
+						MyFamilyService.getGraphView($scope.graph.user.id,
+								$scope.graph.view.id).then(
+								function(resultData) {
 
-											$scope.graph.nodes = resultData.nodes;
-											$scope.graph.links = resultData.links;
+									$scope.graph.nodes = resultData.nodes;
+									$scope.graph.links = resultData.links;
 
-											MyFamilyService
-													.getBlacklisted(
-															$scope.graph.user.id,
-															'node')
-													.then(
-															function(
-																	blacklisted) {
-
-																$scope.graph.blacklist = {};
-																$scope.graph.blacklist.nodes = blacklisted;
-
-																if (callback) {
-
-																	callback();
-																}
-															});
-										});
+									loadBlacklists(callback);
+								});
 					}
 
 					$scope.initViews = function() {
@@ -234,6 +247,11 @@ var mainController = controllers
 																addedDoc.position.x,
 																addedDoc.position.y);
 
+												MyFamilyService.addToBlacklist(
+														$scope.graph.user.id,
+														$scope.excludedUsers,
+														addedDoc.id);
+
 												MyFamilyService
 														.registerEvent(
 																'document',
@@ -261,20 +279,18 @@ var mainController = controllers
 								.then(
 										function() {
 
+											MyFamilyService.updateBlacklist(
+													$scope.graph.user.id,
+													$scope.excludedUsers,
+													addedDoc.id);
+
 											if ($scope.taggedUsers
-													.indexOf($scope.editNodeId) == -1) {
+													.indexOf($scope.graphData.selectedNode.id) == -1) {
 
-												for (docIndex in $scope.graphData.selectedNode.documents) {
-
-													var doc = $scope.graphData.selectedNode.documents[docIndex];
-													if (doc.id == $scope.editDocId) {
-
-														$scope.graphData.selectedNode.documents
-																.splice(
-																		docIndex,
-																		1);
-													}
-												}
+												$scope.graphData.selectedNode.documents
+														.splice(
+																$scope.editDocId,
+																1);
 											}
 										});
 					};
@@ -301,49 +317,46 @@ var mainController = controllers
 						$scope.addDate = dateFilter(date, 'dd/MM/yyyy');
 					});
 
-					$scope.addInTaggedUsers = function(taggableUser) {
+					$scope.addInUsers = function(users, removeFromUsers, user) {
 
-						$scope.taggedUsers.push(taggableUser);
+						users.push(user);
 
-						var taggableUsersIds = $scope.taggableUsers
-								.map(function(user) {
-									return user.id;
+						var removeFromUsersIds = removeFromUsers
+								.map(function(u) {
+									return u.id;
 								});
 
-						var indexUserToRemove = taggableUsersIds
-								.indexOf(taggableUser.id);
+						var indexUserToRemove = removeFromUsersIds
+								.indexOf(user.id);
 
 						if (indexUserToRemove > -1) {
-							$scope.taggableUsers.splice(indexUserToRemove, 1);
+							removeFromUsers.splice(indexUserToRemove, 1);
 						}
 					};
 
-					$scope.removeFromTaggedUsers = function(taggedUser) {
+					$scope.removeFromUsers = function(users, addToUsers, user) {
 
 						var indexUserToInsert = 0;
 
-						for (userIndex in $scope.taggableUsers) {
+						for (userIndex in addToUsers) {
 
-							if ($scope.taggableUsers[userIndex]['id'] > parseInt(taggedUser.id)) {
+							if (addToUsers[userIndex]['id'] > parseInt(user.id)) {
 
 								indexUserToInsert = userIndex;
 								break;
 							}
 						}
 
-						$scope.taggableUsers.splice(indexUserToInsert, 0,
-								taggedUser);
+						addToUsers.splice(indexUserToInsert, 0, user);
 
-						var taggedUsersIds = $scope.taggedUsers.map(function(
-								user) {
-							return user.id;
+						var usersIds = users.map(function(u) {
+							return u.id;
 						});
 
-						var indexUserToRemove = taggedUsersIds
-								.indexOf(taggedUser.id);
+						var indexUserToRemove = usersIds.indexOf(user.id);
 
 						if (indexUserToRemove > -1) {
-							$scope.taggedUsers.splice(indexUserToRemove, 1);
+							users.splice(indexUserToRemove, 1);
 						}
 					};
 

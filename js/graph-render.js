@@ -156,6 +156,9 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 			scope.taggedUsers = [];
 			scope.taggedUsers.push(scope.nodeUser);
 
+			scope.excludableUsers = [];
+			scope.excludedUsers = [];
+
 			for (nodeIndex in graph.nodes) {
 
 				var node = graph.nodes[nodeIndex];
@@ -164,13 +167,10 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 					name : node.label
 				};
 
-				var taggedUsersIds = scope.taggedUsers.map(function(user) {
-					return user.id;
-				});
-
-				if (node.person && taggedUsersIds.indexOf(currentUser.id) == -1) {
+				if (node.person && currentUser.id != scope.nodeUser.id) {
 
 					scope.taggableUsers.push(currentUser);
+					scope.excludableUsers.push(currentUser);
 				}
 			}
 
@@ -247,15 +247,15 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 						});
 	}
 
-	function getMenuWithBlacklistFeature(menu, isBlacklisted) {
+	function getMenuWithBlacklistFeature(menu, isBlacklisted, isBlacklisting) {
 
-		if (!isBlacklisted) {
+		if (!isBlacklisted && !isBlacklisting) {
 
 			var addToBlacklistFeature = {
 				title : "Add to blacklist",
 				action : function(elm, d, i) {
 
-					server.addToBlackList(graph.user.id, d.originalId, 'node')
+					server.addToBlacklist(graph.user.id, d.originalId, -1)
 							.then(function() {
 
 								scope.drawGraph();
@@ -265,21 +265,33 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 			menu.splice(2, 0, addToBlacklistFeature);
 
-		} else {
+		} else if (!isBlacklisting) {
 
 			var removeFromBlacklistFeature = {
 				title : "Remove from blacklist",
 				action : function(elm, d, i) {
 
-					server.removeFromBlackList(graph.user.id, d.originalId,
-							'node').then(function() {
+					server.removeFromBlacklist(graph.user.id, d.originalId, -1)
+							.then(function() {
 
-						scope.drawGraph();
-					});
+								scope.drawGraph();
+							});
 				}
 			};
 
 			menu.splice(2, 0, removeFromBlacklistFeature);
+
+		} else {
+
+			var askToBeRemovedFromBlacklistFeature = {
+				title : "Ask to be removed from blacklist",
+				action : function(elm, d, i) {
+
+					// TODO
+				}
+			};
+
+			menu.splice(2, 0, askToBeRemovedFromBlacklistFeature);
 		}
 
 		return menu;
@@ -322,7 +334,10 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 						currentNode.on("click", clickNode);
 
-						var isBlacklisted = scope.graphData.blacklist.nodes
+						var isBlacklisted = scope.graphData.blacklist.blacklistedNodes
+								.indexOf(d.originalId) > -1;
+
+						var isBlacklisting = scope.graphData.blacklist.blacklistingUsers
 								.indexOf(d.originalId) > -1;
 
 						if (view.id == 4) {
@@ -331,13 +346,14 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 									onPersonMenu);
 
 							var newMenu = getMenuWithBlacklistFeature(
-									onPersonMenuCopy, isBlacklisted);
+									onPersonMenuCopy, isBlacklisted,
+									isBlacklisting);
 
 							currentNode.on('contextmenu', d3
 									.contextMenu(newMenu));
 						}
 
-						if (isBlacklisted) {
+						if (isBlacklisted || isBlacklisting) {
 
 							currentNode.attr("class", "blacklisted");
 
@@ -596,9 +612,13 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 			return;
 		}
 
-		svg.selectedNodeId = d.originalId;
+		if (scope.graphData.blacklist.blacklistingUsers.indexOf(d.originalId) == -1
+				&& scope.graphData.blacklist.blacklistedNodes
+						.indexOf(d.originalId) == -1) {
 
-		selectNode(d);
+			svg.selectedNodeId = d.originalId;
+			selectNode(d);
+		}
 
 		d3.event.stopPropagation();
 	}
@@ -809,88 +829,91 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 		});
 	};
 
+	function populateUsers(newUsers, actualUsers, potentialUsers) {
+
+		for ( var newUsersIndex in newUsers) {
+
+			newUser = newUsers[newUsersIndex];
+
+			if (newUser.id != -1) {
+
+				actualUsers.push({
+					id : newUser.id,
+					name : newUser.label
+				});
+			}
+		}
+
+		for (nodeIndex in graph.nodes) {
+
+			var node = graph.nodes[nodeIndex];
+			var currentUser = {
+				id : node.originalId,
+				name : node.label
+			};
+
+			var actualUsersIds = actualUsers.map(function(user) {
+				return user.id;
+			});
+
+			if (node.person && currentUser.id != scope.owner.id
+					&& actualUsersIds.indexOf(currentUser.id) == -1) {
+
+				potentialUsers.push(currentUser);
+			}
+		}
+	}
+
 	var onDocumentMenu = [
 			{
 				title : 'Edit',
 				action : function(elm, d, i) {
 
-					server
-							.getDocument(elm.id)
-							.then(
-									function(data) {
+					server.getDocument(elm.id).then(
+							function(data) {
 
-										if (data.document != -1) {
+								if (data.document != -1) {
 
-											var tagged = data.document.tagged;
+									scope.owner = {
+										id : d.owner
+									};
 
-											scope.nodeUser = {
-												id : d.originalId,
-												name : d.label
-											};
+									scope.taggableUsers = [];
+									scope.taggedUsers = [];
 
-											scope.taggableUsers = [];
-											scope.taggedUsers = [];
+									scope.excludableUsers = [];
+									scope.excludedUsers = [];
 
-											for ( var taggedIndex in tagged) {
+									populateUsers(data.document.tagged,
+											scope.taggedUsers,
+											scope.taggableUsers);
 
-												tag = tagged[taggedIndex];
-												if (tag.id != -1) {
+									populateUsers(data.document.excluded,
+											scope.excludedUsers,
+											scope.excludableUsers);
 
-													var taggedUser = {
-														id : tag.id,
-														name : tag.label
-													};
+									if (d) {
 
-													scope.taggedUsers
-															.push(taggedUser);
-												}
-											}
+										scope.editNodeId = d.originalId;
+									}
 
-											for (nodeIndex in graph.nodes) {
+									scope.editDocId = data.document.id;
+									scope.editFileName = data.document.file;
+									scope.editTitle = data.document.title;
 
-												var node = graph.nodes[nodeIndex];
-												var currentUser = {
-													id : node.originalId,
-													name : node.label
-												};
+									if (data.document.date.lastIndexOf('0000',
+											0) === 0) {
 
-												var taggedUsersIds = scope.taggedUsers
-														.map(function(user) {
-															return user.id;
-														});
+										scope.editDate = '01/01/2015';
 
-												if (node.person
-														&& taggedUsersIds
-																.indexOf(currentUser.id) == -1) {
+									} else {
 
-													scope.taggableUsers
-															.push(currentUser);
-												}
-											}
+										scope.editDate = data.document.date;
+									}
 
-											if (d) {
-
-												scope.editNodeId = d.originalId;
-											}
-
-											scope.editDocId = data.document.id;
-											scope.editFileName = data.document.file;
-											scope.editTitle = data.document.title;
-
-											if (data.document.date.lastIndexOf(
-													'0000', 0) === 0) {
-
-												scope.editDate = '01/01/2015';
-
-											} else {
-
-												scope.editDate = data.document.date;
-											}
-
-											$('#editDocumentModal').modal(
-													'show');
-										}
-									});
+									$('#editDocumentModal').modal('show');
+								}
+							});
 
 				}
 			},
@@ -1108,6 +1131,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 					}
 
 					scope.graphData.selectedNode = {};
+					scope.graphData.selectedNode.id = nodeId;
 					scope.graphData.selectedNode.documents = data.documents;
 
 					var container = selectedNode.append("g").attr("class",
@@ -1264,10 +1288,8 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 		var document = sel[0][0];
 		var x = document.getAttribute("x");
 		var y = document.getAttribute("y");
-		var id = document.id;
 
-		var nodeId = d ? d.originalId : -1;
-
-		server.updateDocumentPosition(id, nodeId, x, y);
+		server.updateDocumentPosition(d.id, scope.graphData.selectedNode.id, x,
+				y);
 	}
 };
