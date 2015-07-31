@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Jul 17, 2015 at 05:29 PM
+-- Generation Time: Jul 31, 2015 at 06:17 PM
 -- Server version: 5.5.29
 -- PHP Version: 5.3.28
 
@@ -23,9 +23,24 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `blacklist`
+--
+
+DROP TABLE IF EXISTS `blacklist`;
+CREATE TABLE IF NOT EXISTS `blacklist` (
+  `user` int(11) NOT NULL,
+  `blocked` int(11) NOT NULL,
+  `document` int(10) NOT NULL DEFAULT '-1',
+  PRIMARY KEY (`user`,`blocked`,`document`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `documents`
 --
 
+DROP TABLE IF EXISTS `documents`;
 CREATE TABLE IF NOT EXISTS `documents` (
   `id` int(11) NOT NULL,
   `title` varchar(100) NOT NULL,
@@ -40,6 +55,7 @@ CREATE TABLE IF NOT EXISTS `documents` (
 -- Table structure for table `events`
 --
 
+DROP TABLE IF EXISTS `events`;
 CREATE TABLE IF NOT EXISTS `events` (
   `id` int(11) NOT NULL,
   `description` varchar(100) NOT NULL,
@@ -56,6 +72,7 @@ CREATE TABLE IF NOT EXISTS `events` (
 -- Table structure for table `links`
 --
 
+DROP TABLE IF EXISTS `links`;
 CREATE TABLE IF NOT EXISTS `links` (
   `source` int(11) NOT NULL,
   `target` int(11) NOT NULL
@@ -67,6 +84,7 @@ CREATE TABLE IF NOT EXISTS `links` (
 -- Table structure for table `nodes`
 --
 
+DROP TABLE IF EXISTS `nodes`;
 CREATE TABLE IF NOT EXISTS `nodes` (
   `id` int(11) NOT NULL,
   `label` varchar(50) NOT NULL,
@@ -81,13 +99,13 @@ CREATE TABLE IF NOT EXISTS `nodes` (
 -- Table structure for table `notifications`
 --
 
+DROP TABLE IF EXISTS `notifications`;
 CREATE TABLE IF NOT EXISTS `notifications` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
   `event` int(11) NOT NULL,
   `user` int(11) NOT NULL,
   `status` tinyint(1) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=86 ;
+  PRIMARY KEY (`event`,`user`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -95,6 +113,7 @@ CREATE TABLE IF NOT EXISTS `notifications` (
 -- Table structure for table `tags`
 --
 
+DROP TABLE IF EXISTS `tags`;
 CREATE TABLE IF NOT EXISTS `tags` (
   `document` int(11) NOT NULL,
   `node` int(11) NOT NULL,
@@ -107,6 +126,7 @@ CREATE TABLE IF NOT EXISTS `tags` (
 -- Table structure for table `users`
 --
 
+DROP TABLE IF EXISTS `users`;
 CREATE TABLE IF NOT EXISTS `users` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `username` varchar(50) NOT NULL,
@@ -115,7 +135,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `credentials` varchar(50) NOT NULL,
   `node` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=52 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=56 ;
 
 -- --------------------------------------------------------
 
@@ -123,6 +143,7 @@ CREATE TABLE IF NOT EXISTS `users` (
 -- Table structure for table `views`
 --
 
+DROP TABLE IF EXISTS `views`;
 CREATE TABLE IF NOT EXISTS `views` (
   `user` int(11) NOT NULL,
   `view` int(11) NOT NULL,
