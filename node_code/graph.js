@@ -684,35 +684,32 @@ function updateNodeInDB(nodeIndex, field, value, req, callback) {
 
 function insertLink(source, target, req, callback) {
 
+	var insertLinkQuery = "INSERT INTO links VALUES(" + source + ", " + target
+			+ ")";
+
+	console.log(insertLinkQuery);
+
 	req.getConnection(function(err, connection) {
 
-		var insertLinkQuery = "INSERT INTO links VALUES(" + source + ", "
-				+ target + ")";
+		connection.query(insertLinkQuery, function(err, rows) {
 
-		console.log(insertLinkQuery);
+			if (err) {
 
-		req.getConnection(function(err, connection) {
+				console.log("Error Inserting : %s ", err);
 
-			connection.query(insertLinkQuery, function(err, rows) {
+			} else {
 
-				if (err) {
+				if (rows.affectedRows > 0) {
 
-					console.log("Error Inserting : %s ", err);
+					console.log("New link inserted");
+					callback(true);
 
 				} else {
 
-					if (rows.affectedRows > 0) {
-
-						console.log("New link inserted");
-						callback(true);
-
-					} else {
-
-						console.log("New link not inserted");
-						callback(false);
-					}
+					console.log("New link not inserted");
+					callback(false);
 				}
-			});
+			}
 		});
 	});
 };
