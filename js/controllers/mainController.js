@@ -6,6 +6,24 @@ var mainController = controllers
 
 					d3.select("svg").attr("opacity", 1);
 
+					function entityIsForbidden(entity, entityType) {
+
+						var forbidden = false;
+
+						for (forbiddenDocIndex in $scope.graph.blacklist.forbiddenDocuments) {
+
+							var forbiddenDoc = $scope.graph.blacklist.forbiddenDocuments[forbiddenDocIndex];
+							if (entityType == 'document'
+									&& entity == forbiddenDoc.id) {
+
+								forbidden = true;
+								break;
+							}
+						}
+
+						return forbidden;
+					}
+
 					/*
 					 * Populate notifications: get all events about nodes or
 					 * docs in this user view who are not already read by this
@@ -26,7 +44,10 @@ var mainController = controllers
 													.filter(
 															function(event) {
 																return event.status != 1
-																		&& event.node != $scope.graph.user.id;
+																		&& event.node != $scope.graph.user.id
+																		&& !entityIsForbidden(
+																				event.entity,
+																				event.entity_type);
 															}).map(
 															function(item) {
 																return item.id;
@@ -71,15 +92,39 @@ var mainController = controllers
 							nodes : $scope.graph.nodes
 						};
 
-						MyFamilyService.getViewDocuments($scope.graph.user.id,
-								data).then(function(resultData) {
+						MyFamilyService
+								.getViewDocuments($scope.graph.user.id, data)
+								.then(
+										function(resultData) {
 
-							$scope.graph.documents = resultData;
+											$scope.graph.documents = [];
 
-							if (callback) {
-								callback();
-							}
-						});
+											for (docIndex in resultData) {
+
+												var doc = resultData[docIndex];
+												found = false;
+
+												for (forbiddenDocIndex in $scope.graph.blacklist.forbiddenDocuments) {
+
+													var forbiddenDoc = $scope.graph.blacklist.forbiddenDocuments[forbiddenDocIndex];
+													if (doc.id == forbiddenDoc.id) {
+
+														found = true;
+														break;
+													}
+												}
+
+												if (!found) {
+
+													$scope.graph.documents
+															.push(doc);
+												}
+											}
+
+											if (callback) {
+												callback();
+											}
+										});
 					}
 
 					function loadBlacklists(callback) {
@@ -92,23 +137,31 @@ var mainController = controllers
 										function(blacklisted) {
 
 											blacklist.blacklistedNodes = blacklisted;
-
 											MyFamilyService
-													.getBlacklistingUsers(
+													.getForbiddenDocuments(
 															$scope.graph.user.id)
 													.then(
 															function(
-																	blacklisting) {
+																	forbiddenDocs) {
 
-																blacklist.blacklistingUsers = blacklisting;
-																$scope.graph.blacklist = blacklist;
+																blacklist.forbiddenDocuments = forbiddenDocs;
+																MyFamilyService
+																		.getBlacklistingUsers(
+																				$scope.graph.user.id)
+																		.then(
+																				function(
+																						blacklisting) {
 
-																if (callback) {
+																					blacklist.blacklistingUsers = blacklisting;
+																					$scope.graph.blacklist = blacklist;
 
-																	callback();
-																}
+																					if (callback) {
+
+																						callback();
+																					}
+																				});
+
 															});
-
 										});
 					}
 
@@ -279,19 +332,23 @@ var mainController = controllers
 								.then(
 										function() {
 
-											MyFamilyService.updateBlacklist(
-													$scope.graph.user.id,
-													$scope.excludedUsers,
-													addedDoc.id);
+											MyFamilyService
+													.updateBlacklist(
+															$scope.graph.user.id,
+															$scope.excludedUsers,
+															$scope.editDocId)
+													.then(
+															function() {
 
-											if ($scope.taggedUsers
-													.indexOf($scope.graphData.selectedNode.id) == -1) {
+																if ($scope.taggedUsers
+																		.indexOf($scope.graphData.selectedNode.id) == -1) {
 
-												$scope.graphData.selectedNode.documents
-														.splice(
-																$scope.editDocId,
-																1);
-											}
+																	$scope.graphData.selectedNode.documents
+																			.splice(
+																					$scope.editDocId,
+																					1);
+																}
+															});
 										});
 					};
 

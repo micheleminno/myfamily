@@ -387,6 +387,9 @@ function removeOldTags(taggedIds, rows, docIndex, req, callback) {
 				}
 			});
 		});
+	} else {
+
+		callback(1);
 	}
 };
 
@@ -472,6 +475,8 @@ exports.update = function(req, res) {
 				} else {
 
 					if (rows.affectedRows > 0) {
+
+						console.log("Title and date of document updated");
 
 						if (req.query.tagged) {
 

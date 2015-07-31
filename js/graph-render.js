@@ -869,51 +869,65 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 				title : 'Edit',
 				action : function(elm, d, i) {
 
-					server.getDocument(elm.id).then(
-							function(data) {
+					server
+							.getDocument(elm.id)
+							.then(
+									function(data) {
 
-								if (data.document != -1) {
+										if (data.document != -1) {
 
-									scope.owner = {
-										id : d.owner
-									};
+											scope.owner = {
+												id : d.owner
+											};
 
-									scope.taggableUsers = [];
-									scope.taggedUsers = [];
+											scope.taggableUsers = [];
+											scope.taggedUsers = [];
 
-									scope.excludableUsers = [];
-									scope.excludedUsers = [];
+											populateUsers(data.document.tagged,
+													scope.taggedUsers,
+													scope.taggableUsers);
 
-									populateUsers(data.document.tagged,
-											scope.taggedUsers,
-											scope.taggableUsers);
+											if (d) {
 
-									populateUsers(data.document.excluded,
-											scope.excludedUsers,
-											scope.excludableUsers);
+												scope.editNodeId = d.originalId;
+											}
 
-									if (d) {
+											scope.editDocId = data.document.id;
+											scope.editFileName = data.document.file;
+											scope.editTitle = data.document.title;
 
-										scope.editNodeId = d.originalId;
-									}
+											if (data.document.date.lastIndexOf(
+													'0000', 0) === 0) {
 
-									scope.editDocId = data.document.id;
-									scope.editFileName = data.document.file;
-									scope.editTitle = data.document.title;
+												scope.editDate = '01/01/2015';
 
-									if (data.document.date.lastIndexOf('0000',
-											0) === 0) {
+											} else {
 
-										scope.editDate = '01/01/2015';
+												scope.editDate = data.document.date;
+											}
 
-									} else {
+											scope.excludableUsers = [];
+											scope.excludedUsers = [];
 
-										scope.editDate = data.document.date;
-									}
+											server
+													.getBlacklistedUsersForDocument(
+															scope.owner.id,
+															scope.editDocId)
+													.then(
+															function(data) {
 
-									$('#editDocumentModal').modal('show');
-								}
-							});
+																populateUsers(
+																		data,
+																		scope.excludedUsers,
+																		scope.excludableUsers);
+
+																$(
+																		'#editDocumentModal')
+																		.modal(
+																				'show');
+															});
+										}
+									});
 
 				}
 			},
@@ -1098,19 +1112,39 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 	var docDrag = d3.behavior.drag().on("dragstart", docDragstarted).on("drag",
 			docDragged).on("dragend", docDragended);
 
+	function isForbidden(document) {
+
+		for (forbiddenDocIndex in scope.graphData.blacklist.forbiddenDocuments) {
+
+			var forbiddenDoc = scope.graphData.blacklist.forbiddenDocuments[forbiddenDocIndex];
+
+			if (document.id == forbiddenDoc.id) {
+
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	function placeDocuments(nodeId, relationType, selectedNode, centerX,
 			centerY, maxRowSize) {
 
 		server.getNodeDocuments(nodeId, relationType).then(
 				function(data) {
 
-					var documents = data.documents;
+					var documents = [];
 
 					var offset = 0;
 
-					for (docIndex in documents) {
+					for (docIndex in data.documents) {
 
-						var document = documents[docIndex];
+						var document = data.documents[docIndex];
+
+						if (isForbidden(document)) {
+
+							continue;
+						}
 
 						offset += 100;
 
@@ -1128,11 +1162,13 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 							document.position.y = centerY + 100
 									* Math.floor(docIndex / maxRowSize);
 						}
+
+						documents.push(document);
 					}
 
 					scope.graphData.selectedNode = {};
 					scope.graphData.selectedNode.id = nodeId;
-					scope.graphData.selectedNode.documents = data.documents;
+					scope.graphData.selectedNode.documents = documents;
 
 					var container = selectedNode.append("g").attr("class",
 							"docContainer");

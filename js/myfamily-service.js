@@ -757,9 +757,7 @@ app
 										+ '/update?title=' + title + '&date='
 										+ date + '&tagged='
 										+ JSON.stringify(taggedUsersIds))
-								.success(
-
-								function(data) {
+								.success(function(data) {
 
 									if (data) {
 
@@ -841,7 +839,7 @@ app
 
 						return deferred.promise;
 					};
-					
+
 					this.updateBlacklist = function(userId, blockedUsers,
 							documentId) {
 
@@ -849,8 +847,8 @@ app
 
 						var httpPostConfig = {
 
-							url : serverUrl + '/' + userId + '/blacklists/update/'
-									+ documentId,
+							url : serverUrl + '/' + userId
+									+ '/blacklists/update/' + documentId,
 							method : "POST",
 							data : {
 								blockedUsers : blockedUsers
@@ -860,9 +858,9 @@ app
 							}
 						};
 
-						$http(httpPostConfig).success(function(events) {
+						$http(httpPostConfig).success(function(res) {
 
-							deferred.resolve(events);
+							deferred.resolve(res);
 						});
 
 						return deferred.promise;
@@ -908,6 +906,47 @@ app
 						return deferred.promise;
 					};
 
+					this.getBlacklistedUsersForDocument = function(userId,
+							docId) {
+
+						var deferred = $q.defer();
+
+						$http.get(
+								serverUrl + '/' + userId + '/blacklists/'
+										+ docId).success(
+
+						function(data) {
+
+							if (data) {
+
+								deferred.resolve(data);
+							}
+						});
+
+						return deferred.promise;
+					};
+					
+					this.getForbiddenDocuments = function(userId) {
+
+						var deferred = $q.defer();
+
+						$http
+								.get(
+										serverUrl + '/' + userId
+												+ '/forbiddenDocuments')
+								.success(
+
+								function(data) {
+
+									if (data) {
+
+										deferred.resolve(data);
+									}
+								});
+
+						return deferred.promise;
+					};
+					
 					this.getBlacklistingUsers = function(userId) {
 
 						var deferred = $q.defer();

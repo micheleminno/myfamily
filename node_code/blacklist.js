@@ -98,93 +98,104 @@ function addBlacklistedUsersForDocument(userId, documentId, blockedUsers, req,
 		separator = ", ";
 	}
 
-	req
-			.getConnection(function(err, connection) {
+	if (values != "") {
 
-				var insertBlacklistItemsQuery = "INSERT IGNORE INTO blacklist (user, blocked, document) VALUES "
-						+ values;
+		req
+				.getConnection(function(err, connection) {
 
-				console.log(insertBlacklistItemsQuery);
+					var insertBlacklistItemsQuery = "INSERT IGNORE INTO blacklist (user, blocked, document) VALUES "
+							+ values;
 
-				req.getConnection(function(err, connection) {
+					console.log(insertBlacklistItemsQuery);
 
-					connection.query(insertBlacklistItemsQuery, function(err,
-							rows) {
+					req.getConnection(function(err, connection) {
 
-						if (err) {
+						connection.query(insertBlacklistItemsQuery, function(
+								err, rows) {
 
-							console.log("Error Inserting : %s ", err);
+							if (err) {
 
-						} else {
-
-							if (rows.affectedRows > 0) {
-
-								console.log("Blacklist items added");
-
-								callback(true);
+								console.log("Error Inserting : %s ", err);
 
 							} else {
 
-								console.log("Blacklist items not added");
+								if (rows.affectedRows > 0) {
 
-								callback(false);
+									console.log("Blacklist items added");
+
+									callback(true);
+
+								} else {
+
+									console.log("Blacklist items not added");
+
+									callback(false);
+								}
 							}
-						}
+						});
 					});
 				});
-			});
+	} else {
+
+		callback(true);
+	}
 }
 
-function removeBlacklistedUsersForDocument(userId, documentId, blockedUsersIds,
+function removeBlacklistedUsersForDocument(userId, documentId, blockedUsers,
 		req, callback) {
 
 	var values = "";
 	var separator = "";
 
-	for (blockedUserIdIndex in blockedUsersIds) {
+	for (blockedUserIndex in blockedUsers) {
 
-		var blockedUserId = blockedUsersIds[blockedUserIdIndex];
-		values += separator + "(" + userId + ", " + blockedUserId + ", "
+		var blockedUser = blockedUsers[blockedUserIndex];
+		values += separator + "(" + userId + ", " + blockedUser.id + ", "
 				+ documentId + ")";
 
 		separator = ", ";
 	}
 
-	req
-			.getConnection(function(err, connection) {
+	if (values != "") {
+		req
+				.getConnection(function(err, connection) {
 
-				var insertBlacklistItemsQuery = "DELETE FROM blacklist WHERE (user, blocked, document) IN ("
-						+ values + ")";
+					var insertBlacklistItemsQuery = "DELETE FROM blacklist WHERE (user, blocked, document) IN ("
+							+ values + ")";
 
-				console.log(insertBlacklistItemsQuery);
+					console.log(insertBlacklistItemsQuery);
 
-				req.getConnection(function(err, connection) {
+					req.getConnection(function(err, connection) {
 
-					connection.query(insertBlacklistItemsQuery, function(err,
-							rows) {
+						connection.query(insertBlacklistItemsQuery, function(
+								err, rows) {
 
-						if (err) {
+							if (err) {
 
-							console.log("Error Deleting : %s ", err);
-
-						} else {
-
-							if (rows.affectedRows > 0) {
-
-								console.log("Blacklist items deleted");
-
-								callback(true);
+								console.log("Error Deleting : %s ", err);
 
 							} else {
 
-								console.log("Blacklist items not deleted");
+								if (rows.affectedRows > 0) {
 
-								callback(false);
+									console.log("Blacklist items deleted");
+
+									callback(true);
+
+								} else {
+
+									console.log("Blacklist items not deleted");
+
+									callback(false);
+								}
 							}
-						}
+						});
 					});
 				});
-			});
+	} else {
+
+		callback(true);
+	}
 }
 
 /*
@@ -196,10 +207,10 @@ exports.update = function(req, res) {
 	var userId = req.param('user');
 	var documentId = req.param('document');
 
-	getBlacklistedUsersForDocument(userId, docId, function(blacklisted) {
+	getBlacklistedUsersForDocument(userId, documentId, req, function(
+			blacklisted) {
 
 		blockedUsersToAdd = [];
-		blockedUsersToRemove = [];
 
 		for (blockedUsersIndex in blockedUsers) {
 
@@ -210,18 +221,9 @@ exports.update = function(req, res) {
 
 				var actualBlacklistedUser = blacklisted[blacklistedIndex];
 
-				if (blockedUsersToRemove.indexOf(blockedUser.id) == -1) {
-
-					blockedUsersToRemove.push(blockedUser.id);
-				}
-
 				if (actualBlacklistedUser.id == blockedUser.id) {
 
 					found = true;
-
-					blockedUsersToRemove.splice(blockedUsersToRemove
-							.indexOf(blockedUser.id), blockedUser.id);
-
 					break;
 				}
 			}
@@ -229,6 +231,30 @@ exports.update = function(req, res) {
 			if (!found) {
 
 				blockedUsersToAdd.push(blockedUser);
+			}
+		}
+
+		blockedUsersToRemove = [];
+
+		for (blacklistedIndex in blacklisted) {
+
+			var actualBlacklistedUser = blacklisted[blacklistedIndex];
+			var found = false;
+
+			for (blockedUsersIndex in blockedUsers) {
+
+				var blockedUser = blockedUsers[blockedUsersIndex];
+
+				if (blockedUser.id == actualBlacklistedUser.id) {
+
+					found = true;
+					break;
+				}
+			}
+
+			if (!found) {
+
+				blockedUsersToRemove.push(actualBlacklistedUser);
 			}
 		}
 
@@ -348,9 +374,10 @@ exports.listNodes = function(req, res) {
 	});
 };
 
-function getBlacklistedUsersForDocument(userId, documentId, callback) {
+function getBlacklistedUsersForDocument(userId, documentId, req, callback) {
 
-	var selectBlacklistedQuery = "SELECT blocked FROM blacklist WHERE user = "
+	var selectBlacklistedQuery = "SELECT b.blocked as id, n.label as label "
+			+ "FROM blacklist as b JOIN nodes as n ON b.blocked = n.id WHERE user = "
 			+ userId + " AND document = " + documentId;
 
 	console.log(selectBlacklistedQuery);
@@ -369,7 +396,7 @@ function getBlacklistedUsersForDocument(userId, documentId, callback) {
 
 				for ( var rowIndex in rows) {
 
-					blacklisted.push(rows[rowIndex]['blocked']);
+					blacklisted.push(rows[rowIndex]);
 				}
 
 				callback(blacklisted);
@@ -386,7 +413,7 @@ exports.listUsersForDocument = function(req, res) {
 	var userId = req.param('user');
 	var docId = req.param('document');
 
-	getBlacklistedUsersForDocument(userId, docId, function(blacklisted) {
+	getBlacklistedUsersForDocument(userId, docId, req, function(blacklisted) {
 
 		res.status(OK).json('blacklisted', blacklisted);
 	});
@@ -423,6 +450,42 @@ exports.listBlacklistingUsers = function(req, res) {
 
 				console.log("res.: " + JSON.stringify(blacklisting));
 				res.status(OK).json('blacklisting', blacklisting);
+			}
+		});
+	});
+};
+
+/*
+ * Get all forbidden documents for a specific user.
+ */
+exports.listForbiddenDocuments = function(req, res) {
+
+	var userId = req.param('user');
+
+	var selectForbiddenDocumentsQuery = "SELECT document as id FROM blacklist WHERE blocked = "
+			+ userId + " AND document != -1";
+
+	console.log(selectForbiddenDocumentsQuery);
+
+	req.getConnection(function(err, connection) {
+
+		connection.query(selectForbiddenDocumentsQuery, function(err, rows) {
+
+			if (err) {
+
+				console.log("Error Selecting : %s ", err);
+
+			} else {
+
+				var forbiddenDocs = [];
+
+				for ( var rowIndex in rows) {
+
+					forbiddenDocs.push(rows[rowIndex]);
+				}
+
+				console.log("res.: " + JSON.stringify(forbiddenDocs));
+				res.status(OK).json('forbiddenDocs', forbiddenDocs);
 			}
 		});
 	});

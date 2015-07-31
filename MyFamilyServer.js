@@ -122,4 +122,6 @@ app.post('/:user/blacklists/add/:document', blacklist.addMany);
 app.post('/:user/blacklists/update/:document', blacklist.update);
 app.get('/:user/blacklists/remove/:blockedUser/:document', blacklist.remove);
 app.get('/:user/blacklists/nodes', blacklist.listNodes);
+app.get('/:user/blacklists/:document', blacklist.listUsersForDocument);
 app.get('/:user/blacklistingUsers', blacklist.listBlacklistingUsers);
+app.get('/:user/forbiddenDocuments', blacklist.listForbiddenDocuments);
