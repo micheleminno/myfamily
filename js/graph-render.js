@@ -864,74 +864,14 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 		}
 	}
 
-	var onDocumentMenu = [
-			{
-				title : 'Edit',
-				action : function(elm, d, i) {
+	function getMenuWithRemoveFeature(menu, docOwnerId) {
 
-					server
-							.getDocument(elm.id)
-							.then(
-									function(data) {
+		if (docOwnerId != scope.graphData.user.id) {
 
-										if (data.document != -1) {
+			return menu;
+		} else {
+			var removeFeature = {
 
-											scope.owner = {
-												id : d.owner
-											};
-
-											scope.taggableUsers = [];
-											scope.taggedUsers = [];
-
-											populateUsers(data.document.tagged,
-													scope.taggedUsers,
-													scope.taggableUsers);
-
-											if (d) {
-
-												scope.editNodeId = d.originalId;
-											}
-
-											scope.editDocId = data.document.id;
-											scope.editFileName = data.document.file;
-											scope.editTitle = data.document.title;
-
-											if (data.document.date.lastIndexOf(
-													'0000', 0) === 0) {
-
-												scope.editDate = '01/01/2015';
-
-											} else {
-
-												scope.editDate = data.document.date;
-											}
-
-											scope.excludableUsers = [];
-											scope.excludedUsers = [];
-
-											server
-													.getBlacklistedUsersForDocument(
-															scope.owner.id,
-															scope.editDocId)
-													.then(
-															function(data) {
-
-																populateUsers(
-																		data,
-																		scope.excludedUsers,
-																		scope.excludableUsers);
-
-																$(
-																		'#editDocumentModal')
-																		.modal(
-																				'show');
-															});
-										}
-									});
-
-				}
-			},
-			{
 				title : 'Remove',
 				action : function(elm, d, i) {
 
@@ -961,7 +901,80 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 														});
 									});
 				}
-			} ];
+			};
+
+			var onDocumentMenuCopy = jQuery.extend(true, [], menu);
+
+			onDocumentMenuCopy.push(removeFeature);
+
+			return onDocumentMenuCopy;
+		}
+	}
+
+	var onDocumentMenu = [ {
+		title : 'Edit',
+		action : function(elm, d, i) {
+
+			server
+					.getDocument(elm.id)
+					.then(
+							function(data) {
+
+								if (data.document != -1) {
+
+									scope.owner = {
+										id : d.owner
+									};
+
+									scope.taggableUsers = [];
+									scope.taggedUsers = [];
+
+									populateUsers(data.document.tagged,
+											scope.taggedUsers,
+											scope.taggableUsers);
+
+									if (d) {
+
+										scope.editNodeId = d.originalId;
+									}
+
+									scope.editDocId = data.document.id;
+									scope.editFileName = data.document.file;
+									scope.editTitle = data.document.title;
+
+									if (data.document.date.lastIndexOf('0000',
+											0) === 0) {
+
+										scope.editDate = '01/01/2015';
+
+									} else {
+
+										scope.editDate = data.document.date;
+									}
+
+									scope.excludableUsers = [];
+									scope.excludedUsers = [];
+
+									server
+											.getBlacklistedUsersForDocument(
+													scope.owner.id,
+													scope.editDocId)
+											.then(
+													function(data) {
+
+														populateUsers(
+																data,
+																scope.excludedUsers,
+																scope.excludableUsers);
+
+														$('#editDocumentModal')
+																.modal('show');
+													});
+								}
+							});
+
+		}
+	} ];
 
 	function populateThumbnails(currentPage, back) {
 
@@ -1130,88 +1143,117 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 	function placeDocuments(nodeId, relationType, selectedNode, centerX,
 			centerY, maxRowSize) {
 
-		server.getNodeDocuments(nodeId, relationType).then(
-				function(data) {
+		server
+				.getNodeDocuments(nodeId, relationType)
+				.then(
+						function(data) {
 
-					var documents = [];
+							var documents = [];
 
-					var offset = 0;
+							var offset = 0;
 
-					for (docIndex in data.documents) {
+							for (docIndex in data.documents) {
 
-						var document = data.documents[docIndex];
+								var document = data.documents[docIndex];
 
-						if (isForbidden(document)) {
+								if (isForbidden(document)) {
 
-							continue;
-						}
+									continue;
+								}
 
-						offset += 100;
+								offset += 100;
 
-						if (offset >= 100 * maxRowSize) {
+								if (offset >= 100 * maxRowSize) {
 
-							offset = 0;
-						}
+									offset = 0;
+								}
 
-						document.selectedNode = nodeId;
+								document.selectedNode = nodeId;
 
-						if (!document.position) {
+								if (!document.position) {
 
-							document.position = {};
-							document.position.x = centerX / 2 - 300 + offset;
-							document.position.y = centerY + 100
-									* Math.floor(docIndex / maxRowSize);
-						}
+									document.position = {};
+									document.position.x = centerX / 2 - 300
+											+ offset;
+									document.position.y = centerY + 100
+											* Math.floor(docIndex / maxRowSize);
+								}
 
-						documents.push(document);
-					}
+								documents.push(document);
+							}
 
-					scope.graphData.selectedNode = {};
-					scope.graphData.selectedNode.id = nodeId;
-					scope.graphData.selectedNode.documents = documents;
+							scope.graphData.selectedNode = {};
+							scope.graphData.selectedNode.id = nodeId;
+							scope.graphData.selectedNode.documents = documents;
 
-					var container = selectedNode.append("g").attr("class",
-							"docContainer");
+							var container = selectedNode.append("g").attr(
+									"class", "docContainer");
 
-					var sel = container.selectAll("image").data(documents);
+							var sel = container.selectAll("image").data(
+									documents);
 
-					sel.enter().append("image").attr("width", 100).attr("id",
-							function(d) {
-								return d.id;
-							}).attr("title", function(d) {
+							var currentDoc = sel
+									.enter()
+									.append("image")
+									.attr("width", 100)
+									.attr("id", function(d) {
+										return d.id;
+									})
+									.attr("title", function(d) {
 
-						return d.title;
+										return d.title;
 
-					}).attr("url", function(d) {
+									})
+									.attr("owner", function(d) {
 
-						return server.getFilePath(d.file);
+										return d.owner;
 
-					}).attr("date", function(d) {
+									})
+									.attr("url", function(d) {
 
-						return commons.getDate(d.date);
+										return server.getFilePath(d.file);
 
-					}).attr("x", function(d) {
+									})
+									.attr("date", function(d) {
 
-						return d.position.x;
-					}).attr("y", function(d) {
+										return commons.getDate(d.date);
 
-						return d.position.y;
-					}).attr("height", 80).attr(
-							"xlink:href",
-							function(d) {
+									})
+									.attr("x", function(d) {
 
-								return d.file.substr(-4) === ".pdf" ? server
-										.getFilePath(defaultDocumentImg)
-										: server.getFilePath(d.file);
+										return d.position.x;
+									})
+									.attr("y", function(d) {
 
-							}).attr("class", function() {
+										return d.position.y;
+									})
+									.attr("height", 80)
+									.attr(
+											"xlink:href",
+											function(d) {
 
-						return "myCursor-pointer-move doc";
-					}).on("click", docClicked).on("mouseover",
-							thumbnailMouseovered).on("mouseout",
-							thumbnailMouseouted).call(docDrag).on(
-							'contextmenu', d3.contextMenu(onDocumentMenu));
-				});
+												return d.file.substr(-4) === ".pdf" ? server
+														.getFilePath(defaultDocumentImg)
+														: server
+																.getFilePath(d.file);
+
+											}).attr("class", function() {
+
+										return "myCursor-pointer-move doc";
+									}).on("click", docClicked).on("mouseover",
+											thumbnailMouseovered).on(
+											"mouseout", thumbnailMouseouted)
+									.call(docDrag);
+
+							var docOwner = currentDoc[0][0]['attributes']['owner']['nodeValue'];
+
+							var newMenu = getMenuWithRemoveFeature(
+									onDocumentMenu, docOwner);
+
+							currentDoc.on('contextmenu', d3
+									.contextMenu(newMenu));
+
+						});
 	}
 
 	function thumbnailMouseovered(d) {
