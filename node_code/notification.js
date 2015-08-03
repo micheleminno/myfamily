@@ -19,7 +19,7 @@ exports.add = function(req, res) {
 				req
 						.getConnection(function(err, connection) {
 
-							var insertNotificationQuery = "INSERT IGNORE INTO notifications (event, user, status) VALUES("
+							var insertNotificationQuery = "INSERT IGNORE INTO notifications VALUES("
 									+ eventId + ", " + userId + ", 1)";
 
 							console.log(insertNotificationQuery);

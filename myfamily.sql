@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Jul 31, 2015 at 06:17 PM
+-- Generation Time: Aug 03, 2015 at 10:53 AM
 -- Server version: 5.5.29
 -- PHP Version: 5.3.28
 
@@ -42,12 +42,13 @@ CREATE TABLE IF NOT EXISTS `blacklist` (
 
 DROP TABLE IF EXISTS `documents`;
 CREATE TABLE IF NOT EXISTS `documents` (
-  `id` int(11) NOT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `title` varchar(100) NOT NULL,
   `date` datetime NOT NULL,
   `file` varchar(100) NOT NULL,
-  `owner` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+  `owner` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=4 ;
 
 -- --------------------------------------------------------
 
@@ -57,14 +58,14 @@ CREATE TABLE IF NOT EXISTS `documents` (
 
 DROP TABLE IF EXISTS `events`;
 CREATE TABLE IF NOT EXISTS `events` (
-  `id` int(11) NOT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `description` varchar(100) NOT NULL,
   `entity` int(11) NOT NULL,
   `entity_type` varchar(15) NOT NULL,
   `node` int(11) NOT NULL,
   `date` datetime NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=3 ;
 
 -- --------------------------------------------------------
 
@@ -75,7 +76,8 @@ CREATE TABLE IF NOT EXISTS `events` (
 DROP TABLE IF EXISTS `links`;
 CREATE TABLE IF NOT EXISTS `links` (
   `source` int(11) NOT NULL,
-  `target` int(11) NOT NULL
+  `target` int(11) NOT NULL,
+  PRIMARY KEY (`source`,`target`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -86,12 +88,12 @@ CREATE TABLE IF NOT EXISTS `links` (
 
 DROP TABLE IF EXISTS `nodes`;
 CREATE TABLE IF NOT EXISTS `nodes` (
-  `id` int(11) NOT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `label` varchar(50) NOT NULL,
   `img` varchar(50) NOT NULL,
   `person` tinyint(1) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=26 ;
 
 -- --------------------------------------------------------
 
@@ -117,7 +119,8 @@ DROP TABLE IF EXISTS `tags`;
 CREATE TABLE IF NOT EXISTS `tags` (
   `document` int(11) NOT NULL,
   `node` int(11) NOT NULL,
-  `position` point DEFAULT NULL
+  `position` point DEFAULT NULL,
+  PRIMARY KEY (`document`,`node`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -135,7 +138,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `credentials` varchar(50) NOT NULL,
   `node` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=56 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=63 ;
 
 -- --------------------------------------------------------
 

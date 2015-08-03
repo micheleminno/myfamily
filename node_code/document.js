@@ -291,7 +291,8 @@ function insertNewTags(taggedIds, rows, docIndex, req, callback) {
 	console.log("New tags: " + JSON.stringify(newTags));
 
 	if (newTags.length > 0) {
-		var multipleInsertQuery = "INSERT INTO tags (document, node, position) VALUES ";
+		
+		var multipleInsertQuery = "INSERT IGNORE INTO tags VALUES ";
 
 		var separator = '';
 		for (tagsIndex in newTags) {
@@ -658,127 +659,66 @@ function insertTag(document, node, req, callback) {
 
 function insertDocument(title, date, file, owner, tagged, req, callback) {
 
-	req
-			.getConnection(function(err, connection) {
+	var insertQuery = "INSERT INTO documents VALUES(NULL, '" + title
+			+ "', STR_TO_DATE('" + date + "', '%d/%m/%Y'), '" + file + "', "
+			+ owner + ")";
 
-				connection
-						.query(
-								"SELECT MAX(id) as maxId from documents",
-								function(err, rows) {
+	console.log(insertQuery);
 
-									if (err) {
+	req.getConnection(function(err, connection) {
 
-										console.log("Error Selecting : %s ",
-												err);
+		connection.query(insertQuery, function(err, info) {
 
-									} else {
+			if (err) {
 
-										if (rows.length > 0) {
+				console.log("Error Inserting : %s ", err);
+				console.log("New document not inserted");
+				callback(null);
 
-											var currentMaxId = rows[0]['maxId'];
-											var maxId = currentMaxId != null ? parseInt(currentMaxId) + 1
-													: 0;
+			} else {
 
-											var insertQuery = "INSERT INTO documents VALUES("
-													+ maxId
-													+ ", '"
-													+ title
-													+ "', STR_TO_DATE('"
-													+ date
-													+ "', '%d/%m/%Y'), '"
-													+ file
-													+ "', "
-													+ owner
-													+ ")";
+				console.log("New document with id " + info.insertId
+						+ " inserted");
 
-											console.log(insertQuery);
+				var requests = 0;
 
-											req
-													.getConnection(function(
-															err, connection) {
+				var addedDocument = {
+					id : info.insertId,
+					title : title,
+					date : date,
+					file : file,
+					owner : owner
+				};
 
-														connection
-																.query(
-																		insertQuery,
-																		function(
-																				err,
-																				rows) {
+				for (taggedIndex in tagged) {
 
-																			if (err) {
+					requests++;
+					var taggedNode = tagged[taggedIndex];
 
-																				console
-																						.log(
-																								"Error Inserting : %s ",
-																								err);
+					insertTag(info.insertId, taggedNode, req, function(
+							tagInserted) {
 
-																			} else {
+						// TODO
+						// check
+						// tag
+						// inserted
 
-																				if (rows.affectedRows > 0) {
+						requests--;
 
-																					console
-																							.log("New document with id "
-																									+ maxId
-																									+ " inserted");
+						if (requests == 0) {
 
-																					var requests = 0;
+							callback(addedDocument);
+						}
+					});
+				}
 
-																					var addedDocument = {
-																						id : maxId,
-																						title : title,
-																						date : date,
-																						file : file,
-																						owner : owner
-																					};
+				if (tagged.length == 0) {
 
-																					for (taggedIndex in tagged) {
-
-																						requests++;
-																						var taggedNode = tagged[taggedIndex];
-
-																						insertTag(
-																								maxId,
-																								taggedNode,
-																								req,
-																								function(
-																										tagInserted) {
-
-																									// TODO
-																									// check
-																									// tag
-																									// inserted
-
-																									requests--;
-
-																									if (requests == 0) {
-
-																										callback(addedDocument);
-																									}
-																								});
-																					}
-
-																					if (tagged.length == 0) {
-
-																						callback(addedDocument);
-																					}
-																				} else {
-
-																					console
-																							.log("New document with id "
-																									+ maxId
-																									+ " not inserted");
-																					callback(null);
-																				}
-																			}
-																		});
-													});
-
-										} else {
-
-											callback(-1);
-										}
-									}
-								});
-			});
+					callback(addedDocument);
+				}
+			}
+		});
+	});
 };
 
 /*

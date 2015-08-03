@@ -8,100 +8,34 @@ exports.add = function(req, res) {
 	var eventType = req.query.type;
 	var node = parseInt(req.query.node);
 
-	req
-			.getConnection(function(err, connection) {
+	var insertEventQuery = "INSERT INTO events VALUES(NULL, '" + eventType
+			+ "', " + entityId + ", '" + entityType + "', " + node + ", NOW())";
 
-				connection
-						.query(
-								"SELECT MAX(id) as maxId from events",
-								function(err, rows) {
+	console.log(insertEventQuery);
 
-									if (err) {
+	req.getConnection(function(err, connection) {
 
-										console.log("Error Selecting : %s ",
-												err);
+		connection.query(insertEventQuery, function(err, info) {
 
-									} else {
+			if (err) {
 
-										if (rows.length > 0) {
+				console.log("Error Inserting : %s ", err);
+				console.log("Event not added");
 
-											var currentMaxId = rows[0]['maxId'];
-											var maxId = currentMaxId != null ? parseInt(currentMaxId) + 1
-													: 0;
+				res.status(NOK).json('result', {
+					"msg" : "event not added"
+				});
 
-											var insertEventQuery = "INSERT INTO events VALUES("
-													+ maxId
-													+ ", '"
-													+ eventType
-													+ "', "
-													+ entityId
-													+ ", '"
-													+ entityType
-													+ "', "
-													+ node
-													+ ", NOW())";
+			} else {
 
-											console.log(insertEventQuery);
+				console.log("Event with id " + info.insertId + " added");
 
-											req
-													.getConnection(function(
-															err, connection) {
-
-														connection
-																.query(
-																		insertEventQuery,
-																		function(
-																				err,
-																				rows) {
-
-																			if (err) {
-
-																				console
-																						.log(
-																								"Error Inserting : %s ",
-																								err);
-
-																			} else {
-
-																				if (rows.affectedRows > 0) {
-
-																					console
-																							.log("Event with id "
-																									+ maxId
-																									+ " added");
-
-																					res
-																							.status(
-																									OK)
-																							.json(
-																									'result',
-																									{
-																										"msg" : "event added"
-																									});
-
-																				} else {
-
-																					console
-																							.log("Event with id "
-																									+ maxId
-																									+ " not added");
-
-																					res
-																							.status(
-																									NOK)
-																							.json(
-																									'result',
-																									{
-																										"msg" : "event not added"
-																									});
-																				}
-																			}
-																		});
-													});
-										}
-									}
-								});
-			});
+				res.status(OK).json('result', {
+					"msg" : "event added"
+				});
+			}
+		});
+	});
 };
 
 exports.remove = function(req, res) {

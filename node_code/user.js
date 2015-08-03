@@ -60,57 +60,44 @@ exports.register = function(req, res) {
 	var email = req.query.email;
 	var nodeId = req.query.node;
 
-	req
-			.getConnection(function(err, connection) {
+	req.getConnection(function(err, connection) {
 
-				var insertUserQuery = "INSERT INTO users(username, birthdate, email, credentials, node) VALUES('"
-						+ username
-						+ "', 'NULL', '"
-						+ email
-						+ "', '"
-						+ credentials + "', " + nodeId + ")";
+		var insertUserQuery = "INSERT INTO users VALUES(NULL, '" + username
+				+ "', 'NULL', '" + email + "', '" + credentials + "', "
+				+ nodeId + ")";
 
-				console.log(insertUserQuery);
+		console.log(insertUserQuery);
 
-				req.getConnection(function(err, connection) {
+		req.getConnection(function(err, connection) {
 
-					connection.query(insertUserQuery, function(err, rows) {
+			connection.query(insertUserQuery, function(err, info) {
 
-						if (err) {
+				if (err) {
 
-							console.log("Error Inserting : %s ", err);
+					console.log("Error Inserting : %s ", err);
+					console.log("New user not inserted");
 
-						} else {
-
-							if (rows.affectedRows > 0) {
-
-								console.log(JSON.stringify(rows));
-
-								var user = {
-									id : rows.insertId,
-									username : username,
-									nodeId : nodeId
-								};
-
-								console.log("New user with id " + user.id
-										+ " inserted");
-
-								res.status(OK).json('result', {
-									"user" : user
-								});
-
-							} else {
-
-								console.log("New user not inserted");
-
-								res.status(OK).json('result', {
-									"newUser" : null
-								});
-							}
-						}
+					res.status(OK).json('result', {
+						"user" : null
 					});
-				});
+
+				} else {
+
+					var user = {
+						id : info.insertId,
+						username : username,
+						nodeId : nodeId
+					};
+
+					console.log("New user with id " + user.id + " inserted");
+
+					res.status(OK).json('result', {
+						"user" : user
+					});
+				}
 			});
+		});
+	});
 };
 
 exports.update = function(req, res) {

@@ -103,7 +103,7 @@ function addBlacklistedUsersForDocument(userId, documentId, blockedUsers, req,
 		req
 				.getConnection(function(err, connection) {
 
-					var insertBlacklistItemsQuery = "INSERT IGNORE INTO blacklist (user, blocked, document) VALUES "
+					var insertBlacklistItemsQuery = "INSERT IGNORE INTO blacklist VALUES "
 							+ values;
 
 					console.log(insertBlacklistItemsQuery);
