@@ -30,6 +30,11 @@ window.routes = {
 		controller : 'SettingsCtrl',
 		requireLogin : true
 	},
+	'/explore' : {
+		templateUrl : 'html/explore.html',
+		controller : 'ExploreCtrl',
+		requireLogin : true
+	},
 	'/error' : {
 		templateUrl : 'html/error.html',
 		controller : 'ErrorCtrl',
@@ -144,6 +149,7 @@ app.directive('d3Tree', [
 							+ "graphData.blacklist.blacklistingUsers + "
 							+ "graphData.documents + "
 							+ "graphData.selectedNode.documents + "
+							+ "graphData.selectedDocument + "
 							+ "graphData.taggedNodes + "
 							+ "graphData.notifications]";
 

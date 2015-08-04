@@ -98,6 +98,7 @@ var mainController = controllers
 										function(resultData) {
 
 											$scope.graph.documents = [];
+											$scope.graph.taggedNodes = [];
 
 											for (docIndex in resultData) {
 
@@ -118,6 +119,22 @@ var mainController = controllers
 
 													$scope.graph.documents
 															.push(doc);
+
+													var taggedNodesIds = doc.taggedNodes
+															.map(function(n) {
+																return n.id;
+															});
+													
+													for (taggedNodeIndex in taggedNodesIds) {
+
+														var taggedNodeId = taggedNodesIds[taggedNodeIndex];
+														if ($scope.graph.taggedNodes
+																.indexOf(taggedNodeId) == -1) {
+
+															$scope.graph.taggedNodes
+																	.push(taggedNodeId);
+														}
+													}
 												}
 											}
 
@@ -325,31 +342,19 @@ var mainController = controllers
 
 						$('#editDocumentModal').modal('hide');
 
-						MyFamilyService
-								.updateDocument($scope.editDocId,
-										$scope.editTitle, $scope.editDate,
-										$scope.taggedUsers)
-								.then(
-										function() {
+						MyFamilyService.updateDocument($scope.editDocId,
+								$scope.editTitle, $scope.editDate,
+								$scope.taggedUsers).then(
+								function() {
 
-											MyFamilyService
-													.updateBlacklist(
-															$scope.graph.user.id,
-															$scope.excludedUsers,
-															$scope.editDocId)
-													.then(
-															function() {
+									MyFamilyService.updateBlacklist(
+											$scope.graph.user.id,
+											$scope.excludedUsers,
+											$scope.editDocId).then(function() {
 
-																if ($scope.taggedUsers
-																		.indexOf($scope.graphData.selectedNode.id) == -1) {
-
-																	$scope.graphData.selectedNode.documents
-																			.splice(
-																					$scope.editDocId,
-																					1);
-																}
-															});
-										});
+										$scope.drawGraph(true, false);
+									});
+								});
 					};
 
 					$scope.editDateConfig = {

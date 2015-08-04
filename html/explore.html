@@ -1,0 +1,259 @@
+<h1>Explore page</h1>
+
+
+
+<div id="header">
+	<div id="header_well" class="well">
+		<div class="row">
+			<div class="col-lg-2 col-md-2 col-sm-2">
+				<a href="#/home"><img id="logo" class="img-responsive"
+					src="img/logo.png"></a>
+			</div>
+			<div class="col-lg-1 col-md-1 col-sm-1"></div>
+			<div class="col-lg-5 col-md-5 col-sm-5">
+				<div id="searchFeature">
+					<input type="text" ng-model="confirmedKeywords" ng-show=false>
+
+					<span class="tooltip-r" data-placement="left" data-toggle="tooltip"
+						data-original-title="Search documents by typing a keyword contained in their description, their name or Twitter screen name (without @), using operators like AND, OR, *"><b>
+							<input class="search-field" ng-style="myStyle" type="text"
+							ng-model="insertedKeywords"
+							ng-click="resetKeywords(); myStyle = {color:'black'}"
+							ng-init="initKeywords()"
+							onkeydown="if (event.keyCode == 13) { document.getElementById('btn_search').click();}">
+					</b></span>
+					<button class="btn btn-primary pull-right" id="btn_search"
+						type="button"
+						ng-click="confirmedKeywords = insertedKeywords; toggleSelection(confirmedKeywords, 'keywords', true)">
+						<img src="img/search.png" width="25" class="img-responsive"
+							alt="Responsive image">
+					</button>
+
+				</div>
+			</div>
+			<div class="col-lg-4 col-md-4 col-sm-4"></div>
+		</div>
+	</div>
+</div>
+
+<div id="content" class="col-lg-12">
+
+	<div class="row">
+
+		<div class="col-lg-3 col-md-3 col-sm-12">
+			<div class="little-spacer"></div>
+
+			<div class="panel-group" id="accordion">
+
+				<div class="spacer"></div>
+				<div class="panel panel-default">
+					<div class="panel-heading row">
+						<div id="icon-title">
+							<h4 class="panel-title">
+								<a data-toggle="collapse" data-parent="#tagged_panel"
+									href="#tagged_panel"> <img src="img/tag.png" width="25"
+									class="img-responsive" alt="Responsive image">Tagged
+									people
+								</a>
+							</h4>
+						</div>
+
+					</div>
+					<div id="tagged_panel" class="panel-collapse collapse in">
+						<div class="panel-body">
+							<div id="tagged_facet" class="facet_box">
+
+								<div class="row">
+									<div class="col-lg-6 col-md-6 col-sm-6">
+										<input type="checkbox" class="facet_checkbox"
+											name="allTaggedValues[]" value="All"
+											ng-checked="taggedUsers.length == 0"
+											ng-click="toggleSelection(null,'taggedUsers', false)">
+										<span class="facet_label">All</span>
+									</div>
+								</div>
+
+								<div
+									ng-repeat="term in results.facets.tagged_facet.terms | orderBy:taggedUsersSort">
+									<input type="checkbox" class="facet_checkbox"
+										name="selectedTaggedUsersValues[]" value="{{ term.term }}"
+										ng-checked="taggedUsers.indexOf(term.term) > -1"
+										ng-click="toggleSelection(term.term, 'taggedUsers', false)">
+									<span class="facet_label">{{ term.term }}
+										({{term.count}})</span>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- add another panel here -->
+
+				</div>
+			</div>
+		</div>
+
+		<div ng-show="ready" id="documents"
+			class="col-lg-9 col-md-9 col-sm-12" data-ng-init="search()">
+			<div class="spacer"></div>
+
+			<div class="row">
+
+				<div class="dropdown col-lg-3 col-md-2 col-sm-2">
+					<select class="btn dropdown-toggle" ng-init="initFilter()"
+						ng-model="selectedFilter" ng-change="updateFilter()"
+						ng-options="filter.name for filter in filterCriteria">
+					</select>
+				</div>
+
+
+				<div class="col-lg-4 col-md-4 col-sm-5 row-fluid">
+
+					<div class="result_range_label">
+						<b>&nbsp;&nbsp; {{ results.hits.total }}</b> documents, showing
+						from <span class="label label-default">{{ sumResults(start,
+							1) }}</span> to <span class="label label-default">{{
+							sumResults(start, pageSize) }}</span>
+					</div>
+					<div class="spacer"></div>
+
+					<div id="applied_filters" class="row-fluid">
+						<span class="applied_filters_label"
+							ng-show="keywords.length > 0 || taggedUsers.length > 0">Applied
+							filters:</span> <span class="label label-default"
+							ng-show="keywords.length > 0">Keywords:
+							{{clean(keywords)}}</span> <span class="label label-default"
+							ng-show="taggedUsers.length > 0">Tagged User:
+							{{clean(taggedUsers)}}</span> <span class="label label-default"></span>
+					</div>
+				</div>
+
+				<div class="dropdown col-lg-1 col-md-1 col-sm-1">
+					<div class="spacer"></div>
+					<div class="spacer"></div>
+				</div>
+
+				<div class="dropdown col-lg-4 col-md-5 col-sm-4" align="right">
+
+					<div id="sortFeature">
+						<span>Sort by</span> <select class="btn dropdown-toggle"
+							ng-model="selectedSorting"
+							ng-options="sort.name for sort in sortingCriteria"
+							ng-change="currentPage=0; start=0; updateSort()"></select>
+
+						<div class="spacer"></div>
+
+					</div>
+				</div>
+			</div>
+
+			<div class="spacer"></div>
+
+			<div ng-repeat="document in results" class="row-fluid">
+
+				<div class="document_widget">
+					<div class="row">
+						<div id="documents_container"
+							class="col-lg-12 col-md-12 col-sm-12">
+
+							<div id="document_image_col"
+								class="col-lg-2 col-md-2 col-sm-3 col-xs-12">
+								<div class="spacer"></div>
+								<div style="clear: both; float: left;">
+									<img class="img-responsive bookmark_image"
+										ng-src="res/img/star.png">
+								</div>
+								<div>
+									<div>
+										<a href=""> <img class="profile_image img-responsive"
+											ng-src="{{ }}">
+										</a>
+									</div>
+									<div style="height: 10px;"></div>
+									<div align="left">
+										<a class="username little-text" href=""> {{ }}</a>
+									</div>
+									<div align="left">
+										<a class="screename little-text" href=""> @{{ }}</a>
+									</div>
+								</div>
+							</div>
+							<div id="document_meta_col"
+								class="col-lg-6 col-md-7 col-sm-9 col-xs-12">
+								<div class="spacer"></div>
+								<div class="description row">{{ }}</div>
+								<div id="profile_data" class="row">
+									<div class="filter_list">
+										<span> <img src="img/tag.png"
+											class="img-responsive profile-icons" alt="Responsive image">
+											<b>{{ }} &nbsp;&nbsp;</b>
+										</span>
+									</div>
+
+									<!--  other fields -->
+								</div>
+
+							</div>
+							<div id="document_fav_col"
+								class="col-lg-4 col-md-3 col-sm-12 col-xs-12">
+								<div id="btn_details_and_sorting_field"
+									class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+									<div id="btn_details_container"
+										class="col-lg-5 col-md-12 col-sm-3 col-xs-6">
+										<a ng-click="goToDetailsPage()" href="">
+											<button id="btn_details" class="btn btn-default btn-sm">View
+												Community</button>
+										</a>
+									</div>
+									<div id="score-label"
+										class="sorting_field col-lg-7 col-md-12 col-sm-9 col-xs-6">
+										{{ selectedSorting.name }} <span id="score-badge"
+											class="badge">{{ selectedSortingValue(document) * 100
+											| number:0}}</span>
+									</div>
+								</div>
+
+							</div>
+
+						</div>
+					</div>
+				</div>
+				<div class="spacer"></div>
+			</div>
+
+			<div class="spacer"></div>
+
+			<div class="pager">
+				<ul class="pagination pagination-lg">
+					<li ng-hide="currentPage == 1"><a href=""
+						ng-click="navigateToPage(currentPage-1, start-pageSize)">
+							Previous </a></li>
+					<li ng-hide="currentPage < 3"><a href=""
+						ng-click="navigateToPage(currentPage-2, start-2*pageSize)">{{
+							currentPage - 2 }}</a></li>
+					<li ng-hide="currentPage < 2"><a href=""
+						ng-click="navigateToPage(currentPage-1, start-pageSize)"">{{
+							currentPage - 1}}</a></li>
+					<li><a href="" style="color: red"><b>{{ currentPage }}</b></a></li>
+					<li ng-hide="currentPage >= numberOfPages()"><a href=""
+						ng-click="navigateToPage(currentPage+1, start+pageSize)"">{{
+							currentPage + 1 }}</a></li>
+					<li ng-hide="currentPage >= numberOfPages() - 1"><a href=""
+						ng-click="navigateToPage(currentPage+2, start+2*pageSize)">{{
+							currentPage + 2 }}</a></li>
+					<li><a href="" ng-hide="currentPage >= numberOfPages()"
+						ng-click="navigateToPage(currentPage+1, start+pageSize)"> Next
+					</a></li>
+
+					<!-- ng-click="currentPage = currentPage + 1;start = start + pageSize; updatePage()" -->
+				</ul>
+
+				<div>({{ numberOfPages() }} Pages)</div>
+			</div>
+
+		</div>
+
+	</div>
+
+</div>
+
+

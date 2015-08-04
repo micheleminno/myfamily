@@ -18,10 +18,11 @@ exports.list = function(req, res) {
 	} else if (relation == 'tagged') {
 
 		query = "SELECT d.id, d.title, t1.position, d.date, d.file, d.owner, "
-				+ "GROUP_CONCAT(t2.node SEPARATOR ', ') as taggedNodes "
+				+ "GROUP_CONCAT(t2.node SEPARATOR '\", \"') as taggedNodeIds, "
+				+ "GROUP_CONCAT(n.label SEPARATOR ', ') as taggedNodeLabels "
 				+ "FROM tags as t1 JOIN documents as d ON t1.document = d.id "
-				+ "JOIN tags as t2 ON t2.document = d.id WHERE t1.node = "
-				+ nodeIndex + " GROUP BY d.id";
+				+ "JOIN tags as t2 ON t2.document = d.id JOIN nodes as n ON t2.node = n.id "
+				+ "WHERE t1.node = " + nodeIndex + " GROUP BY d.id";
 	}
 
 	console.log(query);
@@ -42,10 +43,33 @@ exports.list = function(req, res) {
 
 					var row = rows[rowIndex];
 
-					if (row['taggedNodes']) {
+					if (row['taggedNodeIds'] && row['taggedNodeLabels']) {
 
-						row['taggedNodes'] = JSON.parse("["
-								+ row['taggedNodes'] + "]");
+						var taggedNodeIdsString = "[" + row['taggedNodeIds']
+								+ "]";
+						console.log(taggedNodeIdsString);
+
+						var taggedNodeLabelsString = "[\""
+							+ row['taggedNodeLabels'] + "\"]";
+						
+						
+						console.log(taggedNodeLabelsString);
+
+						var taggedNodeIds = JSON.parse(taggedNodeIdsString);
+						var taggedNodeLabels = JSON
+								.parse(taggedNodeLabelsString);
+
+						row['taggedNodes'] = [];
+						for (idIndex in taggedNodeIds) {
+
+							row['taggedNodes'].push({
+								id : taggedNodeIds[idIndex],
+								label : taggedNodeLabels[idIndex]
+							});
+						}
+
+						delete row['taggedNodeIds'];
+						delete row['taggedNodeLabels'];
 					}
 
 					documents.push(row);
@@ -80,8 +104,11 @@ exports.view = function(req, res) {
 
 		requests++;
 
-		var query = 'SELECT d.id, t.node, d.title, d.date, d.file FROM tags as t JOIN documents as d '
-				+ 'ON t.document = d.id WHERE t.node = ' + node.originalId;
+		var query = 'SELECT d.id, t.node, n.label, d.title, d.date, d.file FROM tags as t JOIN documents as d '
+				+ 'ON t.document = d.id JOIN nodes as n ON t.node = n.id WHERE t.node = '
+				+ node.originalId;
+
+		console.log(query);
 
 		req.getConnection(function(err, connection) {
 
@@ -103,8 +130,20 @@ exports.view = function(req, res) {
 						if (documentIds.indexOf(documentId) == -1) {
 
 							documentIds.push(documentId);
-							row.taggedNodes = [ row.node ];
-							documents.push(row);
+
+							var doc = {
+								id : row.id,
+								title : row.title,
+								date : row.date,
+								file : row.file
+							};
+
+							doc.taggedNodes = [ {
+								id : row.node,
+								label : row.label
+							} ];
+
+							documents.push(doc);
 
 						} else {
 
@@ -113,7 +152,10 @@ exports.view = function(req, res) {
 								var document = documents[documentIndex];
 								if (document.id == documentId) {
 
-									document.taggedNodes.push(row.node);
+									document.taggedNodes.push({
+										id : row.node,
+										label : row.label
+									});
 
 									break;
 								}
@@ -127,6 +169,8 @@ exports.view = function(req, res) {
 						documents.sort(function(a, b) {
 							return a.id - b.id;
 						});
+
+						console.log(JSON.stringify(documents));
 
 						res.status(OK).json('documents', documents);
 					}
@@ -291,7 +335,7 @@ function insertNewTags(taggedIds, rows, docIndex, req, callback) {
 	console.log("New tags: " + JSON.stringify(newTags));
 
 	if (newTags.length > 0) {
-		
+
 		var multipleInsertQuery = "INSERT IGNORE INTO tags VALUES ";
 
 		var separator = '';
