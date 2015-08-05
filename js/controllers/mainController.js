@@ -44,7 +44,7 @@ var mainController = controllers
 													.filter(
 															function(event) {
 																return event.status != 1
-																		&& event.node != $scope.graph.user.id
+																		&& event.user != $scope.graph.user.id
 																		&& !entityIsForbidden(
 																				event.entity,
 																				event.entity_type);
@@ -124,7 +124,7 @@ var mainController = controllers
 															.map(function(n) {
 																return n.id;
 															});
-													
+
 													for (taggedNodeIndex in taggedNodesIds) {
 
 														var taggedNodeId = taggedNodesIds[taggedNodeIndex];
@@ -327,7 +327,8 @@ var mainController = controllers
 																'document',
 																addedDoc.id,
 																'creation',
-																$scope.taggedUsers[0]['id']);
+																$scope.taggedUsers[0]['id'],
+																$scope.graph.user.id);
 
 												$scope.drawGraph(true, false);
 
@@ -342,19 +343,29 @@ var mainController = controllers
 
 						$('#editDocumentModal').modal('hide');
 
-						MyFamilyService.updateDocument($scope.editDocId,
-								$scope.editTitle, $scope.editDate,
-								$scope.taggedUsers).then(
-								function() {
+						MyFamilyService
+								.updateDocument($scope.editDocId,
+										$scope.editTitle, $scope.editDate,
+										$scope.taggedUsers)
+								.then(
+										function() {
 
-									MyFamilyService.updateBlacklist(
-											$scope.graph.user.id,
-											$scope.excludedUsers,
-											$scope.editDocId).then(function() {
+											if ($scope.graphData.selectedDocument) {
 
-										$scope.drawGraph(true, false);
-									});
-								});
+												$scope.graphData.selectedDocument.title = $scope.editTitle;
+												$scope.graphData.selectedDocument.date = $scope.editDate;
+											}
+
+											MyFamilyService.updateBlacklist(
+													$scope.graph.user.id,
+													$scope.excludedUsers,
+													$scope.editDocId).then(
+													function() {
+
+														$scope.drawGraph(true,
+																false);
+													});
+										});
 					};
 
 					$scope.editDateConfig = {
@@ -424,21 +435,44 @@ var mainController = controllers
 
 					$scope.showNotificationObject = function(notification) {
 
-						var documentUrl = MyFamilyService
-								.getFilePath(notification.file);
+						/*
+						 * var documentUrl = MyFamilyService
+						 * .getFilePath(notification.file);
+						 * 
+						 * var formattedDate = notification.date;
+						 * 
+						 * var spaceIndex = notification.date.indexOf(' ');
+						 * 
+						 * if (spaceIndex > -1) {
+						 * 
+						 * formattedDate = notification.date.substring(0,
+						 * spaceIndex); }
+						 * 
+						 * $scope.graphData.selectedDocument = { url :
+						 * documentUrl, file : notification.file, owner :
+						 * notification.user, title : notification.docTitle,
+						 * date : formattedDate };
+						 */
 
-						$scope.graphData.selectedDocument = {
-							url : documentUrl,
-							title : notification.docTitle,
-							date : notification.date
-						};
+						MyFamilyService
+								.getDocument(notification.entityId)
+								.then(
+										function(data) {
 
-						MyFamilyService.markNotificationAsRead(
-								$scope.graph.user.id, notification.eventId)
-								.then(function() {
+											$scope.graphData.selectedDocument = data.document;
 
-									$scope.drawGraph(true, true);
-								});
+											MyFamilyService
+													.markNotificationAsRead(
+															$scope.graph.user.id,
+															notification.eventId)
+													.then(
+															function() {
 
+																$scope
+																		.drawGraph(
+																				true,
+																				true);
+															});
+										});
 					};
 				});

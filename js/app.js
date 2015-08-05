@@ -150,6 +150,8 @@ app.directive('d3Tree', [
 							+ "graphData.documents + "
 							+ "graphData.selectedNode.documents + "
 							+ "graphData.selectedDocument + "
+							+ "graphData.selectedDocument.title + "
+							+ "graphData.selectedDocument.date + "
 							+ "graphData.taggedNodes + "
 							+ "graphData.notifications]";
 

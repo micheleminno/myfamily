@@ -474,14 +474,15 @@ app
 					};
 
 					this.registerEvent = function(entityType, entityId,
-							eventType, nodeId) {
+							eventType, nodeId, userId) {
 
 						var deferred = $q.defer();
 
 						$http.get(
-								serverUrl + '/events/add/' + entityType + '/'
-										+ entityId + '?type=' + eventType
-										+ '&node=' + nodeId).success(
+								serverUrl + '/' + userId + '/events/add/'
+										+ entityType + '/' + entityId
+										+ '?type=' + eventType + '&node='
+										+ nodeId).success(
 
 						function(data) {
 
@@ -494,13 +495,13 @@ app
 						return deferred.promise;
 					};
 
-					this.deleteEvents = function(entityType, entityId) {
+					this.deleteEvents = function(entityType, entityId, userId) {
 
 						var deferred = $q.defer();
 
 						$http.get(
-								serverUrl + '/events/remove/' + entityType
-										+ '/' + entityId).success(
+								serverUrl + '/' + userId + '/events/remove/'
+										+ entityType + '/' + entityId).success(
 
 						function(data) {
 
@@ -534,6 +535,7 @@ app
 															return {
 
 																eventId : item.id,
+																entityId : item.entity,
 																label : item.description
 																		+ " of "
 																		+ item.entity_type
@@ -542,6 +544,7 @@ app
 																		+ "' on "
 																		+ item.date,
 																file : item.file,
+																user : item.user,
 																docTitle : item.title,
 																date : item.date
 
@@ -925,28 +928,26 @@ app
 
 						return deferred.promise;
 					};
-					
+
 					this.getForbiddenDocuments = function(userId) {
 
 						var deferred = $q.defer();
 
-						$http
-								.get(
-										serverUrl + '/' + userId
-												+ '/forbiddenDocuments')
-								.success(
+						$http.get(
+								serverUrl + '/' + userId
+										+ '/forbiddenDocuments').success(
 
-								function(data) {
+						function(data) {
 
-									if (data) {
+							if (data) {
 
-										deferred.resolve(data);
-									}
-								});
+								deferred.resolve(data);
+							}
+						});
 
 						return deferred.promise;
 					};
-					
+
 					this.getBlacklistingUsers = function(userId) {
 
 						var deferred = $q.defer();

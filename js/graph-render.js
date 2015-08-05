@@ -419,11 +419,6 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 							selectNode(d);
 						}
-
-						if (graph.selectedDocument) {
-
-							appendSelectedDocument(graph.selectedDocument);
-						}
 					} else {
 
 						if (view.id == 4) {
@@ -441,6 +436,11 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 						}).attr("fill", "brown").attr("class", "myCursor-move");
 					}
 				});
+
+		if (graph.selectedDocument) {
+
+			appendSelectedDocument(graph.selectedDocument);
+		}
 
 		svg.streamNode = svgRoot.append("g").attr("cursor", "auto");
 
@@ -869,37 +869,29 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 	function removeDocument(d) {
 
-		server.removeDocument(d.id).then(function() {
+		server.removeDocument(d.id).then(
+				function() {
 
-			server.deleteNotifications('document', d.id).then(function() {
+					server.deleteNotifications('document', d.id).then(
+							function() {
 
-				server.deleteEvents('document', d.id).then(function() {
+								server.deleteEvents('document', d.id,
+										scope.graph.user.id).then(function() {
 
-					scope.drawGraph(true, false);
+									scope.drawGraph(true, false);
+								});
+							});
 				});
-			});
-		});
 	}
 
 	function showEditDocument(d, fromContextMenu) {
 
-		scope.owner = {
-			id : d.owner
-		};
-
-		scope.taggableUsers = [];
-		scope.taggedUsers = [];
-
-		populateUsers(d.taggedNodes, scope.taggedUsers, scope.taggableUsers);
-
-		if (d) {
-
-			scope.editNodeId = d.originalId;
-		}
-
 		scope.editDocId = d.id;
 		scope.editFileName = d.file;
 		scope.editTitle = d.title;
+		scope.owner = {
+			id : d.owner
+		};
 
 		if (d.date.lastIndexOf('0000', 0) === 0) {
 
@@ -909,6 +901,11 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 			scope.editDate = d.date;
 		}
+	
+		scope.taggableUsers = [];
+		scope.taggedUsers = [];
+
+		populateUsers(d.taggedNodes, scope.taggedUsers, scope.taggableUsers);
 
 		scope.excludableUsers = [];
 		scope.excludedUsers = [];
@@ -920,11 +917,11 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 							populateUsers(data, scope.excludedUsers,
 									scope.excludableUsers);
 
-							if(!fromContextMenu) {
-								
+							if (!fromContextMenu) {
+
 								graph.selectedDocument = d;
 							}
-							
+
 							$('#editDocumentModal').modal('show');
 						});
 	}
@@ -1099,103 +1096,123 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 			showEditDocument(d, true);
 		}
-	}, {
-		title : function(d) {
-
-			if (d.owner == scope.graph.user.id) {
-
-				return "Remove";
-			} else {
-
-				return "";
-			}
-		},
-		action : function(elm, d, i) {
-
-			if (d.owner == scope.graph.user.id) {
-
-				removeDocument(d);
-			}
-		}
 	} ];
 
 	function placeDocuments(nodeId, relationType, selectedNode, centerX,
 			centerY, maxRowSize) {
 
-		server.getNodeDocuments(nodeId, relationType).then(
-				function(data) {
+		server
+				.getNodeDocuments(nodeId, relationType)
+				.then(
+						function(data) {
 
-					var documents = [];
+							var documents = [];
 
-					var offset = 0;
+							var offset = 0;
 
-					for (docIndex in data.documents) {
+							for (docIndex in data.documents) {
 
-						var document = data.documents[docIndex];
+								var document = data.documents[docIndex];
 
-						if (isForbidden(document)) {
+								if (isForbidden(document)) {
 
-							continue;
-						}
+									continue;
+								}
 
-						offset += 100;
+								offset += 100;
 
-						if (offset >= 100 * maxRowSize) {
+								if (offset >= 100 * maxRowSize) {
 
-							offset = 0;
-						}
+									offset = 0;
+								}
 
-						document.selectedNode = nodeId;
+								document.selectedNode = nodeId;
 
-						if (!document.position) {
+								if (!document.position) {
 
-							document.position = {};
-							document.position.x = centerX / 2 - 300 + offset;
-							document.position.y = centerY + 100
-									* Math.floor(docIndex / maxRowSize);
-						}
+									document.position = {};
+									document.position.x = centerX / 2 - 300
+											+ offset;
+									document.position.y = centerY + 100
+											* Math.floor(docIndex / maxRowSize);
+								}
 
-						documents.push(document);
-					}
+								documents.push(document);
+							}
 
-					graph.selectedNode = {};
-					graph.selectedNode.id = nodeId;
-					graph.selectedNode.documents = documents;
+							graph.selectedNode = {};
+							graph.selectedNode.id = nodeId;
+							graph.selectedNode.documents = documents;
 
-					var container = selectedNode.append("g").attr("class",
-							"docContainer");
+							var container = selectedNode.append("g").attr(
+									"class", "docContainer");
 
-					var sel = container.selectAll("image").data(documents);
+							var sel = container.selectAll("image").data(
+									documents);
 
-					sel.enter().append("image").attr("width", 100).attr("id",
-							function(d) {
+							var documents = sel.enter().append("image");
 
-								return d.id;
-							}).attr("owner", function(d) {
+							documents
+									.each(function(d) {
 
-						return d.owner;
-					}).attr("x", function(d) {
+										currentDoc = d3
+												.select(this)
+												.attr("width", 100)
+												.attr("id", d.id)
+												.attr("owner", d.owner)
+												.attr("x", d.position.x)
+												.attr("y", d.position.y)
+												.attr("height", 80)
+												.attr(
+														"xlink:href",
+														function(d) {
 
-						return d.position.x;
-					}).attr("y", function(d) {
+															return d.file
+																	.substr(-4) === ".pdf" ? server
+																	.getFilePath(defaultDocumentImg)
+																	: server
+																			.getFilePath(d.file);
 
-						return d.position.y;
-					}).attr("height", 80).attr(
-							"xlink:href",
-							function(d) {
+														})
+												.attr("class",
+														"myCursor-pointer-move doc")
+												.on("click", docClicked).on(
+														"mouseover",
+														thumbnailMouseovered)
+												.on("mouseout",
+														thumbnailMouseouted)
+												.call(docDrag);
 
-								return d.file.substr(-4) === ".pdf" ? server
-										.getFilePath(defaultDocumentImg)
-										: server.getFilePath(d.file);
+										if (d.owner == scope.graph.user.id) {
 
-							}).attr("class", function() {
+											var onDocumentMenuCopy = jQuery
+													.extend(true, [],
+															onDocumentMenu);
 
-						return "myCursor-pointer-move doc";
-					}).on("click", docClicked).on("mouseover",
-							thumbnailMouseovered).on("mouseout",
-							thumbnailMouseouted).on('contextmenu',
-							d3.contextMenu(onDocumentMenu)).call(docDrag);
-				});
+											onDocumentMenuCopy.push({
+												title : "Remove",
+												action : function(elm, d, i) {
+
+													removeDocument(d);
+												}
+											});
+
+											currentDoc
+													.on(
+															'contextmenu',
+															d3
+																	.contextMenu(onDocumentMenuCopy));
+										} else {
+
+											currentDoc
+													.on(
+															'contextmenu',
+															d3
+																	.contextMenu(onDocumentMenu));
+										}
+
+									});
+						});
 	}
 
 	function thumbnailMouseovered(d) {

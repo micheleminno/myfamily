@@ -7,9 +7,11 @@ exports.add = function(req, res) {
 	var entityType = req.param('entityType');
 	var eventType = req.query.type;
 	var node = parseInt(req.query.node);
+	var user = req.param('user');
 
 	var insertEventQuery = "INSERT INTO events VALUES(NULL, '" + eventType
-			+ "', " + entityId + ", '" + entityType + "', " + node + ", NOW())";
+			+ "', " + entityId + ", '" + entityType + "', " + node
+			+ ", NOW(), " + user + ")";
 
 	console.log(insertEventQuery);
 
@@ -42,9 +44,10 @@ exports.remove = function(req, res) {
 
 	var entityId = parseInt(req.param('entityId'));
 	var entityType = req.param('entityType');
+	var user = req.param('user');
 
 	var deleteEventsQuery = "DELETE FROM events WHERE entity = " + entityId
-			+ " AND entity_type = '" + entityType + "'";
+			+ " AND entity_type = '" + entityType + "' AND user = " + user;
 
 	console.log(deleteEventsQuery);
 
@@ -95,7 +98,8 @@ exports.list = function(req, res) {
 
 		requests++;
 
-		var query = "SELECT e.id, e.description, e.entity, e.entity_type, e.node, e.date FROM events as e "
+		var query = "SELECT e.id, e.description, e.entity, e.entity_type, "
+				+ "e.node, e.user, e.date FROM events as e "
 				+ "LEFT JOIN tags as t ON e.entity = t.document "
 				+ "WHERE e.node = " + node.originalId;
 

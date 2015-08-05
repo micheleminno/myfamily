@@ -104,8 +104,8 @@ app.get('/graph/addPerson', graph.addPerson);
 app.get('/:user/view/:view/update', view.updateNode);
 
 // Events
-app.get('/events/add/:entityType/:entityId', event.add);
-app.get('/events/remove/:entityType/:entityId', event.remove);
+app.get('/:user/events/add/:entityType/:entityId', event.add);
+app.get('/:user/events/remove/:entityType/:entityId', event.remove);
 app.post('/events', event.list);
 
 // Notifications

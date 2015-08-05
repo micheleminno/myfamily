@@ -47,13 +47,9 @@ exports.list = function(req, res) {
 
 						var taggedNodeIdsString = "[" + row['taggedNodeIds']
 								+ "]";
-						console.log(taggedNodeIdsString);
 
 						var taggedNodeLabelsString = "[\""
-							+ row['taggedNodeLabels'] + "\"]";
-						
-						
-						console.log(taggedNodeLabelsString);
+								+ row['taggedNodeLabels'] + "\"]";
 
 						var taggedNodeIds = JSON.parse(taggedNodeIdsString);
 						var taggedNodeLabels = JSON
@@ -649,7 +645,7 @@ exports.get = function(req, res) {
 						date : firstRow.date,
 						file : firstRow.file,
 						owner : firstRow.owner,
-						tagged : tagged
+						taggedNodes : tagged
 					};
 
 					res.status(OK).json('result', {

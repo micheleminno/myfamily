@@ -105,7 +105,7 @@ exports.list = function(req, res) {
 		binaryStatus = 0;
 	}
 
-	var query = "SELECT e.id, e.description, e.entity, d.title, d.file, e.entity_type, DATE_FORMAT(e.date, '%d/%m/%Y %h:%i') as date "
+	var query = "SELECT e.id, e.description, e.entity, d.title, d.file, e.entity_type, DATE_FORMAT(e.date, '%d/%m/%Y %h:%i') as date, e.user "
 			+ "FROM notifications as n JOIN events as e ON n.event = e.id JOIN documents as d ON d.id = e.entity "
 			+ "WHERE n.user = "
 			+ userId

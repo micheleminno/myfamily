@@ -46,10 +46,22 @@ commons.getDate = function(dateString) {
 
 	} else {
 
-		dateString = dateString.substring(0, dateString.indexOf('T'));
-		var newDateString = moment(dateString, 'YYYY-MM-DD').format(
-				'MMMM Do YYYY');
+		TIndex = dateString.indexOf('T');
 
-		return newDateString;
+		if (TIndex > -1) {
+
+			dateString = dateString.substring(0, TIndex);
+			var newDateString = moment(dateString, 'YYYY-MM-DD').format(
+					'MMMM Do YYYY');
+
+			return newDateString;
+
+		} else {
+
+			var newDateString = moment(dateString, 'DD/MM/YYYY').format(
+					'MMMM Do YYYY');
+
+			return newDateString;
+		}
 	}
 };
