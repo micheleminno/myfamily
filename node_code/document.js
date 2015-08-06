@@ -87,11 +87,12 @@ function setTaggedNodes(row, idsField, labelsField, taggedNodesField) {
  */
 exports.view = function(req, res) {
 
-	// TODO: userId not used
-
+	var userId = req.param("user");
 	var offset = req.query.offset;
 	var size = req.query.size;
 	var keywords = req.query.keywords;
+	var sortField = req.query.sort;
+	var filter = req.query.filter;
 
 	var subsetResults = "";
 
@@ -108,6 +109,27 @@ exports.view = function(req, res) {
 				+ "', '%')";
 	}
 
+	var sortBy = "";
+
+	if (sortField != null) {
+
+		if (sortField == "date") {
+
+			sortBy = "ORDER BY d.date ";
+		}
+	}
+
+	var filterPart = "";
+
+	if (filter != null) {
+
+		if (filter == "Bookmarked") {
+
+			filterPart = "JOIN bookmarks as b ON b.user = " + userId
+					+ " AND b.document = d.id ";
+		}
+	}
+
 	var viewNodes = req.body.nodes;
 
 	var nodesIds = viewNodes.map(function(n) {
@@ -121,11 +143,11 @@ exports.view = function(req, res) {
 			+ "GROUP_CONCAT(n.label SEPARATOR '\", \"') as taggedNodeLabels "
 			+ "FROM tags as t1 JOIN documents as d ON t1.document = d.id "
 			+ "JOIN nodes as n ON t1.node = n.id "
+			+ filterPart
 			+ "WHERE t1.node IN "
 			+ nodeIdsString
 			+ keywordsFilter
-			+ " GROUP BY d.id "
-			+ subsetResults;
+			+ " GROUP BY d.id " + sortBy + subsetResults;
 
 	console.log(query);
 
@@ -155,9 +177,7 @@ exports.view = function(req, res) {
 						documents.push(row);
 					}
 
-					documents.sort(function(a, b) {
-						return a.id - b.id;
-					});
+					// documents.sort(function(a, b) { return a.id - b.id; });
 
 					console.log("Sorted: " + JSON.stringify(documents));
 

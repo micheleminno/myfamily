@@ -69,7 +69,7 @@ app.get('/user/update', user.update);
 
 // Documents
 app.get('/documents', document.list);
-app.post('/documents/:node', document.view);
+app.post('/:user/documents', document.view);
 app.get('/documents/:document', document.get);
 app.get('/documents/:document/updatePosition', document.updatePosition);
 app.get('/documents/:document/update', document.update);

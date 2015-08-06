@@ -89,8 +89,7 @@
 			<div class="row">
 
 				<div class="dropdown col-lg-3 col-md-2 col-sm-2">
-					<select class="btn dropdown-toggle" ng-init="initFilter()"
-						ng-model="selectedFilter" ng-change="updateFilter()"
+					<select class="btn dropdown-toggle" ng-model="selectedFilter" ng-change="filter()"
 						ng-options="filter.name for filter in filterCriteria">
 					</select>
 				</div>
@@ -110,10 +109,9 @@
 						<span class="applied_filters_label"
 							ng-show="keywords.length > 0 || taggedUsers.length > 0">Applied
 							filters:</span> <span class="label label-default"
-							ng-show="keywords.length > 0">Keywords:
-							{{keywords}}</span> <span class="label label-default"
-							ng-show="taggedUsers.length > 0">Tagged User:
-							{{clean(taggedUsers)}}</span> <span class="label label-default"></span>
+							ng-show="keywords.length > 0">Keywords: {{keywords}}</span> <span
+							class="label label-default" ng-show="taggedUsers.length > 0">Tagged
+							User: {{clean(taggedUsers)}}</span> <span class="label label-default"></span>
 					</div>
 				</div>
 
@@ -146,9 +144,9 @@
 							class="col-lg-12 col-md-12 col-sm-12">
 
 							<div class="col-lg-1 col-md-1 col-sm-1 col-xs-12">
-								<img class="img-responsive bookmark_image"
+								<a href=""><img class="img-responsive bookmark_image"
 									ng-src="/myfamily/img/star-yellow-empty.png"
-									ng-click="bookmark(document)">
+									ng-click="bookmark(document)"></a>
 							</div>
 							<div id="document_image_col"
 								class="col-lg-3 col-md-3 col-sm-3 col-xs-12">

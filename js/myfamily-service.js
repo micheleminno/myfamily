@@ -645,7 +645,7 @@ app
 					// Documents
 
 					this.getViewDocuments = function(userId, nodes, offset,
-							size, keywords) {
+							size, keywords, sort, filter) {
 
 						var deferred = $q.defer();
 
@@ -657,7 +657,7 @@ app
 						}
 
 						var separator = "";
-						
+
 						if (offset != null && size != null) {
 
 							subsetQuery += "offset=" + offset + "&size=" + size;
@@ -667,11 +667,23 @@ app
 						if (keywords != null && keywords != "") {
 
 							subsetQuery += separator + "keywords=" + keywords;
+							separator = "&";
+						}
+
+						if (sort != null) {
+
+							subsetQuery += separator + "sort=" + sort;
+							separator = "&";
+						}
+
+						if (filter != null) {
+
+							subsetQuery += separator + "filter=" + filter;
 						}
 
 						var httpPostConfig = {
 
-							url : serverUrl + "/documents" + "/" + userId
+							url : serverUrl + "/" + userId + "/documents"
 									+ subsetQuery,
 							method : "POST",
 							data : JSON.stringify(nodes),
