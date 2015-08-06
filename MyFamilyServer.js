@@ -69,35 +69,21 @@ app.get('/user/update', user.update);
 
 // Documents
 app.get('/documents', document.list);
-
 app.post('/documents/:node', document.view);
-
 app.get('/documents/:document', document.get);
-
 app.get('/documents/:document/updatePosition', document.updatePosition);
-
 app.get('/documents/:document/update', document.update);
-
 app.get('/documents/:document/remove', document.remove);
-
 app.get('/documents/add/document', document.add);
-
 app.post('/documents/upload', document.upload);
 
 // Graph
-
 app.get('/:user/graph/view', graph.view);
-
 app.get('/:user/graph/add', graph.addNode);
-
 app.get('/:user/graph/remove/:node', graph.removeNode);
-
 app.get('/:user/graph/update/:node', graph.updateNode);
-
 app.post('/:user/graph/profileImage/:node', graph.updateProfileImage);
-
 app.get('/graph/namesakes', graph.namesakes);
-
 app.get('/graph/addPerson', graph.addPerson);
 
 // Views

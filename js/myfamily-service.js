@@ -644,13 +644,35 @@ app
 
 					// Documents
 
-					this.getViewDocuments = function(userId, nodes) {
+					this.getViewDocuments = function(userId, nodes, offset,
+							size, keywords) {
 
 						var deferred = $q.defer();
 
+						var subsetQuery = "";
+
+						if (offset != null || size != null || keywords != null) {
+
+							subsetQuery = "?";
+						}
+
+						var separator = "";
+						
+						if (offset != null && size != null) {
+
+							subsetQuery += "offset=" + offset + "&size=" + size;
+							separator = "&";
+						}
+
+						if (keywords != null && keywords != "") {
+
+							subsetQuery += separator + "keywords=" + keywords;
+						}
+
 						var httpPostConfig = {
 
-							url : serverUrl + "/documents" + "/" + userId,
+							url : serverUrl + "/documents" + "/" + userId
+									+ subsetQuery,
 							method : "POST",
 							data : JSON.stringify(nodes),
 							headers : {

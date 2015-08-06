@@ -43,7 +43,7 @@
 }
 
 .blacklisted {
-	opacity: .2;
+	opacity: .2 !important;
 }
 
 .me {
@@ -53,7 +53,6 @@
 }
 
 .tagSelection {
-	
 	fill: yellow;
 	opacity: .5;
 }
@@ -240,4 +239,23 @@
 	color: white;
 	text-align: center;
 	font-weight: bold;
+}
+
+.spacer {
+	height: 20px;
+}
+
+.document_image {
+	margin-left: 0px;
+	max-width: 250px;
+	max-height: 250px;
+	border-radius: 2px 2px 2px 2px;
+}
+
+.bookmark_image {
+	margin-left: 11px;
+	margin-top: 36px;
+	max-width: 24px;
+	max-height: 24px;
+	border-radius: 2px 2px 2px 2px;
 }

@@ -11,7 +11,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 	var container = null;
 	var force = null;
 	var nodeDrag = null;
-
+	
 	var defaultProfileImg = "default_profile.jpg";
 	var defaultDocumentImg = "default_pdf.png";
 
@@ -326,7 +326,8 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 					currentNode = d3.select(this).attr("id", d.originalId)
 							.attr("x", d.x).attr("y", d.y).attr("label",
-									d.label).attr("level", d.level);
+									d.label).attr("level", d.level).attr(
+									"person", d.person);
 
 					currentNode.call(nodeDrag);
 
@@ -600,6 +601,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 		graph.selectedDocument = null;
 		svg.selectedNodeId = null;
+		scope.searchName = "";
 
 		var sel = svgRoot.selectAll(".selection");
 		sel.remove();
@@ -615,6 +617,8 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 		if (!d3.event || d3.event.defaultPrevented) {
 			return;
 		}
+
+		scope.searchName = "";
 
 		if (graph.blacklist.blacklistingUsers.indexOf(d.originalId) == -1
 				&& graph.blacklist.blacklistedNodes.indexOf(d.originalId) == -1) {
@@ -838,10 +842,10 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 			newUser = newUsers[newUsersIndex];
 
-			if (newUser != -1) {
+			if (newUser.id != -1) {
 
 				actualUsers.push({
-					id : newUser,
+					id : newUser.id,
 					name : newUser.label
 				});
 			}
@@ -901,7 +905,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 			scope.editDate = d.date;
 		}
-	
+
 		scope.taggableUsers = [];
 		scope.taggedUsers = [];
 
@@ -1238,7 +1242,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 							var taggedNode = d.taggedNodes[nodeIndex];
 
-							if (taggedNode == n.id) {
+							if (taggedNode.id == n.id) {
 
 								var currentNode = d3.select(n);
 								var currentCircle = n.childNodes[0].childNodes[0].childNodes[0];
@@ -1297,12 +1301,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 		svgRoot.selectAll(".zoomedDoc").remove();
 		svgRoot.selectAll(".frame").remove();
 
-		var selection = d3.select(this);
-		var doc = selection[0][0];
-
-		appendSelectedDocument(doc.getAttribute("url"), doc
-				.getAttribute("title"), doc.getAttribute("date"));
-
+		appendSelectedDocument(d);
 		d3.event.stopPropagation();
 	}
 

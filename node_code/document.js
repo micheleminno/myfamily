@@ -18,8 +18,8 @@ exports.list = function(req, res) {
 	} else if (relation == 'tagged') {
 
 		query = "SELECT d.id, d.title, t1.position, d.date, d.file, d.owner, "
-				+ "GROUP_CONCAT(t2.node SEPARATOR '\", \"') as taggedNodeIds, "
-				+ "GROUP_CONCAT(n.label SEPARATOR ', ') as taggedNodeLabels "
+				+ "GROUP_CONCAT(t2.node SEPARATOR ', ') as taggedNodeIds, "
+				+ "GROUP_CONCAT(n.label SEPARATOR '\", \"') as taggedNodeLabels "
 				+ "FROM tags as t1 JOIN documents as d ON t1.document = d.id "
 				+ "JOIN tags as t2 ON t2.document = d.id JOIN nodes as n ON t2.node = n.id "
 				+ "WHERE t1.node = " + nodeIndex + " GROUP BY d.id";
@@ -43,30 +43,8 @@ exports.list = function(req, res) {
 
 					var row = rows[rowIndex];
 
-					if (row['taggedNodeIds'] && row['taggedNodeLabels']) {
-
-						var taggedNodeIdsString = "[" + row['taggedNodeIds']
-								+ "]";
-
-						var taggedNodeLabelsString = "[\""
-								+ row['taggedNodeLabels'] + "\"]";
-
-						var taggedNodeIds = JSON.parse(taggedNodeIdsString);
-						var taggedNodeLabels = JSON
-								.parse(taggedNodeLabelsString);
-
-						row['taggedNodes'] = [];
-						for (idIndex in taggedNodeIds) {
-
-							row['taggedNodes'].push({
-								id : taggedNodeIds[idIndex],
-								label : taggedNodeLabels[idIndex]
-							});
-						}
-
-						delete row['taggedNodeIds'];
-						delete row['taggedNodeLabels'];
-					}
+					setTaggedNodes(row, 'taggedNodeIds', 'taggedNodeLabels',
+							'taggedNodes');
 
 					documents.push(row);
 				}
@@ -79,6 +57,30 @@ exports.list = function(req, res) {
 	});
 };
 
+function setTaggedNodes(row, idsField, labelsField, taggedNodesField) {
+
+	if (row[idsField] && row[labelsField]) {
+
+		var taggedNodeIdsString = "[" + row[idsField] + "]";
+
+		var taggedNodeLabelsString = "[\"" + row[labelsField] + "\"]";
+
+		var taggedNodeIds = JSON.parse(taggedNodeIdsString);
+		var taggedNodeLabels = JSON.parse(taggedNodeLabelsString);
+
+		row[taggedNodesField] = [];
+		for (idIndex in taggedNodeIds) {
+
+			row[taggedNodesField].push({
+				id : taggedNodeIds[idIndex],
+				label : taggedNodeLabels[idIndex]
+			});
+		}
+
+		delete row[idsField];
+		delete row[labelsField];
+	}
+}
 /*
  * Get all documents which have at least one person tagged among all nodes in a
  * view.
@@ -87,93 +89,87 @@ exports.view = function(req, res) {
 
 	// TODO: userId not used
 
+	var offset = req.query.offset;
+	var size = req.query.size;
+	var keywords = req.query.keywords;
+
+	var subsetResults = "";
+
+	if (offset != null && size != null) {
+
+		subsetResults = "LIMIT " + size + " OFFSET " + offset;
+	}
+
+	var keywordsFilter = "";
+
+	if (keywords != null) {
+
+		keywordsFilter = " AND d.title LIKE CONCAT('%', '" + keywords
+				+ "', '%')";
+	}
+
 	var viewNodes = req.body.nodes;
 
-	var documents = [];
-	var documentIds = [];
+	var nodesIds = viewNodes.map(function(n) {
+		return n.originalId;
+	});
 
-	var requests = 0;
+	nodeIdsString = '(' + nodesIds.join() + ')';
 
-	for (nodeIndex in viewNodes) {
+	var query = "SELECT SQL_CALC_FOUND_ROWS d.id, d.title, t1.position, d.date, d.file, d.owner, "
+			+ "GROUP_CONCAT(t1.node SEPARATOR ', ') as taggedNodeIds, "
+			+ "GROUP_CONCAT(n.label SEPARATOR '\", \"') as taggedNodeLabels "
+			+ "FROM tags as t1 JOIN documents as d ON t1.document = d.id "
+			+ "JOIN nodes as n ON t1.node = n.id "
+			+ "WHERE t1.node IN "
+			+ nodeIdsString
+			+ keywordsFilter
+			+ " GROUP BY d.id "
+			+ subsetResults;
 
-		var node = viewNodes[nodeIndex];
+	console.log(query);
 
-		requests++;
+	req.getConnection(function(err, connection) {
 
-		var query = 'SELECT d.id, t.node, n.label, d.title, d.date, d.file FROM tags as t JOIN documents as d '
-				+ 'ON t.document = d.id JOIN nodes as n ON t.node = n.id WHERE t.node = '
-				+ node.originalId;
+		connection.query(query, function(err, rows) {
 
-		console.log(query);
+			if (err) {
 
-		req.getConnection(function(err, connection) {
+				console.log("Error Selecting : %s ", err);
 
-			connection.query(query, function(err, rows) {
+			} else {
 
-				requests--;
+				connection.query("SELECT FOUND_ROWS() as total", function(err,
+						info) {
 
-				if (err) {
-
-					console.log("Error Selecting : %s ", err);
-
-				} else {
+					var total = info[0]['total'];
+					var documents = [];
 
 					for ( var rowIndex in rows) {
 
 						var row = rows[rowIndex];
-						var documentId = row.id;
 
-						if (documentIds.indexOf(documentId) == -1) {
+						setTaggedNodes(row, 'taggedNodeIds',
+								'taggedNodeLabels', 'taggedNodes');
 
-							documentIds.push(documentId);
-
-							var doc = {
-								id : row.id,
-								title : row.title,
-								date : row.date,
-								file : row.file
-							};
-
-							doc.taggedNodes = [ {
-								id : row.node,
-								label : row.label
-							} ];
-
-							documents.push(doc);
-
-						} else {
-
-							for (documentIndex in documents) {
-
-								var document = documents[documentIndex];
-								if (document.id == documentId) {
-
-									document.taggedNodes.push({
-										id : row.node,
-										label : row.label
-									});
-
-									break;
-								}
-							}
-
-						}
+						documents.push(row);
 					}
 
-					if (requests == 0) {
+					documents.sort(function(a, b) {
+						return a.id - b.id;
+					});
 
-						documents.sort(function(a, b) {
-							return a.id - b.id;
-						});
+					console.log("Sorted: " + JSON.stringify(documents));
 
-						console.log(JSON.stringify(documents));
+					res.status(OK).json('documents', {
+						documents : documents,
+						total : total
+					});
+				});
 
-						res.status(OK).json('documents', documents);
-					}
-				}
-			});
+			}
 		});
-	}
+	});
 };
 
 function deleteDocument(docIndex, req, callback) {

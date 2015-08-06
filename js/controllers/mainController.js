@@ -100,9 +100,9 @@ var mainController = controllers
 											$scope.graph.documents = [];
 											$scope.graph.taggedNodes = [];
 
-											for (docIndex in resultData) {
+											for (docIndex in resultData.documents) {
 
-												var doc = resultData[docIndex];
+												var doc = resultData.documents[docIndex];
 												found = false;
 
 												for (forbiddenDocIndex in $scope.graph.blacklist.forbiddenDocuments) {
@@ -258,6 +258,8 @@ var mainController = controllers
 					$scope.updateView = function(view) {
 
 						$scope.graph.view = view;
+						$scope.graph.selectedNode = null;
+						
 						$scope.drawGraph();
 					};
 
@@ -266,6 +268,60 @@ var mainController = controllers
 						d3.select("svg").remove();
 						$scope.graphData = null;
 					}
+
+					$scope
+							.$watch(
+									'searchName',
+									function(name) {
+
+										if (!$scope.svg.node) {
+
+											return;
+										}
+
+										if (name != "") {
+
+											$scope.svg.node[0]
+													.forEach(function(n) {
+
+														var label = n.attributes.label.nodeValue;
+														var isPerson = n.attributes.person.nodeValue;
+														var className = (label
+																.toLowerCase()
+																.indexOf(name) == -1 || isPerson == "0") ? "blacklisted"
+																: "";
+
+														d3.select(n).attr(
+																"class",
+																className);
+													});
+
+											$scope.svg.link[0]
+													.forEach(function(n) {
+
+														d3
+																.select(n)
+																.attr("class",
+																		"blacklisted link");
+													});
+										} else {
+
+											$scope.svg.node[0]
+													.forEach(function(n) {
+
+														d3.select(n).attr(
+																"class", "");
+													});
+											
+											$scope.svg.link[0]
+													.forEach(function(n) {
+
+														d3.select(n)
+																.attr("class",
+																		"link");
+													});
+										}
+									});
 
 					$scope.logout = function() {
 
@@ -434,25 +490,6 @@ var mainController = controllers
 					};
 
 					$scope.showNotificationObject = function(notification) {
-
-						/*
-						 * var documentUrl = MyFamilyService
-						 * .getFilePath(notification.file);
-						 * 
-						 * var formattedDate = notification.date;
-						 * 
-						 * var spaceIndex = notification.date.indexOf(' ');
-						 * 
-						 * if (spaceIndex > -1) {
-						 * 
-						 * formattedDate = notification.date.substring(0,
-						 * spaceIndex); }
-						 * 
-						 * $scope.graphData.selectedDocument = { url :
-						 * documentUrl, file : notification.file, owner :
-						 * notification.user, title : notification.docTitle,
-						 * date : formattedDate };
-						 */
 
 						MyFamilyService
 								.getDocument(notification.entityId)
