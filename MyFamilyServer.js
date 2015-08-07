@@ -12,6 +12,7 @@ var view = require('./node_code/view.js');
 var event = require('./node_code/event.js');
 var notification = require('./node_code/notification.js');
 var blacklist = require('./node_code/blacklist.js');
+var bookmark = require('./node_code/bookmark.js');
 
 var app = express();
 
@@ -102,7 +103,7 @@ app.get('/notifications/remove/:entityType/:entityId',
 app.get('/:user/notifications/:status', notification.list);
 app.get('/:user/notifications/:event/setStatus', notification.setStatus);
 
-// Black lists
+// Blacklists
 app.get('/:user/blacklists/add/:blockedUser/:document', blacklist.add);
 app.post('/:user/blacklists/add/:document', blacklist.addMany);
 app.post('/:user/blacklists/update/:document', blacklist.update);
@@ -111,3 +112,8 @@ app.get('/:user/blacklists/nodes', blacklist.listNodes);
 app.get('/:user/blacklists/:document', blacklist.listUsersForDocument);
 app.get('/:user/blacklistingUsers', blacklist.listBlacklistingUsers);
 app.get('/:user/forbiddenDocuments', blacklist.listForbiddenDocuments);
+
+// Bookmarks
+app.get('/:user/bookmarks', bookmark.list);
+app.get('/:user/bookmarks/add/:document', bookmark.add);
+app.get('/:user/bookmarks/remove/:document', bookmark.remove);

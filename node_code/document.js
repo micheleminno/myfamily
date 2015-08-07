@@ -81,6 +81,7 @@ function setTaggedNodes(row, idsField, labelsField, taggedNodesField) {
 		delete row[labelsField];
 	}
 }
+
 /*
  * Get all documents which have at least one person tagged among all nodes in a
  * view.
@@ -93,6 +94,7 @@ exports.view = function(req, res) {
 	var keywords = req.query.keywords;
 	var sortField = req.query.sort;
 	var filter = req.query.filter;
+	var excludedNodeIds = req.query.excludedNodeIds;
 
 	var subsetResults = "";
 
@@ -120,14 +122,26 @@ exports.view = function(req, res) {
 	}
 
 	var filterPart = "";
+	var filterPartSelect = "";
 
 	if (filter != null) {
 
-		if (filter == "Bookmarked") {
+		filterPartSelect = "b.document as bookmarked, ";
+		filterPart = "JOIN bookmarks as b ON b.user = " + userId
+				+ " AND b.document = d.id ";
 
-			filterPart = "JOIN bookmarks as b ON b.user = " + userId
-					+ " AND b.document = d.id ";
+		if (filter == "All") {
+
+			filterPart = "LEFT " + filterPart;
 		}
+	}
+
+	var excludedNodeIdsPart = "";
+
+	if (excludedNodeIds != null) {
+
+		excludedNodeIdsPart = " AND t1.node NOT IN (" + excludedNodeIds
+				+ ")";
 	}
 
 	var viewNodes = req.body.nodes;
@@ -139,6 +153,7 @@ exports.view = function(req, res) {
 	nodeIdsString = '(' + nodesIds.join() + ')';
 
 	var query = "SELECT SQL_CALC_FOUND_ROWS d.id, d.title, t1.position, d.date, d.file, d.owner, "
+			+ filterPartSelect
 			+ "GROUP_CONCAT(t1.node SEPARATOR ', ') as taggedNodeIds, "
 			+ "GROUP_CONCAT(n.label SEPARATOR '\", \"') as taggedNodeLabels "
 			+ "FROM tags as t1 JOIN documents as d ON t1.document = d.id "
@@ -147,7 +162,7 @@ exports.view = function(req, res) {
 			+ "WHERE t1.node IN "
 			+ nodeIdsString
 			+ keywordsFilter
-			+ " GROUP BY d.id " + sortBy + subsetResults;
+			+ excludedNodeIdsPart + " GROUP BY d.id " + sortBy + subsetResults;
 
 	console.log(query);
 

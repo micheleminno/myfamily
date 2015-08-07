@@ -18,8 +18,9 @@
 			<form class="navbar-form navbar-left" style="margin-left: 250px"
 				role="search">
 				<div class="form-group">
-					<input ng-model="keywords" type="text" class="form-control"
-						placeholder="Search">
+					<input ng-model="keywords"
+						ng-keyup="$event.keyCode == 13 && updateKeywords()" type="text"
+						class="form-control" placeholder="Search">
 				</div>
 			</form>
 		</div>
@@ -37,41 +38,29 @@
 
 				<div class="spacer"></div>
 				<div class="panel panel-default">
-					<div class="panel-heading row">
+					<div class="panel-heading">
 						<div id="icon-title">
 							<h4 class="panel-title">
-								<a data-toggle="collapse" data-parent="#tagged_panel"
-									href="#tagged_panel"> <img src="img/tag.png" width="25"
-									class="img-responsive" alt="Responsive image">Tagged
-									people
-								</a>
+								<img src="img/tag.png" width="25" class="img-responsive"
+									style="display: inline-block" alt="Responsive image">&nbsp;
+								Tagged people
+
 							</h4>
 						</div>
 
 					</div>
-					<div id="tagged_panel" class="panel-collapse collapse in">
+					<div id="tagged_panel">
 						<div class="panel-body">
 							<div id="tagged_facet" class="facet_box">
 
-								<div class="row">
-									<div class="col-lg-6 col-md-6 col-sm-6">
-										<input type="checkbox" class="facet_checkbox"
-											name="allTaggedValues[]" value="All"
-											ng-checked="taggedUsers.length == 0"
-											ng-click="toggleSelection(null,'taggedUsers', false)">
-										<span class="facet_label">All</span>
-									</div>
+								<div ng-repeat="user in taggedPeople">
+
+									<input type="checkbox" class="facet_checkbox"
+										ng-checked="user.checked" ng-click="toggleTaggedUser(user)">
+									<span class="facet_label">{{ user.label }}
+										({{user.count}})</span>
 								</div>
 
-								<div
-									ng-repeat="term in results.facets.tagged_facet.terms | orderBy:taggedUsersSort">
-									<input type="checkbox" class="facet_checkbox"
-										name="selectedTaggedUsersValues[]" value="{{ term.term }}"
-										ng-checked="taggedUsers.indexOf(term.term) > -1"
-										ng-click="toggleSelection(term.term, 'taggedUsers', false)">
-									<span class="facet_label">{{ term.term }}
-										({{term.count}})</span>
-								</div>
 							</div>
 						</div>
 					</div>
@@ -89,7 +78,8 @@
 			<div class="row">
 
 				<div class="dropdown col-lg-3 col-md-2 col-sm-2">
-					<select class="btn dropdown-toggle" ng-model="selectedFilter" ng-change="filter()"
+					<select class="btn dropdown-toggle" ng-model="selectedFilter"
+						ng-change="updateFilter()"
 						ng-options="filter.name for filter in filterCriteria">
 					</select>
 				</div>
@@ -104,15 +94,6 @@
 							pageSize) }}</span>
 					</div>
 					<div class="spacer"></div>
-
-					<div id="applied_filters" class="row-fluid">
-						<span class="applied_filters_label"
-							ng-show="keywords.length > 0 || taggedUsers.length > 0">Applied
-							filters:</span> <span class="label label-default"
-							ng-show="keywords.length > 0">Keywords: {{keywords}}</span> <span
-							class="label label-default" ng-show="taggedUsers.length > 0">Tagged
-							User: {{clean(taggedUsers)}}</span> <span class="label label-default"></span>
-					</div>
 				</div>
 
 				<div class="dropdown col-lg-1 col-md-1 col-sm-1">
@@ -136,7 +117,7 @@
 
 			<div class="spacer"></div>
 
-			<div ng-repeat="document in results" class="row-fluid">
+			<div ng-repeat="document in results.documents" class="row-fluid">
 
 				<div class="document_widget">
 					<div class="row">
@@ -145,8 +126,8 @@
 
 							<div class="col-lg-1 col-md-1 col-sm-1 col-xs-12">
 								<a href=""><img class="img-responsive bookmark_image"
-									ng-src="/myfamily/img/star-yellow-empty.png"
-									ng-click="bookmark(document)"></a>
+									ng-src="{{document.starFilePath}}"
+									ng-click="toggleBookmark(document)"></a>
 							</div>
 							<div id="document_image_col"
 								class="col-lg-3 col-md-3 col-sm-3 col-xs-12">

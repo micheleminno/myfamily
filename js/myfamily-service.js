@@ -645,13 +645,18 @@ app
 					// Documents
 
 					this.getViewDocuments = function(userId, nodes, offset,
-							size, keywords, sort, filter) {
+							size, keywords, sort, filter, excludedNodeIds) {
 
 						var deferred = $q.defer();
 
 						var subsetQuery = "";
 
-						if (offset != null || size != null || keywords != null) {
+						if (offset != null
+								|| size != null
+								|| keywords != null
+								|| sort != null
+								|| filter != null
+								|| (excludedNodeIds != null && excludedNodeIds.length > 0)) {
 
 							subsetQuery = "?";
 						}
@@ -679,6 +684,14 @@ app
 						if (filter != null) {
 
 							subsetQuery += separator + "filter=" + filter;
+							separator = "&";
+						}
+
+						if (excludedNodeIds != null
+								&& excludedNodeIds.length > 0) {
+
+							subsetQuery += separator + "excludedNodeIds="
+									+ excludedNodeIds;
 						}
 
 						var httpPostConfig = {
@@ -828,7 +841,7 @@ app
 						return deferred.promise;
 					};
 
-					// Black lists
+					// Blacklists
 
 					this.addToBlacklist = function(userId, blockedUserId,
 							documentId) {
@@ -990,6 +1003,64 @@ app
 								.get(
 										serverUrl + '/' + userId
 												+ '/blacklistingUsers')
+								.success(
+
+								function(data) {
+
+									if (data) {
+
+										deferred.resolve(data);
+									}
+								});
+
+						return deferred.promise;
+					};
+
+					// Bookmarks
+
+					this.addToBookmarks = function(userId, documentId) {
+
+						var deferred = $q.defer();
+
+						$http.get(
+								serverUrl + '/' + userId + '/bookmarks/add/'
+										+ documentId).success(
+
+						function(data) {
+
+							if (data) {
+
+								deferred.resolve(data);
+							}
+						});
+
+						return deferred.promise;
+					};
+
+					this.removeFromBookmarks = function(userId, documentId) {
+
+						var deferred = $q.defer();
+
+						$http.get(
+								serverUrl + '/' + userId + '/bookmarks/remove/'
+										+ documentId).success(
+
+						function(data) {
+
+							if (data) {
+
+								deferred.resolve(data);
+							}
+						});
+
+						return deferred.promise;
+					};
+
+					this.getBookmarks = function(userId) {
+
+						var deferred = $q.defer();
+
+						$http.get(serverUrl + '/' + userId + '/bookmarks')
 								.success(
 
 								function(data) {
