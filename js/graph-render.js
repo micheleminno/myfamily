@@ -11,7 +11,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 	var container = null;
 	var force = null;
 	var nodeDrag = null;
-	
+
 	var defaultProfileImg = "default_profile.jpg";
 	var defaultDocumentImg = "default_pdf.png";
 
@@ -40,7 +40,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 		svgRoot.append("rect").attr("class", "ground").attr("width", 500).attr(
 				"height", 200).attr("x", 1900).attr("y", 1100).attr("cursor",
-				"pointer");
+				"pointer").on("click", groundClicked);
 
 		svgRoot.append("text").attr('class', "nodeLabel").attr("y", 1080).attr(
 				"x", 2220).text("Heritage");
@@ -600,6 +600,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 		}
 
 		graph.selectedDocument = null;
+		graph.selectedNode = {};
 		svg.selectedNodeId = null;
 		scope.searchName = "";
 
@@ -618,6 +619,8 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 			return;
 		}
 
+		graph.selectedNode = {};
+		graph.selectedNode.id = d.originalId;
 		scope.searchName = "";
 
 		if (graph.blacklist.blacklistingUsers.indexOf(d.originalId) == -1
@@ -761,6 +764,9 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 	}
 
 	function groundClicked(d) {
+
+		graph.selectedNode = {};
+		graph.selectedNode.id = -1;
 
 		var selectedNode = d3.select(this.parentNode).moveToFront().append("g")
 				.attr("class", "selection").style("pointer-events", "click");
@@ -1144,8 +1150,6 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 								documents.push(document);
 							}
 
-							graph.selectedNode = {};
-							graph.selectedNode.id = nodeId;
 							graph.selectedNode.documents = documents;
 
 							var container = selectedNode.append("g").attr(
