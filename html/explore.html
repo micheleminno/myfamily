@@ -53,7 +53,7 @@
 						<div class="panel-body">
 							<div id="tagged_facet" class="facet_box">
 
-								<div ng-repeat="user in taggedPeople">
+								<div ng-repeat="user in taggedPeople | orderBy:'-count'">
 
 									<input type="checkbox" class="facet_checkbox"
 										ng-checked="user.checked" ng-click="toggleTaggedUser(user)">

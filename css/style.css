@@ -143,19 +143,6 @@
 }
 
 .docText {
-	font-size: 55px;
-	font-weight: bold;
-	fill: brown;
-	font-family: cursive;
-}
-
-.docText-small {
-	font-size: 40px;
-	fill: brown;
-	font-family: cursive;
-}
-
-.docText {
 	font-size: 35px;
 	font-weight: bold;
 	fill: brown;

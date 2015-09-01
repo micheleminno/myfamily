@@ -728,6 +728,30 @@ app
 						return deferred.promise;
 					};
 
+					this.getGroundDocuments = function(owners) {
+
+						var deferred = $q.defer();
+
+						var httpPostConfig = {
+
+							url : serverUrl + '/heritage/documents',
+							method : "POST",
+							data : {
+								nodes : owners
+							},
+							headers : {
+								'Content-Type' : 'application/json'
+							}
+						};
+
+						$http(httpPostConfig).success(function(events) {
+
+							deferred.resolve(events);
+						});
+
+						return deferred.promise;
+					};
+
 					this.getDocument = function(docId) {
 
 						var deferred = $q.defer();

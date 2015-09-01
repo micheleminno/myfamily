@@ -83,6 +83,56 @@ function setTaggedNodes(row, idsField, labelsField, taggedNodesField) {
 }
 
 /*
+ * Get all documents in the heritage container which are owned by one of the
+ * given nodes.
+ */
+exports.heritageList = function(req, res) {
+
+	var viewNodes = req.body.nodes;
+
+	var nodesIds = viewNodes.map(function(n) {
+		return n.originalId;
+	});
+
+	var query = "SELECT d.id, d.title, t1.position, d.date, d.file, d.owner "
+			+ "FROM tags as t1 JOIN documents as d ON t1.document = d.id "
+			+ "WHERE t1.node = -1 AND d.owner IN (" + nodesIds.join() + ")";
+
+	console.log(query);
+
+	req.getConnection(function(err, connection) {
+
+		connection.query(query, function(err, rows) {
+
+			if (err) {
+
+				console.log("Error Selecting : %s ", err);
+
+			} else {
+
+				var documents = [];
+
+				for ( var rowIndex in rows) {
+
+					var row = rows[rowIndex];
+
+					setTaggedNodes(row, 'taggedNodeIds', 'taggedNodeLabels',
+							'taggedNodes');
+
+					documents.push(row);
+				}
+
+				console.log("Heritage docs: " + JSON.stringify(documents));
+
+				res.status(OK).json('documents', {
+					documents : documents
+				});
+			}
+		});
+	});
+};
+
+/*
  * Get all documents which have at least one person tagged among all nodes in a
  * view.
  */
@@ -140,8 +190,7 @@ exports.view = function(req, res) {
 
 	if (excludedNodeIds != null) {
 
-		excludedNodeIdsPart = " AND t1.node NOT IN (" + excludedNodeIds
-				+ ")";
+		excludedNodeIdsPart = " AND t1.node NOT IN (" + excludedNodeIds + ")";
 	}
 
 	var viewNodes = req.body.nodes;

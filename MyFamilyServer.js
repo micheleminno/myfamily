@@ -70,6 +70,7 @@ app.get('/user/update', user.update);
 
 // Documents
 app.get('/documents', document.list);
+app.post('/heritage/documents', document.heritageList);
 app.post('/:user/documents', document.view);
 app.get('/documents/:document', document.get);
 app.get('/documents/:document/updatePosition', document.updatePosition);
