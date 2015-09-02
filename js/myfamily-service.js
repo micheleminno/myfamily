@@ -429,6 +429,29 @@ app
 						return deferred.promise;
 					};
 
+					this.resetPositions = function(nodes, userId, viewId) {
+
+						var deferred = $q.defer();
+
+						var httpPostConfig = {
+
+							url : serverUrl + '/' + userId + '/' + viewId
+									+ '/graph/resetPositions',
+							method : "POST",
+							data : JSON.stringify(nodes),
+							headers : {
+								'Content-Type' : 'application/json'
+							}
+						};
+
+						$http(httpPostConfig).success(function(data) {
+
+							deferred.resolve(data);
+						});
+
+						return deferred.promise;
+					};
+
 					this.updateNode = function(nodeId, userId, field, value) {
 
 						var deferred = $q.defer();

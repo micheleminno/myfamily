@@ -424,7 +424,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 							selectNode(d);
 						}
-					} else {
+					} else if (d.originalId != -1) {
 
 						if (view.id == 4) {
 
@@ -474,11 +474,6 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 				.attr("height", configuration.streamHeight).attr("x",
 						configuration.streamX).attr("y", configuration.streamY)
 				.attr("rx", 20).attr("ry", 20).attr("class", "data-stream");
-
-		if (graph.selectedDocument) {
-
-			appendSelectedDocument(graph.selectedDocument);
-		}
 
 		fillStream();
 	}

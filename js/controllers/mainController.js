@@ -31,19 +31,33 @@ var mainController = controllers
 					 */
 					function fillNotifications(callback) {
 
+						var nodesCopy = jQuery.extend(true, [],
+								$scope.graph.nodes);
+
 						var data = {
-							nodes : $scope.graph.nodes
+							nodes : nodesCopy
 						};
+
+						data.nodes.push({
+							originalId : -1
+						});
 
 						MyFamilyService
 								.getEvents(data)
 								.then(
 										function(events) {
 
+											var nodesIds = $scope.graph.nodes
+													.map(function(n) {
+														return n.originalId;
+													});
+
 											var newEventIds = events
 													.filter(
 															function(event) {
 																return event.status != 1
+																		&& nodesIds
+																				.indexOf(event.user) > -1
 																		&& event.user != $scope.graph.user.id
 																		&& !entityIsForbidden(
 																				event.entity,
@@ -259,7 +273,7 @@ var mainController = controllers
 
 						$scope.graph.view = view;
 						$scope.graph.selectedNode = null;
-						
+
 						$scope.drawGraph();
 					};
 
@@ -312,7 +326,7 @@ var mainController = controllers
 														d3.select(n).attr(
 																"class", "");
 													});
-											
+
 											$scope.svg.link[0]
 													.forEach(function(n) {
 
@@ -510,6 +524,30 @@ var mainController = controllers
 																				true,
 																				true);
 															});
+										});
+					};
+
+					$scope.resetPositions = function() {
+
+						var nodesIds = $scope.graph.nodes.map(function(n) {
+							return n.originalId;
+						});
+
+						MyFamilyService
+								.resetPositions(nodesIds, $scope.graph.user.id,
+										$scope.graph.view.id)
+								.then(
+										function(data) {
+
+											if ($scope.graphData.resetPositions) {
+
+												$scope.graphData.resetPositions = !$scope.graphData.resetPositions;
+											} else {
+
+												$scope.graphData.resetPositions = true;
+											}
+
+											$scope.drawGraph(false, true);
 										});
 					};
 				});

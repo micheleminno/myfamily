@@ -94,9 +94,13 @@ exports.heritageList = function(req, res) {
 		return n.originalId;
 	});
 
-	var query = "SELECT d.id, d.title, t1.position, d.date, d.file, d.owner "
+	var query = "SELECT d.id, d.title, t1.position, d.date, d.file, d.owner, "
+			+ "GROUP_CONCAT(t2.node SEPARATOR ', ') as taggedNodeIds, "
+			+ "GROUP_CONCAT(n.label SEPARATOR '\", \"') as taggedNodeLabels "
 			+ "FROM tags as t1 JOIN documents as d ON t1.document = d.id "
-			+ "WHERE t1.node = -1 AND d.owner IN (" + nodesIds.join() + ")";
+			+ "JOIN tags as t2 ON t2.document = d.id JOIN nodes as n ON t2.node = n.id "
+			+ "WHERE t1.node = -1 AND d.owner IN (" + nodesIds.join()
+			+ ") GROUP BY d.id";
 
 	console.log(query);
 

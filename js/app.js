@@ -125,62 +125,74 @@ app.directive('prettyp', function() {
 	};
 });
 
-app.directive('d3Tree', [
-		'$window',
-		'MyFamilyService',
-		'AuthenticationService',
-		function($window, MyFamilyService, AuthenticationService) {
+app
+		.directive(
+				'd3Tree',
+				[
+						'$window',
+						'MyFamilyService',
+						'AuthenticationService',
+						function($window, MyFamilyService,
+								AuthenticationService) {
 
-			return {
+							return {
 
-				restrict : 'A',
+								restrict : 'A',
 
-				scope : false,
+								scope : false,
 
-				controller : 'MainCtrl',
+								controller : 'MainCtrl',
 
-				link : function(scope, element, attrs) {
+								link : function(scope, element, attrs) {
 
-					scope.initViews(scope);
+									scope.initViews(scope);
 
-					scope.graph = {};
-					scope.graph.view = scope.views[4];
+									scope.graph = {};
+									scope.graph.view = scope.views[4];
 
-					scope.graph.user = {};
-					scope.graph.user.id = AuthenticationService.getUserId();
-					scope.graph.user.label = AuthenticationService
-							.getUsername();
+									scope.graph.user = {};
+									scope.graph.user.id = AuthenticationService
+											.getUserId();
+									scope.graph.user.label = AuthenticationService
+											.getUsername();
 
-					scope.initD3Config();
-					scope.drawGraph();
+									scope.initD3Config();
+									scope.drawGraph();
 
-					var interestingEntities = "[graphData.nodes + "
-							+ "graphData.blacklist.blacklistedNodes + "
-							+ "graphData.blacklist.blacklistingUsers + "
-							+ "graphData.documents + "
-							+ "graphData.selectedNode.documents + "
-							+ "graphData.selectedDocument + "
-							+ "graphData.selectedDocument.title + "
-							+ "graphData.selectedDocument.date + "
-							+ "graphData.taggedNodes + "
-							+ "graphData.notifications]";
+									var interestingEntities = "[graphData.nodes + "
+											+ "graphData.blacklist.blacklistedNodes + "
+											+ "graphData.blacklist.blacklistingUsers + "
+											+ "graphData.documents + "
+											+ "graphData.selectedNode.documents + "
+											+ "graphData.selectedDocument + "
+											+ "graphData.selectedDocument.title + "
+											+ "graphData.selectedDocument.date + "
+											+ "graphData.taggedNodes + "
+											+ "graphData.notifications + "
+											+ "graphData.resetPositions]";
 
-					scope.$watchCollection(interestingEntities, function(
-							newValue, oldValue) {
+									scope
+											.$watchCollection(
+													interestingEntities,
+													function(newValue, oldValue) {
 
-						return scope.renderGraph(scope, scope.graphData,
-								scope.configurationData, MyFamilyService,
-								scope.svg);
+														return scope
+																.renderGraph(
+																		scope,
+																		scope.graphData,
+																		scope.configurationData,
+																		MyFamilyService,
+																		scope.svg);
 
-					}, false);
+													}, false);
 
-					window.onresize = function() {
+									window.onresize = function() {
 
-						scope.$apply();
-					};
+										scope.$apply();
+									};
 
-					scope.renderGraph = graphRender;
-				}
-			};
+									scope.renderGraph = graphRender;
+								}
+							};
 
-		} ]);
+						} ]);

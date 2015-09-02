@@ -628,8 +628,8 @@ function updateNodeInDB(nodeIndex, field, value, req, callback) {
 
 function insertLink(source, target, req, callback) {
 
-	var insertLinkQuery = "INSERT IGNORE INTO links VALUES(" + source + ", " + target
-			+ ")";
+	var insertLinkQuery = "INSERT IGNORE INTO links VALUES(" + source + ", "
+			+ target + ")";
 
 	console.log(insertLinkQuery);
 
@@ -884,6 +884,57 @@ exports.updateNode = function(req, res) {
 				"msg" : "node not updated"
 			});
 		}
+	});
+};
+
+exports.resetPositions = function(req, res) {
+
+	var user = req.param('user');
+	var view = req.param('view');
+	var viewNodes = req.body;
+
+	var updateNodesQuery = 'DELETE from views WHERE user = ' + user
+			+ ' AND view = ' + view + ' AND node IN(' + viewNodes.join() + ')';
+
+	console.log(updateNodesQuery);
+
+	req.getConnection(function(err, connection) {
+
+		connection.query(updateNodesQuery, function(err, rows) {
+
+			if (err) {
+
+				console.log("Error Updating : %s ", err);
+
+			} else {
+
+				if (rows.affectedRows > 0) {
+
+					console.log("Positions of user " + user + " and view "
+							+ view + " deleted");
+
+					res.status(OK).json(
+							'result',
+							{
+								"msg" : "Positions of user " + user
+										+ " and view " + view + " deleted"
+							});
+
+				} else {
+
+					console.log("Positions of user " + user + " and view "
+							+ view + " not deleted: nothing to delete");
+
+					res.status(NOK).json(
+							'result',
+							{
+								"msg" : "Positions of user " + user
+										+ " and view " + view
+										+ " not deleted: nothing to delete"
+							});
+				}
+			}
+		});
 	});
 };
 
