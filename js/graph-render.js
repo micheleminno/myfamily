@@ -161,6 +161,8 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 			scope.excludableUsers = [];
 			scope.excludedUsers = [];
 
+			scope.inHeritage = false;
+
 			for (nodeIndex in graph.nodes) {
 
 				var node = graph.nodes[nodeIndex];
@@ -196,6 +198,8 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 			scope.taggedUsers.push(heritageNode);
 
 			scope.$apply();
+
+			scope.inHeritage = true;
 
 			$('#addDocumentModal #tagged').hide();
 			$('#addDocumentModal').modal('show');
@@ -888,19 +892,40 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 	function removeDocument(d) {
 
-		server.removeDocument(d.id).then(
-				function() {
+		server
+				.removeDocument(d.id)
+				.then(
+						function() {
 
-					server.deleteNotifications('document', d.id).then(
-							function() {
+							server
+									.deleteNotifications('document', d.id)
+									.then(
+											function() {
 
-								server.deleteEvents('document', d.id,
-										scope.graph.user.id).then(function() {
+												server
+														.deleteEvents(
+																'document',
+																d.id,
+																scope.graph.user.id)
+														.then(
+																function() {
 
-									scope.drawGraph(true, false);
-								});
-							});
-				});
+																	var indexDocToRemove = scope.graph.selectedNode.documents
+																			.indexOf(d);
+
+																	if (indexDocToRemove > -1) {
+																		scope.graph.selectedNode.documents
+																				.splice(
+																						indexDocToRemove,
+																						1);
+																	}
+																	scope
+																			.drawGraph(
+																					true,
+																					false);
+																});
+											});
+						});
 	}
 
 	function showEditDocument(d, fromContextMenu) {
@@ -921,6 +946,15 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 			scope.editDate = d.date;
 		}
 
+		var taggedUsersIds = d.taggedNodes.map(function(user) {
+			return user.id;
+		});
+		
+		if(taggedUsersIds.indexOf(-1) > -1) {
+			
+			scope.inHeritage = true;
+		}
+		
 		scope.taggableUsers = [];
 		scope.taggedUsers = [];
 
@@ -1013,8 +1047,6 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 	}
 
 	function appendSelectedDocument(d) {
-
-		container.moveToFront();
 
 		var documentUrl = server.getFilePath(d.file);
 		var documentDate = commons.getDate(d.date);

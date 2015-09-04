@@ -373,6 +373,8 @@ var mainController = controllers
 
 												// Display new document
 
+												$scope.graph.selectedNode.documents.push(addedDoc);
+												
 												addedDoc.position = {
 													x : $scope.svg.uploadedDocumentPosition[0],
 													y : $scope.svg.uploadedDocumentPosition[1]
