@@ -911,7 +911,7 @@ app
 						return deferred.promise;
 					};
 
-					this.addToBlacklist = function(userId, blockedUsers,
+					this.addManyToBlacklist = function(userId, blockedUsers,
 							documentId) {
 
 						var deferred = $q.defer();

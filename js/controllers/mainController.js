@@ -55,10 +55,14 @@ var mainController = controllers
 											var newEventIds = events
 													.filter(
 															function(event) {
-																return event.status != 1
-																		&& nodesIds
-																				.indexOf(event.user) > -1
+
+																return nodesIds
+																		.indexOf(event.user) > -1
 																		&& event.user != $scope.graph.user.id
+																		&& $scope.graph.blacklist.blacklistingUsers
+																				.indexOf(event.user) == -1
+																		&& $scope.graph.blacklist.blacklistedNodes
+																				.indexOf(event.user) == -1
 																		&& !entityIsForbidden(
 																				event.entity,
 																				event.entity_type);
@@ -373,8 +377,9 @@ var mainController = controllers
 
 												// Display new document
 
-												$scope.graph.selectedNode.documents.push(addedDoc);
-												
+												$scope.graph.selectedNode.documents
+														.push(addedDoc);
+
 												addedDoc.position = {
 													x : $scope.svg.uploadedDocumentPosition[0],
 													y : $scope.svg.uploadedDocumentPosition[1]
@@ -389,10 +394,11 @@ var mainController = controllers
 																addedDoc.position.x,
 																addedDoc.position.y);
 
-												MyFamilyService.addToBlacklist(
-														$scope.graph.user.id,
-														$scope.excludedUsers,
-														addedDoc.id);
+												MyFamilyService
+														.addManyToBlacklist(
+																$scope.graph.user.id,
+																$scope.excludedUsers,
+																addedDoc.id);
 
 												MyFamilyService
 														.registerEvent(

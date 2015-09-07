@@ -91,7 +91,7 @@ exports.add = function(req, res) {
 };
 
 /*
- * Get all unread notifications about a set of nodes for a specific user.
+ * Get all notifications about a set of nodes for a specific user.
  */
 exports.list = function(req, res) {
 

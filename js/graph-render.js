@@ -341,8 +341,6 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 					if (d.person) {
 
-						currentNode.on("click", clickNode);
-
 						var isBlacklisted = graph.blacklist.blacklistedNodes
 								.indexOf(d.originalId) > -1;
 
@@ -377,6 +375,10 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 													"link blacklisted");
 										}
 									});
+						} else {
+
+							currentNode.on("click", clickNode);
+
 						}
 
 						var defs = currentNode.append('svgRoot:defs');
@@ -949,12 +951,12 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 		var taggedUsersIds = d.taggedNodes.map(function(user) {
 			return user.id;
 		});
-		
-		if(taggedUsersIds.indexOf(-1) > -1) {
-			
+
+		if (taggedUsersIds.indexOf(-1) > -1) {
+
 			scope.inHeritage = true;
 		}
-		
+
 		scope.taggableUsers = [];
 		scope.taggedUsers = [];
 
