@@ -167,7 +167,7 @@ app
 											+ "graphData.selectedDocument + "
 											+ "graphData.selectedDocument.title + "
 											+ "graphData.selectedDocument.date + "
-											+ "graphData.taggedNodes + "
+											+ "graphData.selectedDocument.taggedNodes + "
 											+ "graphData.notifications + "
 											+ "graphData.resetPositions]";
 

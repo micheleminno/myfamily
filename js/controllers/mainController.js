@@ -432,6 +432,16 @@ var mainController = controllers
 
 												$scope.graphData.selectedDocument.title = $scope.editTitle;
 												$scope.graphData.selectedDocument.date = $scope.editDate;
+
+												var taggedNodes = $scope.taggedUsers
+														.map(function(n) {
+															return {
+																id : n.id,
+																label : n.name
+															};
+														});
+
+												$scope.graphData.selectedDocument.taggedNodes = taggedNodes;
 											}
 
 											MyFamilyService.updateBlacklist(

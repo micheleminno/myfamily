@@ -778,15 +778,31 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 		var selectedNode = svgRoot.append("g").attr("class", "selection")
 				.style("pointer-events", "click");
 
-		selectedNode.append("rect").attr("class", "ground--selected").attr(
-				"width", 3100).attr("height", 350).attr("x", -700).attr("y",
-				1050).attr("cursor", "auto").on(
-				'contextmenu',
-				d3.contextMenu(onHeritageMenu, function() {
+		selectedNode
+				.append("rect")
+				.attr("class", "ground--selected")
+				.attr("width", 3100)
+				.attr("height", 350)
+				.attr("x", -700)
+				.attr("y", 1050)
+				.attr("cursor", "auto")
+				.on(
+						'contextmenu',
+						d3
+								.contextMenu(
+										onHeritageMenu,
+										function() {
 
-					svg.uploadedDocumentPosition = [ this.event.x + 800,
-							this.event.y + 800 ];
-				}));
+											var x = this.event.x > -700
+													&& this.event.x < 2150 ? this.event.x
+													: null;
+											var y = this.event.y > 1000
+													&& this.event.y < 1200 ? this.event.y
+													: null;
+
+											svg.uploadedDocumentPosition = [ x,
+													y ];
+										}));
 
 		selectedNode.append("text").attr('class', "label--selected").attr("y",
 				1130).attr("x", -650).text("Heritage");
