@@ -50,18 +50,18 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 		container = svgRoot.append("g");
 
 		force = d3.layout.force().size(
-				[ configuration.width, configuration.height ]).gravity(0)
+				[ configuration.width, configuration.height ]).gravity(-.05)
 				.charge(function(d) {
 					if (d.person) {
-						return -2000 / d.level;
+						return -500 * d.level;
 					} else {
 						return 0;
 					}
 				}).linkDistance(function(d) {
 					if (!d.source.person && d.target.person) {
-						return 900 * 1 / d.level;
+						return 150 * d.level;
 					} else {
-						return 300 * 1 / d.level;
+						return 80 * d.level;
 					}
 				}).on("tick", tick);
 
@@ -323,7 +323,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 			currentLink = d3.select(this);
 			currentLink.attr("class", "link").attr("stroke-width", function(d) {
 
-				return 30 / d.level + "px";
+				return 4 * d.level + "px";
 			});
 		});
 
@@ -440,10 +440,10 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 						currentNode.append("ellipse").attr("rx", function(d) {
 
-							return 100 / d.level;
+							return 20 * d.level;
 						}).attr("ry", function(d) {
 
-							return 50 / d.level;
+							return 10 * d.level;
 						}).attr("fill", "brown").attr("class", "myCursor-move");
 					}
 				});

@@ -6,11 +6,11 @@ commons.getCircleSize = function(thisLabel, thisLevel, userLabel) {
 
 	if (thisLabel.toUpperCase() == userLabel.toUpperCase()) {
 
-		circleSize = (125 / thisLevel) * 1.5;
+		circleSize = 20 * thisLevel * 2;
 
 	} else {
 
-		circleSize = 125 / thisLevel;
+		circleSize = 20 * thisLevel;
 	}
 
 	return circleSize;

@@ -1192,7 +1192,7 @@ var nodeOriginalToIdMap = {};
 
 var width = 2800;
 var height = 1200;
-var offset = 350;
+var offset = 300;
 
 function getX(order, levelSize) {
 
@@ -1202,7 +1202,7 @@ function getX(order, levelSize) {
 
 function getY(level) {
 
-	return height - (offset * level);
+	return offset * level - 2*offset;
 };
 
 function assignPositions(graph, viewIndex, user, req, callback) {
