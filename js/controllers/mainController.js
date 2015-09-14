@@ -557,14 +557,7 @@ var mainController = controllers
 								.then(
 										function(data) {
 
-											if ($scope.graphData.resetPositions) {
-
-												$scope.graphData.resetPositions = !$scope.graphData.resetPositions;
-											} else {
-
-												$scope.graphData.resetPositions = true;
-											}
-
+											$scope.graphData.resetPositions = !$scope.graphData.resetPositions;
 											$scope.drawGraph(false, true);
 										});
 					};

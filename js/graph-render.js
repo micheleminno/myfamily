@@ -50,18 +50,21 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 		container = svgRoot.append("g");
 
 		force = d3.layout.force().size(
-				[ configuration.width, configuration.height ]).gravity(-.05)
+				[ configuration.width, configuration.height ]).gravity(function(d) {
+					
+					return 0.05;
+				})
 				.charge(function(d) {
 					if (d.person) {
-						return -500 * d.level;
+						return -500 / d.level;
 					} else {
 						return 0;
 					}
 				}).linkDistance(function(d) {
 					if (!d.source.person && d.target.person) {
-						return 150 * d.level;
-					} else {
 						return 80 * d.level;
+					} else {
+						return 40 * d.level;
 					}
 				}).on("tick", tick);
 
@@ -440,10 +443,10 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 						currentNode.append("ellipse").attr("rx", function(d) {
 
-							return 20 * d.level;
+							return 15 * d.level;
 						}).attr("ry", function(d) {
 
-							return 10 * d.level;
+							return 7 * d.level;
 						}).attr("fill", "brown").attr("class", "myCursor-move");
 					}
 				});
