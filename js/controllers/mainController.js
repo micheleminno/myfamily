@@ -5,7 +5,7 @@ var mainController = controllers
 						AuthenticationService) {
 
 					d3.select("svg").attr("opacity", 1);
-
+					
 					function entityIsForbidden(entity, entityType) {
 
 						var forbidden = false;
@@ -217,7 +217,8 @@ var mainController = controllers
 
 									$scope.graph.nodes = resultData.nodes;
 									$scope.graph.links = resultData.links;
-
+									$scope.graph.resetPositions = false;
+									
 									loadBlacklists(callback);
 								});
 					}
@@ -240,6 +241,27 @@ var mainController = controllers
 							id : 4,
 							label : 'Extended family'
 						} ];
+					};
+					
+					$scope.initEventTypes = function() {
+
+						$scope.eventTypes = [ {
+							id : 0,
+							label : 'Birth',
+							on: 'person'
+						}, {
+							id : 1,
+							label : 'Death',
+							on: 'person'
+						}, {
+							id : 2,
+							label : 'Marriage',
+							on: 'family'
+						}, {
+							id : 3,
+							label : 'Divorce',
+							on: 'family'
+						}];
 					};
 
 					$scope.initD3Config = function() {
@@ -558,6 +580,7 @@ var mainController = controllers
 										function(data) {
 
 											$scope.graphData.resetPositions = !$scope.graphData.resetPositions;
+
 											$scope.drawGraph(false, true);
 										});
 					};

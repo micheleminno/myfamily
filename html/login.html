@@ -47,6 +47,11 @@
 						data-datetimepicker-config="{ dropdownSelector: '.birth-date-toggle-select', minView: 'day', startView: 'year'}"></datetimepicker>
 				</ul>
 			</div>
+			
+			<div class="row">
+				<input class="form-control register-input" ng-model="birthPlace"
+					type="text" name="birthPlace" placeholder="Birth place" />
+			</div>
 
 			<div class="row">
 				<input class="form-control register-input" ng-model="email"
@@ -162,8 +167,7 @@
 			<div class="modal-header">
 				<button type="button" class="close" data-dismiss="modal"
 					aria-hidden="true">×</button>
-				<h3 id="identifyUserModalLabel">We found someone called
-					'{{username}}'</h3>
+				<h3 id="identifyUserModalLabel">We found you</h3>
 			</div>
 			<div class="modal-body">
 
@@ -180,7 +184,7 @@
 			<div class="modal-footer">
 				<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
 				<button class="btn btn-primary" ng-click="registerNewUser()">No,
-					there's no me</button>
+					it's not me</button>
 			</div>
 		</div>
 	</div>

@@ -50,23 +50,23 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 		container = svgRoot.append("g");
 
 		force = d3.layout.force().size(
-				[ configuration.width, configuration.height ]).gravity(function(d) {
-					
+				[ configuration.width, configuration.height ]).gravity(
+				function(d) {
+
 					return 0.05;
-				})
-				.charge(function(d) {
-					if (d.person) {
-						return -500 / d.level;
-					} else {
-						return 0;
-					}
-				}).linkDistance(function(d) {
-					if (!d.source.person && d.target.person) {
-						return 80 * d.level;
-					} else {
-						return 40 * d.level;
-					}
-				}).on("tick", tick);
+				}).charge(function(d) {
+			if (d.person) {
+				return -500 / d.level;
+			} else {
+				return 0;
+			}
+		}).linkDistance(function(d) {
+			if (!d.source.person && d.target.person) {
+				return 80 * d.level;
+			} else {
+				return 40 * d.level;
+			}
+		}).on("tick", tick);
 
 		nodeDrag = force.drag().origin(function(d) {
 			return d;
@@ -447,7 +447,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 						}).attr("ry", function(d) {
 
 							return 7 * d.level;
-						}).attr("fill", "brown").attr("class", "myCursor-move");
+						}).attr("fill", "brown").on("click", clickFamily);
 					}
 				});
 
@@ -624,6 +624,11 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 		svgRoot.selectAll(".tree-leaf").style("pointer-events", "all");
 	}
 
+	function clickFamily(d) {
+
+		// TODO
+	}
+
 	function clickNode(d) {
 
 		if (!d3.event || d3.event.defaultPrevented) {
@@ -707,6 +712,45 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 		d3.event.stopPropagation();
 	}
 
+	function addInfo(d) {
+
+		$('#addInfoModal').modal('show');
+	}
+
+	function showInfo(d) {
+
+		scope.showInfo = !scope.showInfo;
+
+		if (scope.showInfo) {
+
+			svgRoot.selectAll(".infoButton").attr("class", "firedInfoButton");
+			var infoContainer = svg.selectedNode.append("g");
+			infoContainer.append("rect").attr("class", "infoBox").attr("width",
+					1000).attr("height", 800).attr("x",
+					configuration.centerX + 900);
+
+			infoContainer.append("text").text("Info").attr("class", "infoText")
+					.attr("x", configuration.centerX + 915).attr("y", 50);
+
+			infoContainer.append("circle").attr('class', "infoButton").attr(
+					"r", 30).attr("cy", 40).attr("cx",
+					configuration.centerX + 1050).attr("cursor", "pointer").on(
+					"click", addInfo);
+
+			infoContainer.append("text").attr('class', "info").text("+").attr(
+					"y", 50).attr("x", configuration.centerX + 1040).attr(
+					"cursor", "pointer").on("click", addInfo);
+
+		} else {
+
+			svgRoot.selectAll(".firedInfoButton").attr("class", "infoButton");
+			svgRoot.selectAll(".infoBox").remove();
+			svgRoot.selectAll(".infoText").remove();
+		}
+
+		d3.event.stopPropagation();
+	}
+
 	function selectNode(d) {
 
 		svg.selectedNode = svgRoot.append("g").data([ d ]).attr("class",
@@ -746,8 +790,18 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 						"title").text("Click to upload a new profile image");
 
 		svg.selectedNode.append("text").attr('class', "label--selected").attr(
-				"y", -50).attr("x", configuration.centerX - 230).text(d.label)
+				"y", -55).attr("x", configuration.centerX - 230).text(d.label)
 				.call(makeEditable);
+
+		svg.selectedNode.append("circle").attr('class', "infoButton").attr("r",
+				30).attr("cy", -65).attr("cx", configuration.centerX + 300)
+				.attr("cursor", "pointer").on("click", showInfo);
+
+		svg.selectedNode.append("text").attr('class', "info").text("i").attr(
+				"y", -54).attr("x", configuration.centerX + 293).attr("cursor",
+				"pointer").on("click", showInfo);
+
+		scope.showInfo = false;
 
 		placeDocuments(d.originalId, "tagged", svg.selectedNode,
 				configuration.centerX, configuration.centerY,

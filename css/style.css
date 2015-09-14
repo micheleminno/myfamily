@@ -78,6 +78,32 @@
 	stroke-width: 4px;
 }
 
+.info {
+	fill: white;
+	font-size: 40px;
+	font-family: cursive;
+}
+
+.infoButton {
+	fill: black;
+}
+
+.firedInfoButton {
+	fill: #FFB100;
+}
+
+.infoBox {
+	stroke: black;
+	stroke-width: 4px;
+	fill: #FFB100;
+}
+
+.infoText {
+	fill: white;
+	font-size: 40px;
+	font-family: cursive;
+}
+
 .navigator {
 	stroke-width: 5px;
 	stroke: brown;

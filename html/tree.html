@@ -283,3 +283,52 @@
 		</div>
 	</div>
 </div>
+
+<div id="addInfoModal" class="modal fade" tabindex="-1" role="dialog"
+	aria-labelledby="addInfoModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"
+					aria-hidden="true">×</button>
+				<h3 id="addInfoModalLabel">Add event</h3>
+			</div>
+			<div class="modal-body">
+
+				<div style="margin-bottom: 20px"></div>
+				<div id="tagged" style="display: inline-block">
+					<p style="display: inline; margin-right: 20px">Event type:</p>
+
+					<div class="dropdown" style="display: inline; margin-right: 10px">
+						<button class="btn btn-default dropdown-toggle" type="button"
+							id="dropdownMenuTagged" data-toggle="dropdown"
+							aria-haspopup="true" aria-expanded="true">
+							Choose <span class="caret"></span>
+						</button>
+
+						<ul id="eventTypes" class="dropdown-menu"
+							aria-labelledby="dropdownMenuTagged">
+							<li ng-repeat="eventType in eventTypes | filter: { on: 'person' }"><a
+								href=""
+								ng-click="addInUsers(taggedUsers, taggableUsers, taggableUser)">{{eventType.label}}</a></li>
+						</ul>
+					</div>
+				</div>
+				<br />
+				<ul style="margin-top: 16px" id="add-taggedArea" name="taggedArea">
+					<li ng-repeat="taggedUser in taggedUsers">{{taggedUser.name}}<a
+						style="margin-left: 5px" href=""
+						ng-show="taggedUser.id != nodeUser.id || inHeritage"
+						ng-click="removeFromUsers(taggedUsers, taggableUsers, taggedUser)">(remove)</a></li>
+				</ul>
+
+
+			</div>
+			<div class="modal-footer">
+				<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+				<button class="btn btn-primary" id="addInfo"
+					ng-click="addNodeInfo()">Add</button>
+			</div>
+		</div>
+	</div>
+</div>

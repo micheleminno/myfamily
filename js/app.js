@@ -145,8 +145,9 @@ app
 
 								link : function(scope, element, attrs) {
 
-									scope.initViews(scope);
-
+									scope.initViews();
+									scope.initEventTypes();
+									
 									scope.graph = {};
 									scope.graph.view = scope.views[4];
 
