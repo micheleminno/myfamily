@@ -24,6 +24,11 @@
 	opacity: .7;
 }
 
+.familyNode {
+	cursor: url(../img/move-Hand.png) 17.5 5, pointer;
+	fill: brown
+}
+
 .core {
 	stroke: brown;
 	fill: brown;
@@ -71,9 +76,16 @@
 	cursor: pointer;
 }
 
-.node--selected {
+.person--selected {
 	opacity: 1;
 	fill: DeepSkyBlue;
+	stroke: black;
+	stroke-width: 4px;
+}
+
+.family--selected {
+	opacity: 1;
+	fill: darkred;
 	stroke: black;
 	stroke-width: 4px;
 }
@@ -89,13 +101,13 @@
 }
 
 .firedInfoButton {
-	fill: #FFB100;
+	fill: orange;
 }
 
 .infoBox {
 	stroke: black;
 	stroke-width: 4px;
-	fill: #FFB100;
+	fill: orange;
 }
 
 .infoText {
@@ -154,6 +166,13 @@
 	font-weight: bold;
 	font-family: cursive;
 	cursor: pointer;
+}
+
+.label--family {
+	fill: white;
+	font-size: 60px;
+	font-weight: bold;
+	font-family: cursive;
 }
 
 .frame {

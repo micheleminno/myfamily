@@ -342,6 +342,8 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 					currentNode.call(nodeDrag);
 
+					currentNode.on("click", clickNode);
+
 					if (d.person) {
 
 						var isBlacklisted = graph.blacklist.blacklistedNodes
@@ -378,10 +380,8 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 													"link blacklisted");
 										}
 									});
-						} else {
 
-							currentNode.on("click", clickNode);
-
+							currentNode.on("click", null);
 						}
 
 						var defs = currentNode.append('svgRoot:defs');
@@ -447,7 +447,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 						}).attr("ry", function(d) {
 
 							return 7 * d.level;
-						}).attr("fill", "brown").on("click", clickFamily);
+						}).attr("class", "familyNode");
 					}
 				});
 
@@ -624,11 +624,6 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 		svgRoot.selectAll(".tree-leaf").style("pointer-events", "all");
 	}
 
-	function clickFamily(d) {
-
-		// TODO
-	}
-
 	function clickNode(d) {
 
 		if (!d3.event || d3.event.defaultPrevented) {
@@ -751,18 +746,49 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 		d3.event.stopPropagation();
 	}
 
-	function selectNode(d) {
+	function selectFamily(selectedNode, d) {
 
-		svg.selectedNode = svgRoot.append("g").data([ d ]).attr("class",
-				"selection").style("pointer-events", "click");
+		var parents = [];
+
+		graph.links.forEach(function(link) {
+
+			if (link.target.id == d.id) {
+
+				parents.push(link.source.label);
+			}
+		});
+
+		configuration.centerX = configuration.width / 10;
+		configuration.centerY = configuration.height / 1.7;
+
+		selectedNode.append("ellipse").attr("class", "family--selected").attr(
+				"cx", configuration.centerX).attr("cy", configuration.centerY)
+				.attr("rx", 800).attr("ry", 400).attr("fill", "darkred");
+
+		selectedNode.append("text").attr('class', "label--family").attr("y",
+				150).attr("x", configuration.centerX - 440).text(
+				parents.join(" and "));
+
+		selectedNode.append("circle").attr('class', "infoButton").attr("r", 30)
+				.attr("cy", 150).attr("cx", configuration.centerX + 600).attr(
+						"cursor", "pointer").on("click", showInfo);
+
+		selectedNode.append("text").attr('class', "info").text("i").attr("y",
+				160).attr("x", configuration.centerX + 593).attr("cursor",
+				"pointer").on("click", showInfo);
+
+		scope.showInfo = false;
+	}
+
+	function selectPerson(selectedNode, d) {
 
 		configuration.centerX = configuration.width / 10;
 		configuration.centerY = configuration.height / 1.7;
 		configuration.maxRowSize = 10;
 
-		svg.selectedNode.append("circle").attr('r', 615).attr("cx",
+		selectedNode.append("circle").attr('r', 615).attr("cx",
 				configuration.centerX).attr("cy", configuration.centerY).attr(
-				'class', "node--selected").on("click", profileNodeClicked)
+				'class', "person--selected").on("click", profileNodeClicked)
 				.attr("cursor", "auto").on(
 						'contextmenu',
 						d3.contextMenu(onSelectedNodeMenu, function() {
@@ -771,7 +797,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 									this.event.y ];
 						}));
 
-		var profileContainer = svg.selectedNode.append("g").on("mouseover",
+		var profileContainer = selectedNode.append("g").on("mouseover",
 				profileMouseovered).on("mouseout", profileMouseouted).on(
 				"click", profileNodeClicked);
 
@@ -789,23 +815,38 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 						profileImageClicked).attr("cursor", "auto").append(
 						"title").text("Click to upload a new profile image");
 
-		svg.selectedNode.append("text").attr('class', "label--selected").attr(
-				"y", -55).attr("x", configuration.centerX - 230).text(d.label)
-				.call(makeEditable);
+		selectedNode.append("text").attr('class', "label--selected").attr("y",
+				-55).attr("x", configuration.centerX - 230).text(d.label).call(
+				makeEditable);
 
-		svg.selectedNode.append("circle").attr('class', "infoButton").attr("r",
-				30).attr("cy", -65).attr("cx", configuration.centerX + 300)
-				.attr("cursor", "pointer").on("click", showInfo);
+		selectedNode.append("circle").attr('class', "infoButton").attr("r", 30)
+				.attr("cy", -65).attr("cx", configuration.centerX + 300).attr(
+						"cursor", "pointer").on("click", showInfo);
 
-		svg.selectedNode.append("text").attr('class', "info").text("i").attr(
-				"y", -54).attr("x", configuration.centerX + 293).attr("cursor",
+		selectedNode.append("text").attr('class', "info").text("i").attr("y",
+				-54).attr("x", configuration.centerX + 293).attr("cursor",
 				"pointer").on("click", showInfo);
 
 		scope.showInfo = false;
 
-		placeDocuments(d.originalId, "tagged", svg.selectedNode,
+		placeDocuments(d.originalId, "tagged", selectedNode,
 				configuration.centerX, configuration.centerY,
 				configuration.maxRowSize);
+	}
+
+	function selectNode(d) {
+
+		svg.selectedNode = svgRoot.append("g").data([ d ]).attr("class",
+				"selection").style("pointer-events", "click");
+
+		if (d.person) {
+
+			selectPerson(svg.selectedNode, d);
+
+		} else {
+
+			selectFamily(svg.selectedNode, d);
+		}
 	}
 
 	function backMain() {
