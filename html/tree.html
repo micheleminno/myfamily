@@ -296,38 +296,47 @@
 			<div class="modal-body">
 
 				<div style="margin-bottom: 20px"></div>
-				<div id="tagged" style="display: inline-block">
+				<div id="eventType" style="display: inline-block">
 					<p style="display: inline; margin-right: 20px">Event type:</p>
 
 					<div class="dropdown" style="display: inline; margin-right: 10px">
 						<button class="btn btn-default dropdown-toggle" type="button"
 							id="dropdownMenuTagged" data-toggle="dropdown"
 							aria-haspopup="true" aria-expanded="true">
-							Choose <span class="caret"></span>
+							{{selectedEventType}} <span class="caret"></span>
 						</button>
 
 						<ul id="eventTypes" class="dropdown-menu"
 							aria-labelledby="dropdownMenuTagged">
-							<li ng-repeat="eventType in eventTypes | filter: { on: 'person' }"><a
-								href=""
-								ng-click="addInUsers(taggedUsers, taggableUsers, taggableUser)">{{eventType.label}}</a></li>
+							<li
+								ng-repeat="eventType in eventTypes | filter: { on: 'person' }"><a
+								href="" ng-click="selectEvent(eventType)">{{eventType.label}}</a></li>
+						</ul>
+					</div>
+				</div>
+				<div style="display: inline-block; margin-left: 100px">
+					<div class="dropdown">
+						<div class="dropdown-toggle add-date-toggle-select" id="dLabel"
+							role="button" data-toggle="dropdown" data-target="#" href="">
+
+							<p style="display: inline; margin-right: 20px">Date:</p>
+							<input type="text" data-ng-model="nodeEventDate"><span
+								class="add-on"><i class="icon-calendar"></i></span>
+
+						</div>
+						<ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
+							<datetimepicker data-ng-model="nodeEventDate"
+								data-datetimepicker-config="addDateConfig"></datetimepicker>
 						</ul>
 					</div>
 				</div>
 				<br />
-				<ul style="margin-top: 16px" id="add-taggedArea" name="taggedArea">
-					<li ng-repeat="taggedUser in taggedUsers">{{taggedUser.name}}<a
-						style="margin-left: 5px" href=""
-						ng-show="taggedUser.id != nodeUser.id || inHeritage"
-						ng-click="removeFromUsers(taggedUsers, taggableUsers, taggedUser)">(remove)</a></li>
-				</ul>
-
 
 			</div>
 			<div class="modal-footer">
 				<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
 				<button class="btn btn-primary" id="addInfo"
-					ng-click="addNodeInfo()">Add</button>
+					ng-click="addNodeEvent()">Add</button>
 			</div>
 		</div>
 	</div>

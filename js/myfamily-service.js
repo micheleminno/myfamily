@@ -537,6 +537,46 @@ app
 						return deferred.promise;
 					};
 
+					// Node events
+
+					this.addNodeEvent = function(eventType, date, nodeId) {
+
+						var deferred = $q.defer();
+
+						$http.get(
+								serverUrl + '/nodeEvents/add/' + nodeId
+										+ '?type=' + eventType + '&date='
+										+ date).success(
+
+						function(data) {
+
+							if (data) {
+
+								deferred.resolve(data);
+							}
+						});
+
+						return deferred.promise;
+					};
+
+					this.getNodeEvents = function(nodeId) {
+
+						var deferred = $q.defer();
+
+						$http.get(serverUrl + '/nodeEvents/'+ nodeId)
+								.success(
+
+								function(data) {
+
+									if (data) {
+
+										deferred.resolve(data);
+									}
+								});
+
+						return deferred.promise;
+					};
+
 					// Notifications
 
 					this.getUnreadNotifications = function(userId) {

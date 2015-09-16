@@ -5,7 +5,7 @@ var mainController = controllers
 						AuthenticationService) {
 
 					d3.select("svg").attr("opacity", 1);
-					
+
 					function entityIsForbidden(entity, entityType) {
 
 						var forbidden = false;
@@ -218,7 +218,7 @@ var mainController = controllers
 									$scope.graph.nodes = resultData.nodes;
 									$scope.graph.links = resultData.links;
 									$scope.graph.resetPositions = false;
-									
+
 									loadBlacklists(callback);
 								});
 					}
@@ -242,26 +242,26 @@ var mainController = controllers
 							label : 'Extended family'
 						} ];
 					};
-					
+
 					$scope.initEventTypes = function() {
 
 						$scope.eventTypes = [ {
 							id : 0,
 							label : 'Birth',
-							on: 'person'
+							on : 'person'
 						}, {
 							id : 1,
 							label : 'Death',
-							on: 'person'
+							on : 'person'
 						}, {
 							id : 2,
 							label : 'Marriage',
-							on: 'family'
+							on : 'family'
 						}, {
 							id : 3,
 							label : 'Divorce',
-							on: 'family'
-						}];
+							on : 'family'
+						} ];
 					};
 
 					$scope.initD3Config = function() {
@@ -500,6 +500,11 @@ var mainController = controllers
 						$scope.addDate = dateFilter(date, 'dd/MM/yyyy');
 					});
 
+					$scope.$watch('nodeEventDate', function(date) {
+
+						$scope.nodeEventDate = dateFilter(date, 'dd/MM/yyyy');
+					});
+
 					$scope.addInUsers = function(users, removeFromUsers, user) {
 
 						users.push(user);
@@ -583,5 +588,24 @@ var mainController = controllers
 
 											$scope.drawGraph(false, true);
 										});
+					};
+
+					$scope.selectEvent = function(eventType) {
+
+						$scope.selectedEventType = eventType.label;
+					};
+
+					$scope.addNodeEvent = function() {
+
+						$('#addInfoModal').modal('hide');
+
+						MyFamilyService.addNodeEvent($scope.selectedEventType,
+								$scope.nodeEventDate, $scope.selectedNodeId)
+								.then(function(addedNodeEvent) {
+
+									$scope.graphData.selectedNode.events.push(addedNodeEvent);
+									
+									$scope.drawGraph(false, false);
+								});
 					};
 				});

@@ -10,6 +10,7 @@ var document = require('./node_code/document.js');
 var graph = require('./node_code/graph.js');
 var view = require('./node_code/view.js');
 var event = require('./node_code/event.js');
+var nodeEvent = require('./node_code/nodeEvent.js');
 var notification = require('./node_code/notification.js');
 var blacklist = require('./node_code/blacklist.js');
 var bookmark = require('./node_code/bookmark.js');
@@ -96,6 +97,11 @@ app.get('/:user/view/:view/update', view.updateNode);
 app.get('/:user/events/add/:entityType/:entityId', event.add);
 app.get('/:user/events/remove/:entityType/:entityId', event.remove);
 app.post('/events', event.list);
+
+//Node events
+app.get('/nodeEvents/add/:node', nodeEvent.add);
+app.get('/nodeEvents/remove/:eventId', nodeEvent.remove);
+app.get('/nodeEvents/:node', nodeEvent.list);
 
 // Notifications
 app.post('/:user/notifications/add', notification.add);

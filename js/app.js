@@ -165,6 +165,7 @@ app
 											+ "graphData.blacklist.blacklistingUsers + "
 											+ "graphData.documents + "
 											+ "graphData.selectedNode.documents + "
+											+ "graphData.selectedNode.events + "
 											+ "graphData.selectedDocument + "
 											+ "graphData.selectedDocument.title + "
 											+ "graphData.selectedDocument.date + "

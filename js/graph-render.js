@@ -632,6 +632,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 		graph.selectedNode = {};
 		graph.selectedNode.id = d.originalId;
+		graph.selectedNode.showInfo = false;
 		scope.searchName = "";
 
 		if (graph.blacklist.blacklistingUsers.indexOf(d.originalId) == -1
@@ -709,17 +710,26 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 	function addInfo(d) {
 
+		scope.selectedNodeId = d.originalId;
 		$('#addInfoModal').modal('show');
+
+		d3.event.stopPropagation();
 	}
 
 	function showInfo(d) {
 
-		scope.showInfo = !scope.showInfo;
+		if (d3.event) {
+		
+			graph.selectedNode.showInfo = !graph.selectedNode.showInfo;
+		}
 
-		if (scope.showInfo) {
+		if (graph.selectedNode.showInfo) {
 
 			svgRoot.selectAll(".infoButton").attr("class", "firedInfoButton");
-			var infoContainer = svg.selectedNode.append("g");
+
+			var infoContainer = svg.selectedNode.append("g").attr("class",
+					"infoSelection");
+
 			infoContainer.append("rect").attr("class", "infoBox").attr("width",
 					1000).attr("height", 800).attr("x",
 					configuration.centerX + 900);
@@ -733,17 +743,50 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 					"click", addInfo);
 
 			infoContainer.append("text").attr('class', "info").text("+").attr(
-					"y", 50).attr("x", configuration.centerX + 1040).attr(
+					"y", 50).attr("x", configuration.centerX + 1038).attr(
 					"cursor", "pointer").on("click", addInfo);
+
+			server
+					.getNodeEvents(d.originalId)
+					.then(
+							function(events) {
+
+								graph.selectedNode.events = events;
+
+								var offset = 100;
+
+								for (eventIndex in events) {
+
+									var event = events[eventIndex];
+
+									infoContainer
+											.append("text")
+											.attr('class', "info")
+											.text(
+													event.type
+															+ ": "
+															+ commons
+																	.getDate(event.date))
+											.attr("y", 50 + offset)
+											.attr(
+													"x",
+													configuration.centerX + 1000);
+
+									offset += 100;
+								}
+
+							});
 
 		} else {
 
 			svgRoot.selectAll(".firedInfoButton").attr("class", "infoButton");
-			svgRoot.selectAll(".infoBox").remove();
-			svgRoot.selectAll(".infoText").remove();
+			svgRoot.selectAll(".infoSelection").remove();
 		}
 
-		d3.event.stopPropagation();
+		if (d3.event) {
+
+			d3.event.stopPropagation();
+		}
 	}
 
 	function selectFamily(selectedNode, d) {
@@ -766,18 +809,16 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 				.attr("rx", 800).attr("ry", 400).attr("fill", "darkred");
 
 		selectedNode.append("text").attr('class', "label--family").attr("y",
-				150).attr("x", configuration.centerX - 440).text(
+				150).attr("x", configuration.centerX - 475).text(
 				parents.join(" and "));
 
 		selectedNode.append("circle").attr('class', "infoButton").attr("r", 30)
-				.attr("cy", 150).attr("cx", configuration.centerX + 600).attr(
+				.attr("cy", 140).attr("cx", configuration.centerX + 575).attr(
 						"cursor", "pointer").on("click", showInfo);
 
 		selectedNode.append("text").attr('class', "info").text("i").attr("y",
-				160).attr("x", configuration.centerX + 593).attr("cursor",
+				150).attr("x", configuration.centerX + 568).attr("cursor",
 				"pointer").on("click", showInfo);
-
-		scope.showInfo = false;
 	}
 
 	function selectPerson(selectedNode, d) {
@@ -827,7 +868,12 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 				-54).attr("x", configuration.centerX + 293).attr("cursor",
 				"pointer").on("click", showInfo);
 
-		scope.showInfo = false;
+		if (graph.selectedNode.showInfo) {
+
+			showInfo({
+				originalId : graph.selectedNode.id
+			});
+		}
 
 		placeDocuments(d.originalId, "tagged", selectedNode,
 				configuration.centerX, configuration.centerY,
