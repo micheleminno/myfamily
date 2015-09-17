@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Sep 10, 2015 at 03:18 PM
+-- Generation Time: Sep 17, 2015 at 03:44 PM
 -- Server version: 5.5.29
 -- PHP Version: 5.3.28
 
@@ -111,6 +111,22 @@ CREATE TABLE IF NOT EXISTS `nodes` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `node_events`
+--
+
+DROP TABLE IF EXISTS `node_events`;
+CREATE TABLE IF NOT EXISTS `node_events` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `type` varchar(50) NOT NULL,
+  `date` datetime NOT NULL,
+  `node` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `type` (`type`,`node`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=27 ;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `notifications`
 --
 
@@ -151,7 +167,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `credentials` varchar(50) NOT NULL,
   `node` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=67 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=69 ;
 
 -- --------------------------------------------------------
 
