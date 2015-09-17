@@ -344,6 +344,12 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 					currentNode.on("click", clickNode);
 
+					if (graph.selectedNode
+							&& d.originalId == graph.selectedNode.id) {
+
+						selectNode(d);
+					}
+					
 					if (d.person) {
 
 						var isBlacklisted = graph.blacklist.blacklistedNodes
@@ -428,11 +434,6 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 							return d.label;
 						}).call(makeEditable);
 
-						if (graph.selectedNode
-								&& d.originalId == graph.selectedNode.id) {
-
-							selectNode(d);
-						}
 					} else if (d.originalId != -1) {
 
 						if (view.id == 4) {
