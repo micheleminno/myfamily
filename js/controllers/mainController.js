@@ -595,16 +595,26 @@ var mainController = controllers
 						$scope.selectedEventType = eventType.label;
 					};
 
+					$scope.eventTypeFilter = function(eventType) {
+
+						if ($scope.graphData && $scope.graphData.selectedNode) {
+						
+							return eventType.on == $scope.graphData.selectedNode.type;
+						}
+					};
+
 					$scope.addNodeEvent = function() {
 
 						$('#addInfoModal').modal('hide');
 
 						MyFamilyService.addNodeEvent($scope.selectedEventType,
-								$scope.nodeEventDate, $scope.selectedNodeId)
-								.then(function(addedNodeEvent) {
+								$scope.nodeEventDate,
+								$scope.graphData.selectedNode.id).then(
+								function(addedNodeEvent) {
 
-									$scope.graphData.selectedNode.events.push(addedNodeEvent);
-									
+									$scope.graphData.selectedNode.events
+											.push(addedNodeEvent);
+
 									$scope.drawGraph(false, false);
 								});
 					};

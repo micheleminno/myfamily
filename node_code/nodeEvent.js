@@ -9,7 +9,7 @@ exports.add = function(req, res) {
 
 	var insertNodeEventQuery = "INSERT INTO node_events VALUES(NULL, '"
 			+ eventType + "', STR_TO_DATE('" + date + "', '%d/%m/%Y'), "
-			+ nodeId + ")";
+			+ nodeId + ") ON DUPLICATE KEY UPDATE date=VALUES(date)";
 
 	console.log(insertNodeEventQuery);
 
@@ -45,20 +45,15 @@ exports.add = function(req, res) {
 
 exports.remove = function(req, res) {
 
-	// TODO
+	var eventId = parseInt(req.param('eventId'));
 
-	var entityId = parseInt(req.param('entityId'));
-	var entityType = req.param('entityType');
-	var user = req.param('user');
+	var deleteNodeEventQuery = "DELETE FROM node_events WHERE id = " + eventId;
 
-	var deleteEventsQuery = "DELETE FROM events WHERE entity = " + entityId
-			+ " AND entity_type = '" + entityType + "' AND user = " + user;
-
-	console.log(deleteEventsQuery);
+	console.log(deleteNodeEventQuery);
 
 	req.getConnection(function(err, connection) {
 
-		connection.query(deleteEventsQuery, function(err, rows) {
+		connection.query(deleteNodeEventQuery, function(err, rows) {
 
 			if (err) {
 
@@ -68,19 +63,17 @@ exports.remove = function(req, res) {
 
 				if (rows.affectedRows > 0) {
 
-					console.log("Events related to " + entityType + " "
-							+ entityId + " deleted");
+					console.log("Node event " + eventId + " deleted");
 
 					res.status(OK).json('result', {
-						"events" : rows
+						"deleted" : true
 					});
 				} else {
 
-					console.log("Events related to " + entityType + " "
-							+ entityId + " not deleted");
+					console.log("Node event " + eventId + " not deleted");
 
 					res.status(NOK).json('result', {
-						"msg" : "events not deleted"
+						"deleted" : false
 					});
 				}
 			}
@@ -113,8 +106,9 @@ exports.list = function(req, res) {
 
 				for ( var rowIndex in rows) {
 
-					console.log("Node event added: "
-							+ JSON.stringify(rows[rowIndex]));
+					console
+							.log("Node event: "
+									+ JSON.stringify(rows[rowIndex]));
 
 					events.push(rows[rowIndex]);
 				}

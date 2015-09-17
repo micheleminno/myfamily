@@ -309,7 +309,7 @@
 						<ul id="eventTypes" class="dropdown-menu"
 							aria-labelledby="dropdownMenuTagged">
 							<li
-								ng-repeat="eventType in eventTypes | filter: { on: 'person' }"><a
+								ng-repeat="eventType in eventTypes | filter: eventTypeFilter"><a
 								href="" ng-click="selectEvent(eventType)">{{eventType.label}}</a></li>
 						</ul>
 					</div>

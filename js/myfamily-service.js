@@ -559,12 +559,14 @@ app
 						return deferred.promise;
 					};
 
-					this.getNodeEvents = function(nodeId) {
+					this.removeNodeEvent = function(nodeEventId) {
 
 						var deferred = $q.defer();
 
-						$http.get(serverUrl + '/nodeEvents/'+ nodeId)
-								.success(
+						$http
+								.get(
+										serverUrl + '/nodeEvents/remove/'
+												+ nodeEventId).success(
 
 								function(data) {
 
@@ -573,6 +575,23 @@ app
 										deferred.resolve(data);
 									}
 								});
+
+						return deferred.promise;
+					};
+
+					this.getNodeEvents = function(nodeId) {
+
+						var deferred = $q.defer();
+
+						$http.get(serverUrl + '/nodeEvents/' + nodeId).success(
+
+						function(data) {
+
+							if (data) {
+
+								deferred.resolve(data);
+							}
+						});
 
 						return deferred.promise;
 					};

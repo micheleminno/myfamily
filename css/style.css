@@ -108,6 +108,7 @@
 	stroke: black;
 	stroke-width: 4px;
 	fill: orange;
+	cursor: auto;
 }
 
 .infoText {

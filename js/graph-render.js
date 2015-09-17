@@ -349,7 +349,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 						selectNode(d);
 					}
-					
+
 					if (d.person) {
 
 						var isBlacklisted = graph.blacklist.blacklistedNodes
@@ -633,8 +633,12 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 		graph.selectedNode = {};
 		graph.selectedNode.id = d.originalId;
+		graph.selectedNode.type = d.person ? 'person' : 'family';
+
 		graph.selectedNode.showInfo = false;
 		scope.searchName = "";
+		scope.selectedEventType = "";
+		scope.nodeEventDate = "";
 
 		if (graph.blacklist.blacklistingUsers.indexOf(d.originalId) == -1
 				&& graph.blacklist.blacklistedNodes.indexOf(d.originalId) == -1) {
@@ -711,8 +715,29 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 	function addInfo(d) {
 
-		scope.selectedNodeId = d.originalId;
 		$('#addInfoModal').modal('show');
+
+		d3.event.stopPropagation();
+	}
+
+	function removeInfo(id) {
+
+		server.removeNodeEvent(id).then(function(removed) {
+
+			if (removed) {
+
+				var eventsIds = graph.selectedNode.events.map(function(event) {
+					return event.id;
+				});
+
+				var eventIndex = eventsIds.indexOf(id);
+			
+				if (eventIndex > -1) {
+
+					graph.selectedNode.events.splice(eventIndex, 1);
+				}
+			}
+		});
 
 		d3.event.stopPropagation();
 	}
@@ -720,7 +745,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 	function showInfo(d) {
 
 		if (d3.event) {
-		
+
 			graph.selectedNode.showInfo = !graph.selectedNode.showInfo;
 		}
 
@@ -729,14 +754,15 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 			svgRoot.selectAll(".infoButton").attr("class", "firedInfoButton");
 
 			var infoContainer = svg.selectedNode.append("g").attr("class",
-					"infoSelection");
+					"infoSelection").on("click", profileNodeClicked);
 
 			infoContainer.append("rect").attr("class", "infoBox").attr("width",
 					1000).attr("height", 800).attr("x",
 					configuration.centerX + 900);
 
 			infoContainer.append("text").text("Info").attr("class", "infoText")
-					.attr("x", configuration.centerX + 915).attr("y", 50);
+					.attr("cursor", "auto").attr("x",
+							configuration.centerX + 915).attr("y", 50);
 
 			infoContainer.append("circle").attr('class', "infoButton").attr(
 					"r", 30).attr("cy", 40).attr("cx",
@@ -762,7 +788,8 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 									infoContainer
 											.append("text")
-											.attr('class', "info")
+											.attr("class", "info")
+											.attr("cursor", "auto")
 											.text(
 													event.type
 															+ ": "
@@ -772,6 +799,32 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 											.attr(
 													"x",
 													configuration.centerX + 1000);
+
+									infoContainer
+											.append("circle")
+											.attr("class", "infoButton")
+											.attr("r", 20)
+											.attr("cy", 40 + offset)
+											.attr(
+													"cx",
+													configuration.centerX + 1500)
+											.attr("cursor", "pointer").on(
+													"click", addInfo);
+
+									infoContainer
+											.append("text")
+											.text("x")
+											.attr("fill", "white")
+											.attr("font-size", "25px")
+											.attr("y", 48 + offset)
+											.attr(
+													"x",
+													configuration.centerX + 1493)
+											.attr("cursor", "pointer").on(
+													"click", function() {
+
+														removeInfo(event.id);
+													});
 
 									offset += 100;
 								}
@@ -814,12 +867,19 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 				parents.join(" and "));
 
 		selectedNode.append("circle").attr('class', "infoButton").attr("r", 30)
-				.attr("cy", 140).attr("cx", configuration.centerX + 575).attr(
+				.attr("cy", 350).attr("cx", configuration.centerX + 725).attr(
 						"cursor", "pointer").on("click", showInfo);
 
 		selectedNode.append("text").attr('class', "info").text("i").attr("y",
-				150).attr("x", configuration.centerX + 568).attr("cursor",
+				359).attr("x", configuration.centerX + 718).attr("cursor",
 				"pointer").on("click", showInfo);
+
+		if (graph.selectedNode.showInfo) {
+
+			showInfo({
+				originalId : graph.selectedNode.id
+			});
+		}
 	}
 
 	function selectPerson(selectedNode, d) {
