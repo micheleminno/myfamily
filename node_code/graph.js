@@ -130,6 +130,8 @@ function getFamilyMembers(familyIndex, nodeIndex, memberType, graph, req,
 					+ whereClause
 					+ ' GROUP BY n.id';
 
+			console.log(selectFamilyMembers);
+			
 			req.getConnection(function(err, connection) {
 
 				connection.query(selectFamilyMembers,
@@ -626,10 +628,12 @@ function updateNodeInDB(nodeIndex, field, value, req, callback) {
 	});
 };
 
-function insertLink(source, target, req, callback) {
+function insertLink(source, target, linkVisible, req, callback) {
+
+	var visibleValue = linkVisible ? 1 : 0;
 
 	var insertLinkQuery = "INSERT IGNORE INTO links VALUES(" + source + ", "
-			+ target + ")";
+			+ target + ", " + visibleValue + ")";
 
 	console.log(insertLinkQuery);
 
@@ -709,6 +713,13 @@ exports.addNode = function(req, res) {
 		label = getDefaultLabel(isPerson, sourceIndex, targetIndex);
 	}
 
+	var linkVisible = true;
+
+	if (req.query.link && req.query.link == 'invisible') {
+
+		linkVisible = false;
+	}
+
 	insertNode(label, isPerson, req, function(insertedId) {
 
 		if (insertedId == -1) {
@@ -718,7 +729,8 @@ exports.addNode = function(req, res) {
 			});
 		} else if (sourceIndex) {
 
-			insertLink(sourceIndex, insertedId, req, function(linkInserted) {
+			insertLink(sourceIndex, insertedId, linkVisible, req, function(
+					linkInserted) {
 
 				if (linkInserted) {
 
@@ -735,7 +747,8 @@ exports.addNode = function(req, res) {
 			});
 		} else if (targetIndex) {
 
-			insertLink(insertedId, targetIndex, req, function(linkInserted) {
+			insertLink(insertedId, targetIndex, linkVisible, req, function(
+					linkInserted) {
 
 				if (linkInserted) {
 
@@ -1202,7 +1215,7 @@ function getX(order, levelSize) {
 
 function getY(level) {
 
-	return offset * level - 2*offset;
+	return offset * level - 2 * offset;
 };
 
 function assignPositions(graph, viewIndex, user, req, callback) {

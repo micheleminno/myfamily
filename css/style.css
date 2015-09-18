@@ -18,6 +18,11 @@
 	opacity: .6;
 }
 
+.invisibleLink {
+	fill: none;
+	opacity: 0;
+}
+
 .node {
 	cursor: url(../img/move-Hand.png) 17.5 5, pointer;
 	stroke-width: 20px;
@@ -186,6 +191,12 @@
 	stroke-width: 4px;
 	stroke: black;
 	fill: black;
+}
+
+.info-frame {
+	stroke-width: 4px;
+	stroke: black;
+	fill: #936D19;
 }
 
 .docText {

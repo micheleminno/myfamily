@@ -136,6 +136,17 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 				}
 			},
 			{
+				title : 'Add other',
+				action : function(elm, d, i) {
+
+					server.addNode('person', graph.user.id, d.originalId,
+							'source', false).then(function() {
+
+						scope.drawGraph(false, true);
+					});
+				}
+			},
+			{
 				title : 'Remove',
 				action : function(elm, d, i) {
 
@@ -324,7 +335,14 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 		svg.link.each(function(d) {
 
 			currentLink = d3.select(this);
-			currentLink.attr("class", "link").attr("stroke-width", function(d) {
+			currentLink.attr("class", function(d) {
+
+				//TODO
+				
+				//return d.visible ? "link" : "invisibleLink";
+				return "link";
+
+			}).attr("stroke-width", function(d) {
 
 				return 4 * d.level + "px";
 			});
@@ -762,15 +780,15 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 			infoContainer.append("text").text("Info").attr("class", "infoText")
 					.attr("cursor", "auto").attr("x",
-							configuration.centerX + 915).attr("y", 50);
+							configuration.centerX + 925).attr("y", 70);
 
 			infoContainer.append("circle").attr('class', "infoButton").attr(
-					"r", 30).attr("cy", 40).attr("cx",
+					"r", 30).attr("cy", 60).attr("cx",
 					configuration.centerX + 1050).attr("cursor", "pointer").on(
 					"click", addInfo);
 
 			infoContainer.append("text").attr('class', "info").text("+").attr(
-					"y", 50).attr("x", configuration.centerX + 1038).attr(
+					"y", 70).attr("x", configuration.centerX + 1038).attr(
 					"cursor", "pointer").on("click", addInfo);
 
 			server
@@ -780,11 +798,17 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 								graph.selectedNode.events = events;
 
-								var offset = 100;
+								var offset = 150;
 
 								for (eventIndex in events) {
 
 									var event = events[eventIndex];
+
+									infoContainer.append("rect").attr("width",
+											700).attr("height", 100).attr(
+											'class', "info-frame").attr("x",
+											configuration.centerX + 975).attr(
+											"y", offset);
 
 									infoContainer
 											.append("text")
@@ -826,7 +850,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 														removeInfo(event.id);
 													});
 
-									offset += 100;
+									offset += 140;
 								}
 
 							});

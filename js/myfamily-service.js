@@ -64,7 +64,7 @@ app
 						}
 
 						internalAddNode('person', userId, familyNodeId,
-								familyNodeRole, partnerName).then(
+								familyNodeRole, partnerName, visible).then(
 								function(data) {
 
 									if (data.newNode) {
@@ -355,17 +355,22 @@ app
 					};
 
 					var internalAddNode = function(type, userId, otherNodeId,
-							otherNodeRole, label) {
+							otherNodeRole, label, visible) {
 
 						var deferred = $q.defer();
 
 						var url = serverUrl + "/" + userId + '/graph/add?type='
 								+ type + '&' + otherNodeRole + '='
-								+ otherNodeId;
+								+ otherNodeId + invisibleLinkPart;
 
 						if (label) {
 
 							url += '&label=' + label;
+						}
+
+						if (!visible) {
+
+							url += '&link=invisible';
 						}
 
 						$http.get(url).success(
@@ -382,10 +387,10 @@ app
 					};
 
 					this.addNode = function(type, userId, otherNodeId,
-							otherNodeRole) {
+							otherNodeRole, visible) {
 
 						return internalAddNode(type, userId, otherNodeId,
-								otherNodeRole);
+								otherNodeRole, visible);
 					};
 
 					this.removeNode = function(userId, nodeId) {
