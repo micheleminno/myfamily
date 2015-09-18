@@ -731,7 +731,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 				});
 
 				var eventIndex = eventsIds.indexOf(id);
-			
+
 				if (eventIndex > -1) {
 
 					graph.selectedNode.events.splice(eventIndex, 1);
@@ -807,7 +807,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 											.attr("cy", 40 + offset)
 											.attr(
 													"cx",
-													configuration.centerX + 1500)
+													configuration.centerX + 1600)
 											.attr("cursor", "pointer").on(
 													"click", addInfo);
 
@@ -819,7 +819,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 											.attr("y", 48 + offset)
 											.attr(
 													"x",
-													configuration.centerX + 1493)
+													configuration.centerX + 1593)
 											.attr("cursor", "pointer").on(
 													"click", function() {
 
