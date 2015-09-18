@@ -337,11 +337,9 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 			currentLink = d3.select(this);
 			currentLink.attr("class", function(d) {
 
-				//TODO
 				
-				//return d.visible ? "link" : "invisibleLink";
-				return "link";
-
+				return d.visible ? "link" : "invisibleLink";
+				
 			}).attr("stroke-width", function(d) {
 
 				return 4 * d.level + "px";

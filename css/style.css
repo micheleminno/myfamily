@@ -19,8 +19,9 @@
 }
 
 .invisibleLink {
+	stroke: brown;
 	fill: none;
-	opacity: 0;
+	opacity: .1;
 }
 
 .node {

@@ -131,7 +131,7 @@ function getFamilyMembers(familyIndex, nodeIndex, memberType, graph, req,
 					+ ' GROUP BY n.id';
 
 			console.log(selectFamilyMembers);
-			
+
 			req.getConnection(function(err, connection) {
 
 				connection.query(selectFamilyMembers,
@@ -158,7 +158,8 @@ function getFamilyMembers(familyIndex, nodeIndex, memberType, graph, req,
 												id : row['source'] + "-"
 														+ row['target'],
 												source : row['source'],
-												target : row['target']
+												target : row['target'],
+												visible : row['visible']
 											};
 
 											graphView.links.push(link);
@@ -352,22 +353,40 @@ function addMembers(asChild, nodeIndex, familyIndex, viewIndex, graph, history,
 		if (familyIndex != -1 && graphView.nodes.length > 0) {
 
 			var linkFamilyNode;
+			
+			//TODO fix visible
 
 			if (asChild) {
 
 				history += 'c';
+
+				var idValue = familyIndex + "-" + nodeIndex;
+				var selectedLink = graphView.links.filter(function(link) {
+					
+					return link.id = idValue;
+				});
+				
 				linkFamilyNode = {
-					id : familyIndex + "-" + nodeIndex,
+					id : idValue,
 					source : familyIndex,
-					target : nodeIndex
+					target : nodeIndex,
+					visible : selectedLink.visible
 				};
 			} else {
 
 				history += 'p';
+
+				var idValue = nodeIndex + "-" + familyIndex;
+				var selectedLink = graphView.links.filter(function(link) {
+					
+					return link.id = idValue;
+				});
+
 				linkFamilyNode = {
-					id : nodeIndex + "-" + familyIndex,
+					id : idValue,
 					source : nodeIndex,
-					target : familyIndex
+					target : familyIndex,
+					visible : selectedLink.visible
 				};
 			}
 
@@ -461,47 +480,6 @@ function getFamilyType(viewIndex) {
 	}
 
 	return mode;
-};
-
-function addEntities(nodeIndex, familyIndex, memberType, level, startingNodes,
-		graphView) {
-
-	if (familyIndex != -1) {
-
-		if (memberType == 'child') {
-
-			level.links.push({
-				id : familyIndex + "-" + nodeIndex,
-				source : familyIndex,
-				target : nodeIndex
-			});
-
-		} else {
-
-			level.links.push({
-				id : nodeIndex + "-" + familyIndex,
-				source : nodeIndex,
-				target : familyIndex
-			});
-		}
-
-		graphView.links.forEach(function(link) {
-
-			level.links.push(link);
-		});
-
-		graphView.nodes.forEach(function(node) {
-
-			level.nodes.push(node);
-
-			if (node.person && node.id != nodeIndex) {
-
-				startingNodes.push(node.id);
-			}
-		});
-	}
-
-	return [ level, startingNodes ];
 };
 
 function output(graph, res) {

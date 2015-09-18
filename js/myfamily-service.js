@@ -361,7 +361,7 @@ app
 
 						var url = serverUrl + "/" + userId + '/graph/add?type='
 								+ type + '&' + otherNodeRole + '='
-								+ otherNodeId + invisibleLinkPart;
+								+ otherNodeId;
 
 						if (label) {
 
