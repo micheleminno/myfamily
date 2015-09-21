@@ -353,40 +353,40 @@ function addMembers(asChild, nodeIndex, familyIndex, viewIndex, graph, history,
 		if (familyIndex != -1 && graphView.nodes.length > 0) {
 
 			var linkFamilyNode;
-			
-			//TODO fix visible
 
 			if (asChild) {
 
 				history += 'c';
 
 				var idValue = familyIndex + "-" + nodeIndex;
+
 				var selectedLink = graphView.links.filter(function(link) {
-					
-					return link.id = idValue;
+
+					return link.id == idValue;
 				});
-				
+
 				linkFamilyNode = {
 					id : idValue,
 					source : familyIndex,
 					target : nodeIndex,
-					visible : selectedLink.visible
+					visible : selectedLink[0].visible
 				};
 			} else {
 
 				history += 'p';
 
 				var idValue = nodeIndex + "-" + familyIndex;
+
 				var selectedLink = graphView.links.filter(function(link) {
-					
-					return link.id = idValue;
+
+					return link.id == idValue;
 				});
 
 				linkFamilyNode = {
 					id : idValue,
 					source : nodeIndex,
 					target : familyIndex,
-					visible : selectedLink.visible
+					visible : selectedLink[0].visible
 				};
 			}
 
