@@ -175,6 +175,7 @@ function getFamilyMembers(familyIndex, nodeIndex, memberType, graph, req,
 											label : row['label'],
 											img : row['img'],
 											person : isPerson,
+											email: row['email'],
 											fixed : fixed
 										};
 

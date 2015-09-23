@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Sep 17, 2015 at 03:44 PM
+-- Generation Time: Sep 23, 2015 at 12:18 PM
 -- Server version: 5.5.29
 -- PHP Version: 5.3.28
 
@@ -90,6 +90,7 @@ DROP TABLE IF EXISTS `links`;
 CREATE TABLE IF NOT EXISTS `links` (
   `source` int(11) NOT NULL,
   `target` int(11) NOT NULL,
+  `visible` tinyint(1) NOT NULL,
   PRIMARY KEY (`source`,`target`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
@@ -105,8 +106,9 @@ CREATE TABLE IF NOT EXISTS `nodes` (
   `label` varchar(50) NOT NULL,
   `img` varchar(50) NOT NULL,
   `person` tinyint(1) NOT NULL,
+  `email` varchar(50) NOT NULL DEFAULT 'email@address',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=98 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=100 ;
 
 -- --------------------------------------------------------
 
@@ -122,7 +124,7 @@ CREATE TABLE IF NOT EXISTS `node_events` (
   `node` int(11) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `type` (`type`,`node`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=27 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=33 ;
 
 -- --------------------------------------------------------
 

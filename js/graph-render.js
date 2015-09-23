@@ -220,7 +220,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 		}
 	} ];
 
-	function makeEditable(d) {
+	function editName(d) {
 
 		this
 				.on("mouseover", function() {
@@ -265,6 +265,31 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 							d3.event.stopPropagation();
 						});
+	}
+
+	function editEmailAddress(d) {
+
+		this.on("mouseover", function() {
+			d3.select(this).style("fill", "red");
+		}).on("mouseout", function() {
+			d3.select(this).style("fill", null);
+		}).on(
+				"click",
+				function(d) {
+
+					var result = prompt('Enter a new email address', d.name);
+
+					if (result) {
+
+						var text = d3.select(this)[0][0];
+						text.textContent = result;
+
+						server.updateNode(d.originalId, graph.user.id, 'email',
+								result);
+					}
+
+					d3.event.stopPropagation();
+				});
 	}
 
 	function getMenuWithBlacklistFeature(menu, isBlacklisted, isBlacklisting) {
@@ -337,9 +362,8 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 			currentLink = d3.select(this);
 			currentLink.attr("class", function(d) {
 
-				
 				return d.visible ? "link" : "invisibleLink";
-				
+
 			}).attr("stroke-width", function(d) {
 
 				return 4 * d.level + "px";
@@ -448,7 +472,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 									}
 								}).attr("dy", "1.5em").text(function(d) {
 							return d.label;
-						}).call(makeEditable);
+						}).call(editName);
 
 					} else if (d.originalId != -1) {
 
@@ -780,6 +804,11 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 					.attr("cursor", "auto").attr("x",
 							configuration.centerX + 925).attr("y", 70);
 
+			infoContainer.append("text").text(d.email)
+					.attr("class", "infoText").attr("cursor", "auto").attr("x",
+							configuration.centerX + 1425).attr("y", 70).attr(
+							"cursor", "pointer").call(editEmailAddress);
+
 			infoContainer.append("circle").attr('class', "infoButton").attr(
 					"r", 30).attr("cy", 60).attr("cx",
 					configuration.centerX + 1050).attr("cursor", "pointer").on(
@@ -941,7 +970,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 		selectedNode.append("text").attr('class', "label--selected").attr("y",
 				-55).attr("x", configuration.centerX - 230).text(d.label).call(
-				makeEditable);
+				editName);
 
 		selectedNode.append("circle").attr('class', "infoButton").attr("r", 30)
 				.attr("cy", -65).attr("cx", configuration.centerX + 300).attr(
@@ -954,7 +983,8 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 		if (graph.selectedNode.showInfo) {
 
 			showInfo({
-				originalId : graph.selectedNode.id
+				originalId : graph.selectedNode.id,
+				email: d.email
 			});
 		}
 
