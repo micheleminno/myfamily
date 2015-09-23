@@ -446,7 +446,7 @@ var mainController = controllers
 						MyFamilyService
 								.updateDocument($scope.editDocId,
 										$scope.editTitle, $scope.editDate,
-										$scope.taggedUsers)
+										$scope.taggedUsers, $scope.keywords)
 								.then(
 										function() {
 
@@ -464,6 +464,7 @@ var mainController = controllers
 														});
 
 												$scope.graphData.selectedDocument.taggedNodes = taggedNodes;
+												$scope.graphData.selectedDocument.keywords = $scope.keywords;
 											}
 
 											MyFamilyService.updateBlacklist(
@@ -505,46 +506,50 @@ var mainController = controllers
 						$scope.nodeEventDate = dateFilter(date, 'dd/MM/yyyy');
 					});
 
-					$scope.addInUsers = function(users, removeFromUsers, user) {
+					$scope.addElement = function(elements, availableElements,
+							element) {
 
-						users.push(user);
+						elements.push(element);
 
-						var removeFromUsersIds = removeFromUsers
-								.map(function(u) {
-									return u.id;
+						var availableElementIds = availableElements
+								.map(function(e) {
+									return e.id;
 								});
 
-						var indexUserToRemove = removeFromUsersIds
-								.indexOf(user.id);
+						var indexElementToRemove = availableElementIds
+								.indexOf(element.id);
 
-						if (indexUserToRemove > -1) {
-							removeFromUsers.splice(indexUserToRemove, 1);
+						if (indexElementToRemove > -1) {
+							availableElements.splice(indexElementToRemove, 1);
 						}
 					};
 
-					$scope.removeFromUsers = function(users, addToUsers, user) {
+					$scope.removeElement = function(elements,
+							availableElements, element) {
 
-						var indexUserToInsert = 0;
+						var indexElementToInsert = 0;
 
-						for (userIndex in addToUsers) {
+						for (elementIndex in availableElements) {
 
-							if (addToUsers[userIndex]['id'] > parseInt(user.id)) {
+							if (availableElements[elementIndex]['id'] > parseInt(element.id)) {
 
-								indexUserToInsert = userIndex;
+								indexElementToInsert = elementIndex;
 								break;
 							}
 						}
 
-						addToUsers.splice(indexUserToInsert, 0, user);
+						availableElements.splice(indexElementToInsert, 0,
+								element);
 
-						var usersIds = users.map(function(u) {
-							return u.id;
+						var elementIds = elements.map(function(e) {
+							return e.id;
 						});
 
-						var indexUserToRemove = usersIds.indexOf(user.id);
+						var indexElementToRemove = elementIds
+								.indexOf(element.id);
 
-						if (indexUserToRemove > -1) {
-							users.splice(indexUserToRemove, 1);
+						if (indexElementToRemove > -1) {
+							elements.splice(indexElementToRemove, 1);
 						}
 					};
 
@@ -598,7 +603,7 @@ var mainController = controllers
 					$scope.eventTypeFilter = function(eventType) {
 
 						if ($scope.graphData && $scope.graphData.selectedNode) {
-						
+
 							return eventType.on == $scope.graphData.selectedNode.type;
 						}
 					};
@@ -618,4 +623,22 @@ var mainController = controllers
 									$scope.drawGraph(false, false);
 								});
 					};
+
+					$scope.selectedNewKeyword = function(selected) {
+
+						if (selected.originalObject.value) {
+
+							$scope.keywords.push({
+								id : selected.originalObject.id,
+								label : selected.originalObject.value
+							});
+
+						} else {
+
+							$scope.keywords.push({
+								label : selected.originalObject
+							});
+						}
+					};
+
 				});

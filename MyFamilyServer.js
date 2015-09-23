@@ -14,6 +14,7 @@ var nodeEvent = require('./node_code/nodeEvent.js');
 var notification = require('./node_code/notification.js');
 var blacklist = require('./node_code/blacklist.js');
 var bookmark = require('./node_code/bookmark.js');
+var keyword = require('./node_code/keyword.js');
 
 var app = express();
 
@@ -125,3 +126,9 @@ app.get('/:user/forbiddenDocuments', blacklist.listForbiddenDocuments);
 app.get('/:user/bookmarks', bookmark.list);
 app.get('/:user/bookmarks/add/:document', bookmark.add);
 app.get('/:user/bookmarks/remove/:document', bookmark.remove);
+
+//Keywords
+app.get('/:user/keywords', keyword.listAll);
+app.get('/:user/:document/keywords', keyword.list);
+app.get('/:user/:document/keywords/add/:keyword', keyword.add);
+app.get('/:user/:document/keywords/remove/:keyword', keyword.remove);

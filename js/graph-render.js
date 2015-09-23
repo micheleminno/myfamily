@@ -984,7 +984,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 			showInfo({
 				originalId : graph.selectedNode.id,
-				email: d.email
+				email : d.email
 			});
 		}
 
@@ -1220,6 +1220,17 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 			scope.editDate = d.date;
 		}
+
+		if (d.keywords) {
+			scope.keywords = d.keywords;
+		} else {
+			scope.keywords = [];
+		}
+
+		server.getAllKeywords().then(function(data) {
+
+			scope.availableKeywords = data;
+		});
 
 		var taggedUsersIds = d.taggedNodes.map(function(user) {
 			return user.id;

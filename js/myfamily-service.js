@@ -905,7 +905,7 @@ app
 					};
 
 					this.updateDocument = function(docId, title, date,
-							taggedPeople) {
+							taggedPeople, keywords) {
 
 						var deferred = $q.defer();
 
@@ -917,7 +917,8 @@ app
 								serverUrl + '/documents/' + docId
 										+ '/update?title=' + title + '&date='
 										+ date + '&tagged='
-										+ JSON.stringify(taggedUsersIds))
+										+ JSON.stringify(taggedUsersIds) + '&keywords='
+										+ JSON.stringify(keywords))
 								.success(function(data) {
 
 									if (data) {
@@ -1172,6 +1173,26 @@ app
 						var deferred = $q.defer();
 
 						$http.get(serverUrl + '/' + userId + '/bookmarks')
+								.success(
+
+								function(data) {
+
+									if (data) {
+
+										deferred.resolve(data);
+									}
+								});
+
+						return deferred.promise;
+					};
+
+					// Keywords
+
+					this.getAllKeywords = function(userId) {
+
+						var deferred = $q.defer();
+
+						$http.get(serverUrl + '/' + userId + '/keywords')
 								.success(
 
 								function(data) {

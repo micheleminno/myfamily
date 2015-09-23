@@ -19,9 +19,12 @@ exports.list = function(req, res) {
 
 		query = "SELECT d.id, d.title, t1.position, d.date, d.file, d.owner, "
 				+ "GROUP_CONCAT(t2.node SEPARATOR ', ') as taggedNodeIds, "
-				+ "GROUP_CONCAT(n.label SEPARATOR '\", \"') as taggedNodeLabels "
+				+ "GROUP_CONCAT(n.label SEPARATOR '\", \"') as taggedNodeLabels, "
+				+ "GROUP_CONCAT(k.id SEPARATOR ', ') as keywordIds, "
+				+ "GROUP_CONCAT(k.value SEPARATOR '\", \"') as keywordValues "
 				+ "FROM tags as t1 JOIN documents as d ON t1.document = d.id "
 				+ "JOIN tags as t2 ON t2.document = d.id JOIN nodes as n ON t2.node = n.id "
+				+ "LEFT JOIN keywords as k ON k.document = d.id "
 				+ "WHERE t1.node = " + nodeIndex + " GROUP BY d.id";
 	}
 
@@ -43,8 +46,10 @@ exports.list = function(req, res) {
 
 					var row = rows[rowIndex];
 
-					setTaggedNodes(row, 'taggedNodeIds', 'taggedNodeLabels',
+					setObjects(row, 'taggedNodeIds', 'taggedNodeLabels',
 							'taggedNodes');
+
+					setObjects(row, 'keywordIds', 'keywordValues', 'keywords');
 
 					documents.push(row);
 				}
@@ -57,23 +62,33 @@ exports.list = function(req, res) {
 	});
 };
 
-function setTaggedNodes(row, idsField, labelsField, taggedNodesField) {
+function setObjects(row, idsField, labelsField, aggregateField) {
 
 	if (row[idsField] && row[labelsField]) {
 
-		var taggedNodeIdsString = "[" + row[idsField] + "]";
+		var idsString = "[" + row[idsField] + "]";
 
-		var taggedNodeLabelsString = "[\"" + row[labelsField] + "\"]";
+		var labelsString = "[\"" + row[labelsField] + "\"]";
 
-		var taggedNodeIds = JSON.parse(taggedNodeIdsString);
-		var taggedNodeLabels = JSON.parse(taggedNodeLabelsString);
+		var ids = JSON.parse(idsString);
+		var labels = JSON.parse(labelsString);
 
-		row[taggedNodesField] = [];
-		for (idIndex in taggedNodeIds) {
+		// remove duplicates
 
-			row[taggedNodesField].push({
-				id : taggedNodeIds[idIndex],
-				label : taggedNodeLabels[idIndex]
+		ids = ids.filter(function(elem, pos) {
+			return ids.indexOf(elem) == pos;
+		});
+
+		labels = labels.filter(function(elem, pos) {
+			return labels.indexOf(elem) == pos;
+		});
+
+		row[aggregateField] = [];
+		for (idIndex in ids) {
+
+			row[aggregateField].push({
+				id : ids[idIndex],
+				label : labels[idIndex]
 			});
 		}
 
@@ -96,9 +111,12 @@ exports.heritageList = function(req, res) {
 
 	var query = "SELECT d.id, d.title, t1.position, d.date, d.file, d.owner, "
 			+ "GROUP_CONCAT(t2.node SEPARATOR ', ') as taggedNodeIds, "
-			+ "GROUP_CONCAT(n.label SEPARATOR '\", \"') as taggedNodeLabels "
+			+ "GROUP_CONCAT(n.label SEPARATOR '\", \"') as taggedNodeLabels, "
+			+ "GROUP_CONCAT(k.id SEPARATOR ', ') as keywordIds, "
+			+ "GROUP_CONCAT(k.value SEPARATOR '\", \"') as keywordValues "
 			+ "FROM tags as t1 JOIN documents as d ON t1.document = d.id "
 			+ "JOIN tags as t2 ON t2.document = d.id JOIN nodes as n ON t2.node = n.id "
+			+ "LEFT JOIN keywords as k ON k.document = d.id "
 			+ "WHERE t1.node = -1 AND d.owner IN (" + nodesIds.join()
 			+ ") GROUP BY d.id";
 
@@ -120,8 +138,10 @@ exports.heritageList = function(req, res) {
 
 					var row = rows[rowIndex];
 
-					setTaggedNodes(row, 'taggedNodeIds', 'taggedNodeLabels',
+					setObjects(row, 'taggedNodeIds', 'taggedNodeLabels',
 							'taggedNodes');
+
+					setObjects(row, 'keywordIds', 'keywordValues', 'keywords');
 
 					documents.push(row);
 				}
@@ -205,14 +225,17 @@ exports.view = function(req, res) {
 
 	nodeIdsString = '(' + nodesIds.join() + ')';
 
-	var query = "SELECT SQL_CALC_FOUND_ROWS d.id, d.title, t1.position, d.date, d.file, d.owner, "
+	var query = "SELECT SQL_CALC_FOUND_ROWS d.id, d.title, t.position, d.date, d.file, d.owner, "
 			+ filterPartSelect
-			+ "GROUP_CONCAT(t1.node SEPARATOR ', ') as taggedNodeIds, "
-			+ "GROUP_CONCAT(n.label SEPARATOR '\", \"') as taggedNodeLabels "
-			+ "FROM tags as t1 JOIN documents as d ON t1.document = d.id "
-			+ "JOIN nodes as n ON t1.node = n.id "
+			+ "GROUP_CONCAT(t.node SEPARATOR ', ') as taggedNodeIds, "
+			+ "GROUP_CONCAT(n.label SEPARATOR '\", \"') as taggedNodeLabels, "
+			+ "GROUP_CONCAT(k.id SEPARATOR ', ') as keywordIds, "
+			+ "GROUP_CONCAT(k.value SEPARATOR '\", \"') as keywordValues "
+			+ "FROM tags as t JOIN documents as d ON t.document = d.id "
+			+ "JOIN nodes as n ON t.node = n.id "
+			+ "LEFT JOIN keywords as k ON k.document = d.id "
 			+ filterPart
-			+ "WHERE t1.node IN "
+			+ "WHERE t.node IN "
 			+ nodeIdsString
 			+ keywordsFilter
 			+ excludedNodeIdsPart + " GROUP BY d.id " + sortBy + subsetResults;
@@ -239,8 +262,11 @@ exports.view = function(req, res) {
 
 						var row = rows[rowIndex];
 
-						setTaggedNodes(row, 'taggedNodeIds',
-								'taggedNodeLabels', 'taggedNodes');
+						setObjects(row, 'taggedNodeIds', 'taggedNodeLabels',
+								'taggedNodes');
+
+						setObjects(row, 'keywordIds', 'keywordValues',
+								'keywords');
 
 						documents.push(row);
 					}

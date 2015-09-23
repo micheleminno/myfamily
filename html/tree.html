@@ -138,7 +138,7 @@
 						<ul id="add-taggablePersons" class="dropdown-menu"
 							aria-labelledby="dropdownMenuTagged">
 							<li ng-repeat="taggableUser in taggableUsers"><a href=""
-								ng-click="addInUsers(taggedUsers, taggableUsers, taggableUser)">{{taggableUser.name}}</a></li>
+								ng-click="addElement(taggedUsers, taggableUsers, taggableUser)">{{taggableUser.name}}</a></li>
 						</ul>
 					</div>
 				</div>
@@ -147,11 +147,11 @@
 					<li ng-repeat="taggedUser in taggedUsers">{{taggedUser.name}}<a
 						style="margin-left: 5px" href=""
 						ng-show="taggedUser.id != nodeUser.id || inHeritage"
-						ng-click="removeFromUsers(taggedUsers, taggableUsers, taggedUser)">(remove)</a></li>
+						ng-click="removeElement(taggedUsers, taggableUsers, taggedUser)">(remove)</a></li>
 				</ul>
 				<div id="excluded" style="display: inline-block; margin-top: 20px">
-					<p style="display: inline; margin-right: 20px">Persons
-						excluded:</p>
+					<p style="display: inline; margin-right: 20px">Persons I'm not
+						sharing with:</p>
 
 					<div class="dropdown" style="display: inline; margin-right: 10px">
 						<button class="btn btn-default dropdown-toggle" type="button"
@@ -163,7 +163,7 @@
 						<ul id="add-excludablePersons" class="dropdown-menu"
 							aria-labelledby="dropdownMenuExcluded">
 							<li ng-repeat="excludableUser in excludableUsers"><a href=""
-								ng-click="addInUsers(excludedUsers, excludableUsers, excludableUser)">{{excludableUser.name}}</a></li>
+								ng-click="addElement(excludedUsers, excludableUsers, excludableUser)">{{excludableUser.name}}</a></li>
 						</ul>
 					</div>
 				</div>
@@ -172,7 +172,7 @@
 					name="excludedArea">
 					<li ng-repeat="excludedUser in excludedUsers">{{excludedUser.name}}<a
 						style="margin-left: 5px" href=""
-						ng-click="removeFromUsers(excludedUsers, excludableUsers, excludedUser)">(remove)</a></li>
+						ng-click="removeElement(excludedUsers, excludableUsers, excludedUser)">(remove)</a></li>
 				</ul>
 
 			</div>
@@ -221,6 +221,33 @@
 					</div>
 				</div>
 				<div style="margin-bottom: 20px"></div>
+				<div id="keywords">
+					<p style="margin-right: 20px;">Keywords:</p>
+					<div class="padded-row">
+
+						<div style="width: 167px; margin-left: 23px; margin-bottom: 20px" angucomplete-alt
+							id="newKeyword" placeholder="type new keyword" pause="100"
+							selected-object="selectedNewKeyword"
+							local-data="availableKeywords" search-fields="value"
+							title-field="value" minlength="1"
+							input-class="form-control form-control-small"
+							match-class="highlight" clear-selected="true"
+							override-suggestions="true" text-no-results=false
+							text-searching=false></div>
+
+					</div>
+				</div>
+				<ul id="edit-keywordArea" name="keywordArea">
+					<li ng-repeat="keyword in keywords">{{keyword.label}}<a
+						style="margin-left: 5px" href=""
+						ng-click="removeElement(keywords, availableKeywords, keyword)">(remove)</a></li>
+				</ul>
+
+
+
+
+				<br />
+				<div style="margin-bottom: 20px"></div>
 				<div id="tagged" style="display: inline-block">
 					<p style="display: inline; margin-right: 20px">Persons tagged:</p>
 
@@ -228,13 +255,13 @@
 						<button class="btn btn-default dropdown-toggle" type="button"
 							id="dropdownMenuTagged" data-toggle="dropdown"
 							aria-haspopup="true" aria-expanded="true">
-							Add <span class="caret"></span>
+							Select <span class="caret"></span>
 						</button>
 
 						<ul id="edit-taggablePersons" class="dropdown-menu"
 							aria-labelledby="dropdownMenuTagged">
 							<li ng-repeat="taggableUser in taggableUsers"><a href=""
-								ng-click="addInUsers(taggedUsers, taggableUsers, taggableUser)">{{taggableUser.name}}</a></li>
+								ng-click="addElement(taggedUsers, taggableUsers, taggableUser)">{{taggableUser.name}}</a></li>
 						</ul>
 					</div>
 
@@ -244,24 +271,24 @@
 					<li ng-repeat="taggedUser in taggedUsers">{{taggedUser.name}}<a
 						style="margin-left: 5px" href=""
 						ng-show="taggedUser.id != owner.id || inHeritage"
-						ng-click="removeFromUsers(taggedUsers, taggableUsers, taggedUser)">(remove)</a></li>
+						ng-click="removeElement(taggedUsers, taggableUsers, taggedUser)">(remove)</a></li>
 				</ul>
 
 				<div id="excluded" style="display: inline-block; margin-top: 20px">
-					<p style="display: inline; margin-right: 20px">Persons
-						excluded:</p>
+					<p style="display: inline; margin-right: 20px">Persons I'm not
+						sharing with:</p>
 
 					<div class="dropdown" style="display: inline; margin-right: 10px">
 						<button class="btn btn-default dropdown-toggle" type="button"
 							id="dropdownMenuExcluded" data-toggle="dropdown"
 							aria-haspopup="true" aria-expanded="true">
-							Add <span class="caret"></span>
+							Select <span class="caret"></span>
 						</button>
 
 						<ul id="edit-excludablePersons" class="dropdown-menu"
 							aria-labelledby="dropdownMenuExcluded">
 							<li ng-repeat="excludableUser in excludableUsers"><a href=""
-								ng-click="addInUsers(excludedUsers, excludableUsers, excludableUser)">{{excludableUser.name}}</a></li>
+								ng-click="addElement(excludedUsers, excludableUsers, excludableUser)">{{excludableUser.name}}</a></li>
 						</ul>
 					</div>
 				</div>
@@ -271,7 +298,7 @@
 					<li ng-repeat="excludedUser in excludedUsers">{{excludedUser.name}}<a
 						style="margin-left: 5px" href=""
 						ng-show="excludedUser.id != nodeUser.id"
-						ng-click="removeFromUsers(excludedUsers, excludableUsers, excludedUser)">(remove)</a></li>
+						ng-click="removeElement(excludedUsers, excludableUsers, excludedUser)">(remove)</a></li>
 				</ul>
 
 			</div>
@@ -308,8 +335,7 @@
 
 						<ul id="eventTypes" class="dropdown-menu"
 							aria-labelledby="dropdownMenuTagged">
-							<li
-								ng-repeat="eventType in eventTypes | filter: eventTypeFilter"><a
+							<li ng-repeat="eventType in eventTypes | filter: eventTypeFilter"><a
 								href="" ng-click="selectEvent(eventType)">{{eventType.label}}</a></li>
 						</ul>
 					</div>

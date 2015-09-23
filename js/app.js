@@ -1,5 +1,5 @@
 var app = angular.module('main', [ 'ngRoute', 'controllers',
-		'ui.bootstrap.datetimepicker', 'ngMessages' ]);
+		'ui.bootstrap.datetimepicker', 'ngMessages', 'angucomplete-alt' ]);
 
 var controllers = angular.module('controllers', [ 'user-services' ]);
 
@@ -125,76 +125,65 @@ app.directive('prettyp', function() {
 	};
 });
 
-app
-		.directive(
-				'd3Tree',
-				[
-						'$window',
-						'MyFamilyService',
-						'AuthenticationService',
-						function($window, MyFamilyService,
-								AuthenticationService) {
+app.directive('d3Tree', [
+		'$window',
+		'MyFamilyService',
+		'AuthenticationService',
+		function($window, MyFamilyService, AuthenticationService) {
 
-							return {
+			return {
 
-								restrict : 'A',
+				restrict : 'A',
 
-								scope : false,
+				scope : false,
 
-								controller : 'MainCtrl',
+				controller : 'MainCtrl',
 
-								link : function(scope, element, attrs) {
+				link : function(scope, element, attrs) {
 
-									scope.initViews();
-									scope.initEventTypes();
-									
-									scope.graph = {};
-									scope.graph.view = scope.views[4];
+					scope.initViews();
+					scope.initEventTypes();
 
-									scope.graph.user = {};
-									scope.graph.user.id = AuthenticationService
-											.getUserId();
-									scope.graph.user.label = AuthenticationService
-											.getUsername();
+					scope.graph = {};
+					scope.graph.view = scope.views[4];
 
-									scope.initD3Config();
-									scope.drawGraph();
+					scope.graph.user = {};
+					scope.graph.user.id = AuthenticationService.getUserId();
+					scope.graph.user.label = AuthenticationService
+							.getUsername();
 
-									var interestingEntities = "[graphData.nodes + "
-											+ "graphData.blacklist.blacklistedNodes + "
-											+ "graphData.blacklist.blacklistingUsers + "
-											+ "graphData.documents + "
-											+ "graphData.selectedNode.documents + "
-											+ "graphData.selectedNode.events + "
-											+ "graphData.selectedDocument + "
-											+ "graphData.selectedDocument.title + "
-											+ "graphData.selectedDocument.date + "
-											+ "graphData.selectedDocument.taggedNodes + "
-											+ "graphData.notifications + "
-											+ "graphData.resetPositions]";
+					scope.initD3Config();
+					scope.drawGraph();
 
-									scope
-											.$watchCollection(
-													interestingEntities,
-													function(newValue, oldValue) {
+					var interestingEntities = "[graphData.nodes + "
+							+ "graphData.blacklist.blacklistedNodes + "
+							+ "graphData.blacklist.blacklistingUsers + "
+							+ "graphData.documents + "
+							+ "graphData.selectedNode.documents + "
+							+ "graphData.selectedNode.events + "
+							+ "graphData.selectedDocument + "
+							+ "graphData.selectedDocument.title + "
+							+ "graphData.selectedDocument.date + "
+							+ "graphData.selectedDocument.taggedNodes + "
+							+ "graphData.notifications + "
+							+ "graphData.resetPositions]";
 
-														return scope
-																.renderGraph(
-																		scope,
-																		scope.graphData,
-																		scope.configurationData,
-																		MyFamilyService,
-																		scope.svg);
+					scope.$watchCollection(interestingEntities, function(
+							newValue, oldValue) {
 
-													}, false);
+						return scope.renderGraph(scope, scope.graphData,
+								scope.configurationData, MyFamilyService,
+								scope.svg);
 
-									window.onresize = function() {
+					}, false);
 
-										scope.$apply();
-									};
+					window.onresize = function() {
 
-									scope.renderGraph = graphRender;
-								}
-							};
+						scope.$apply();
+					};
 
-						} ]);
+					scope.renderGraph = graphRender;
+				}
+			};
+
+		} ]);
