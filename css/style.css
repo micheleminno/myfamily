@@ -304,21 +304,3 @@
 	max-height: 24px;
 	border-radius: 2px 2px 2px 2px;
 }
-
-/* css per file uploader */
-.my-drop-zone {
-	border: dotted 3px lightgray !important;
-}
-
-.nv-file-over {
-	border: dotted 3px red !important;
-}
-
-.another-file-over-class {
-	border: dotted 3px green !important;
-}
-/* fine css per file uploader */
-
-html, body {
-	height: 100%;
-}

@@ -72,7 +72,6 @@
 
 <div d3-tree></div>
 
-<input type="file" id="profile-img-upload" name="profile-img-upload" />
 
 <iframe id="upload_target" name="upload_target" src="#"
 	style="display: none;"></iframe>
@@ -82,17 +81,109 @@
 	<input type="file" id="profile-img-upload" name="profile-img-upload" />
 </form>
 
-<script type="text/ng-template" id="addDocumentModal.html">
-	<div class="modal-header">
-		<h3 class="modal-title">Upload a document</h3>
+<div id="addDocumentModal" class="modal fade" tabindex="-1"
+	role="dialog" aria-labelledby="addDocumentModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"
+					aria-hidden="true">×</button>
+				<h3 id="addDocumentModalLabel">Upload a document</h3>
+			</div>
+			<div class="modal-body">
+
+				<h4>Select document in your local disk</h4>
+
+				<iframe id="upload_target" name="upload_target" src="#"
+					style="display: none;"></iframe>
+
+				<form target="upload_target" id="uploadDocumentForm"
+					enctype="multipart/form-data" method="post">
+					<input type="file" id="document-upload" name="document-upload" />
+				</form>
+
+				<h4 style="margin-top: 30px">Info</h4>
+				<div style="display: inline-block">
+					<p style="display: inline; margin-right: 20px">Title:</p>
+					<input type="text" id="title" ng-model="addTitle" name="title">
+				</div>
+				<div style="margin-bottom: 10px"></div>
+				<div style="display: inline-block">
+					<div class="dropdown">
+						<div class="dropdown-toggle add-date-toggle-select" id="dLabel"
+							role="button" data-toggle="dropdown" data-target="#" href="">
+
+							<p style="display: inline; margin-right: 20px">Date:</p>
+							<input type="text" data-ng-model="addDate"><span
+								class="add-on"><i class="icon-calendar"></i></span>
+
+						</div>
+						<ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
+							<datetimepicker data-ng-model="addDate"
+								data-datetimepicker-config="addDateConfig"></datetimepicker>
+						</ul>
+					</div>
+				</div>
+				<div style="margin-bottom: 20px"></div>
+				<div id="tagged" style="display: inline-block">
+					<p style="display: inline; margin-right: 20px">Persons tagged:</p>
+
+					<div class="dropdown" style="display: inline; margin-right: 10px">
+						<button class="btn btn-default dropdown-toggle" type="button"
+							id="dropdownMenuTagged" data-toggle="dropdown"
+							aria-haspopup="true" aria-expanded="true">
+							Add <span class="caret"></span>
+						</button>
+
+						<ul id="add-taggablePersons" class="dropdown-menu"
+							aria-labelledby="dropdownMenuTagged">
+							<li ng-repeat="taggableUser in taggableUsers"><a href=""
+								ng-click="addElement(taggedUsers, taggableUsers, taggableUser)">{{taggableUser.name}}</a></li>
+						</ul>
+					</div>
+				</div>
+				<br />
+				<ul style="margin-top: 16px" id="add-taggedArea" name="taggedArea">
+					<li ng-repeat="taggedUser in taggedUsers">{{taggedUser.name}}<a
+						style="margin-left: 5px" href=""
+						ng-show="taggedUser.id != nodeUser.id || inHeritage"
+						ng-click="removeElement(taggedUsers, taggableUsers, taggedUser)">(remove)</a></li>
+				</ul>
+				<div id="excluded" style="display: inline-block; margin-top: 20px">
+					<p style="display: inline; margin-right: 20px">Persons I'm not
+						sharing with:</p>
+
+					<div class="dropdown" style="display: inline; margin-right: 10px">
+						<button class="btn btn-default dropdown-toggle" type="button"
+							id="dropdownMenuExcluded" data-toggle="dropdown"
+							aria-haspopup="true" aria-expanded="true">
+							Add <span class="caret"></span>
+						</button>
+
+						<ul id="add-excludablePersons" class="dropdown-menu"
+							aria-labelledby="dropdownMenuExcluded">
+							<li ng-repeat="excludableUser in excludableUsers"><a href=""
+								ng-click="addElement(excludedUsers, excludableUsers, excludableUser)">{{excludableUser.name}}</a></li>
+						</ul>
+					</div>
+				</div>
+				<br />
+				<ul style="margin-top: 16px" id="add-excludedArea"
+					name="excludedArea">
+					<li ng-repeat="excludedUser in excludedUsers">{{excludedUser.name}}<a
+						style="margin-left: 5px" href=""
+						ng-click="removeElement(excludedUsers, excludableUsers, excludedUser)">(remove)</a></li>
+				</ul>
+
+			</div>
+			<div class="modal-footer">
+				<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+				<button class="btn btn-primary" id="uploadDocument"
+					ng-click="uploadNewDocument()">Upload</button>
+			</div>
+		</div>
 	</div>
-	<div class="modal-body">
-		<div ng-include="'html/partials/upload.tpl.html'"></div>
-	</div>
-	<div class="modal-footer">
-		<button class="btn" data-dismiss="modal" aria-hidden="true" ng-click="openUploadModal(false)">Close</button>
-	</div>
-</script>
+</div>
 
 <div id="editDocumentModal" class="modal fade" tabindex="-1"
 	role="dialog" aria-labelledby="addDocumentModalLabel">

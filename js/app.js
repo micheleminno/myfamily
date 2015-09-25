@@ -1,7 +1,7 @@
 var app = angular.module('main', [ 'ngRoute', 'controllers',
-		'ui.bootstrap.datetimepicker', 'ngMessages']);
+		'ui.bootstrap.datetimepicker', 'ngMessages', 'angucomplete-alt' ]);
 
-var controllers = angular.module('controllers', [ 'user-services', 'angularFileUpload', 'ui.bootstrap']);
+var controllers = angular.module('controllers', [ 'user-services' ]);
 
 window.routes = {
 
