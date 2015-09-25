@@ -175,7 +175,7 @@ function getFamilyMembers(familyIndex, nodeIndex, memberType, graph, req,
 											label : row['label'],
 											img : row['img'],
 											person : isPerson,
-											email: row['email'],
+											email : row['email'],
 											fixed : fixed
 										};
 
@@ -366,11 +366,18 @@ function addMembers(asChild, nodeIndex, familyIndex, viewIndex, graph, history,
 					return link.id == idValue;
 				});
 
+				var linkVisible = 1;
+
+				if (selectedLink[0]) {
+
+					linkVisible = selectedLink[0].visible;
+				}
+
 				linkFamilyNode = {
 					id : idValue,
 					source : familyIndex,
 					target : nodeIndex,
-					visible : selectedLink[0].visible
+					visible : linkVisible
 				};
 			} else {
 
@@ -383,11 +390,18 @@ function addMembers(asChild, nodeIndex, familyIndex, viewIndex, graph, history,
 					return link.id == idValue;
 				});
 
+				var linkVisible = 1;
+
+				if (selectedLink[0]) {
+
+					linkVisible = selectedLink[0].visible;
+				}
+
 				linkFamilyNode = {
 					id : idValue,
 					source : nodeIndex,
 					target : familyIndex,
-					visible : selectedLink[0].visible
+					visible : linkVisible
 				};
 			}
 

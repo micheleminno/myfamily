@@ -125,6 +125,30 @@
 					</div>
 				</div>
 				<div style="margin-bottom: 20px"></div>
+				<div id="keywords">
+					<p style="margin-right: 20px;">Keywords:</p>
+					<div class="padded-row">
+
+						<div style="width: 167px; margin-left: 23px; margin-bottom: 20px"
+							angucomplete-alt id="newKeyword" placeholder="type new keyword"
+							pause="100" selected-object="selectedNewKeyword"
+							local-data="availableKeywords" search-fields="value"
+							title-field="value" minlength="1"
+							input-class="form-control form-control-small"
+							match-class="highlight" clear-selected="true"
+							override-suggestions="true" text-no-results=false
+							text-searching=false></div>
+
+					</div>
+				</div>
+				<ul id="edit-keywordArea" name="keywordArea">
+					<li ng-repeat="keyword in keywords">{{keyword.label}}<a
+						style="margin-left: 5px" href=""
+						ng-click="removeElement(keywords, availableKeywords, keyword)">(remove)</a></li>
+				</ul>
+
+				<br />
+				<div style="margin-bottom: 20px"></div>
 				<div id="tagged" style="display: inline-block">
 					<p style="display: inline; margin-right: 20px">Persons tagged:</p>
 
@@ -135,7 +159,7 @@
 							Add <span class="caret"></span>
 						</button>
 
-						<ul id="add-taggablePersons" class="dropdown-menu"
+						<ul id="add-taggablePersons" class="dropdown-menu scrollable-menu"
 							aria-labelledby="dropdownMenuTagged">
 							<li ng-repeat="taggableUser in taggableUsers"><a href=""
 								ng-click="addElement(taggedUsers, taggableUsers, taggableUser)">{{taggableUser.name}}</a></li>
@@ -160,7 +184,8 @@
 							Add <span class="caret"></span>
 						</button>
 
-						<ul id="add-excludablePersons" class="dropdown-menu"
+						<ul id="add-excludablePersons"
+							class="dropdown-menu scrollable-menu"
 							aria-labelledby="dropdownMenuExcluded">
 							<li ng-repeat="excludableUser in excludableUsers"><a href=""
 								ng-click="addElement(excludedUsers, excludableUsers, excludableUser)">{{excludableUser.name}}</a></li>
@@ -225,9 +250,9 @@
 					<p style="margin-right: 20px;">Keywords:</p>
 					<div class="padded-row">
 
-						<div style="width: 167px; margin-left: 23px; margin-bottom: 20px" angucomplete-alt
-							id="newKeyword" placeholder="type new keyword" pause="100"
-							selected-object="selectedNewKeyword"
+						<div style="width: 167px; margin-left: 23px; margin-bottom: 20px"
+							angucomplete-alt id="newKeyword" placeholder="type new keyword"
+							pause="100" selected-object="selectedNewKeyword"
 							local-data="availableKeywords" search-fields="value"
 							title-field="value" minlength="1"
 							input-class="form-control form-control-small"
@@ -243,9 +268,6 @@
 						ng-click="removeElement(keywords, availableKeywords, keyword)">(remove)</a></li>
 				</ul>
 
-
-
-
 				<br />
 				<div style="margin-bottom: 20px"></div>
 				<div id="tagged" style="display: inline-block">
@@ -258,7 +280,8 @@
 							Select <span class="caret"></span>
 						</button>
 
-						<ul id="edit-taggablePersons" class="dropdown-menu"
+						<ul id="edit-taggablePersons"
+							class="dropdown-menu scrollable-menu"
 							aria-labelledby="dropdownMenuTagged">
 							<li ng-repeat="taggableUser in taggableUsers"><a href=""
 								ng-click="addElement(taggedUsers, taggableUsers, taggableUser)">{{taggableUser.name}}</a></li>
@@ -285,7 +308,8 @@
 							Select <span class="caret"></span>
 						</button>
 
-						<ul id="edit-excludablePersons" class="dropdown-menu"
+						<ul id="edit-excludablePersons"
+							class="dropdown-menu scrollable-menu"
 							aria-labelledby="dropdownMenuExcluded">
 							<li ng-repeat="excludableUser in excludableUsers"><a href=""
 								ng-click="addElement(excludedUsers, excludableUsers, excludableUser)">{{excludableUser.name}}</a></li>

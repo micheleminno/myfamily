@@ -286,6 +286,63 @@ exports.view = function(req, res) {
 	});
 };
 
+function deleteDocKeywords(req, docIndex, callback) {
+
+	var deleteKeywordsQuery = "DELETE FROM keywords WHERE document = "
+			+ docIndex;
+
+	console.log(deleteKeywordsQuery);
+
+	req.getConnection(function(err, connection) {
+
+		connection.query(deleteKeywordsQuery, function(err, rows) {
+
+			if (err) {
+
+				console.log("Error Deleting : %s ", err);
+
+			} else {
+
+				if (rows.affectedRows > 0) {
+
+					console
+							.log("Keywords of document " + docIndex
+									+ " deleted");
+
+					callback(1);
+				}
+			}
+		});
+	});
+}
+
+function deleteDocTags(req, docIndex, callback) {
+
+	var deleteTagsQuery = "DELETE FROM tags WHERE document = " + docIndex;
+	console.log(deleteTagsQuery);
+
+	req.getConnection(function(err, connection) {
+
+		connection.query(deleteTagsQuery, function(err, rows) {
+
+			if (err) {
+
+				console.log("Error Deleting : %s ", err);
+
+			} else {
+
+				if (rows.affectedRows > 0) {
+
+					console.log("Tags of document " + docIndex + " deleted");
+				}
+
+				callback(1);
+			}
+
+		});
+	});
+}
+
 function deleteDocument(docIndex, req, callback) {
 
 	var deleteDocQuery = "DELETE FROM documents WHERE id = " + docIndex;
@@ -305,28 +362,17 @@ function deleteDocument(docIndex, req, callback) {
 
 					console.log("Document " + docIndex + " deleted");
 
-					var deleteTagsQuery = "DELETE FROM tags WHERE document = "
-							+ docIndex;
-					console.log(deleteTagsQuery);
+					deleteDocTags(req, docIndex, function(res) {
 
-					req.getConnection(function(err, connection) {
+						if (res == 1) {
 
-						connection.query(deleteTagsQuery, function(err, rows) {
+							deleteDocKeywords(req, docIndex, function() {
 
-							if (err) {
-
-								console.log("Error Deleting : %s ", err);
-
-							} else {
-
-								if (rows.affectedRows > 0) {
-
-									console.log("Tags of document " + docIndex
-											+ " deleted");
-									callback(1);
-								}
-							}
-						});
+								callback(1);
+							});
+						} else {
+							callback(0);
+						}
 					});
 
 				} else {
@@ -478,6 +524,70 @@ function insertNewTags(taggedIds, rows, docIndex, req, callback) {
 	}
 };
 
+function insertNewKeywords(keywords, rows, docIndex, req, callback) {
+
+	var newKeywords = [];
+
+	for (keywordIndex in keywords) {
+
+		var found = false;
+		for (rowIndex in rows) {
+
+			var row = rows[rowIndex];
+
+			if (keywords[keywordIndex]['label'] == row['value']) {
+
+				found = true;
+				break;
+			}
+		}
+
+		if (!found) {
+
+			newKeywords.push(keywords[keywordIndex]['label']);
+		}
+	}
+
+	console.log("New keywords: " + JSON.stringify(newKeywords));
+
+	if (newKeywords.length > 0) {
+
+		var multipleInsertQuery = "INSERT IGNORE INTO keywords VALUES ";
+
+		var separator = '';
+		for (keywordsIndex in newKeywords) {
+
+			multipleInsertQuery += separator + "(NULL, '"
+					+ newKeywords[keywordsIndex] + "', " + docIndex + ")";
+			separator = ', ';
+		}
+
+		console.log(multipleInsertQuery);
+
+		req.getConnection(function(err, connection) {
+
+			connection.query(multipleInsertQuery, function(err, rows) {
+
+				if (err) {
+
+					console.log("Error Inserting : %s ", err);
+					callback(-1);
+
+				} else {
+
+					if (rows.affectedRows > 0) {
+
+						callback(1);
+					}
+				}
+			});
+		});
+	} else {
+
+		callback(1);
+	}
+};
+
 function removeOldTags(taggedIds, rows, docIndex, req, callback) {
 
 	var oldTags = [];
@@ -544,7 +654,120 @@ function removeOldTags(taggedIds, rows, docIndex, req, callback) {
 	}
 };
 
-function updateTagged(taggedIds, docIndex, req, callback) {
+function removeOldKeywords(keywords, rows, docIndex, req, callback) {
+
+	var oldKeywords = [];
+
+	for (rowIndex in rows) {
+
+		var row = rows[rowIndex];
+
+		var found = false;
+		for (keywordIndex in keywords) {
+
+			if (keywords[keywordIndex]['label'] == row['value']) {
+
+				found = true;
+				break;
+			}
+		}
+
+		if (!found && row['value'] != -1) {
+
+			oldKeywords.push(row['value']);
+		}
+	}
+
+	console.log("Old keywords: " + JSON.stringify(oldKeywords));
+
+	if (oldKeywords.length > 0) {
+
+		var multipleDeleteQuery = "DELETE FROM keywords WHERE (document, value) IN (";
+
+		var separator = '';
+		for (keywordIndex in oldKeywords) {
+
+			multipleDeleteQuery += separator + "(" + docIndex + ", '"
+					+ oldKeywords[keywordIndex] + "')";
+			separator = ', ';
+		}
+
+		multipleDeleteQuery += ')';
+
+		console.log(multipleDeleteQuery);
+
+		req.getConnection(function(err, connection) {
+
+			connection.query(multipleDeleteQuery, function(err, rows) {
+
+				if (err) {
+
+					console.log("Error deleting : %s ", err);
+					callback(-1);
+
+				} else {
+
+					if (rows.affectedRows > 0) {
+
+						callback(1);
+					}
+				}
+			});
+		});
+	} else {
+
+		callback(1);
+	}
+};
+
+function updateKeywords(req, docIndex, callback) {
+
+	var getKeywordsQuery = 'SELECT * from keywords WHERE document = '
+			+ docIndex;
+
+	console.log(getKeywordsQuery);
+
+	req.getConnection(function(err, connection) {
+
+		connection.query(getKeywordsQuery,
+				function(err, rows) {
+
+					if (err) {
+
+						console.log("Error Selecting : %s ", err);
+
+					} else {
+
+						var keywords = req.query.keywords;
+
+						console.log("Keywords after edit: "
+								+ JSON.stringify(keywords));
+
+						var keywords = JSON.parse(req.query.keywords);
+
+						insertNewKeywords(keywords, rows, docIndex, req,
+								function(res) {
+
+									if (res == -1) {
+
+										callback(-1);
+
+									} else {
+
+										removeOldKeywords(keywords, rows,
+												docIndex, req, function(res) {
+
+													callback(res);
+
+												});
+									}
+								});
+					}
+				});
+	});
+}
+
+function updateTaggedAndKeywords(docIndex, req, callback) {
 
 	var getTagsQuery = 'SELECT * from tags WHERE document = ' + docIndex;
 
@@ -562,6 +785,8 @@ function updateTagged(taggedIds, docIndex, req, callback) {
 
 				console.log("Tags after edit: " + JSON.stringify(taggedIds));
 
+				var taggedIds = JSON.parse(req.query.tagged);
+
 				insertNewTags(taggedIds, rows, docIndex, req, function(res) {
 
 					if (res == -1) {
@@ -573,7 +798,19 @@ function updateTagged(taggedIds, docIndex, req, callback) {
 						removeOldTags(taggedIds, rows, docIndex, req, function(
 								res) {
 
-							callback(res);
+							if (res == -1) {
+
+								callback(-1);
+
+							} else if (req.query.keywords) {
+								updateKeywords(req, docIndex, function(res) {
+
+									callback(res);
+								});
+							} else {
+
+								callback(1);
+							}
 						});
 					}
 				});
@@ -629,11 +866,9 @@ exports.update = function(req, res) {
 
 						console.log("Title and date of document updated");
 
-						if (req.query.tagged) {
+						if (req.query.tagged || req.query.keywords) {
 
-							var taggedIds = JSON.parse(req.query.tagged);
-
-							updateTagged(taggedIds, index, req, function(
+							updateTaggedAndKeywords(index, req, function(
 									inserted) {
 
 								if (inserted == 1) {
@@ -683,11 +918,9 @@ exports.update = function(req, res) {
 		});
 	} else {
 
-		if (req.query.tagged) {
+		if (req.query.tagged || req.query.keywords) {
 
-			var taggedIds = JSON.parse(req.query.tagged);
-
-			updateTagged(taggedIds, index, req, function(inserted) {
+			updateTaggedAndKeywords(index, req, function(inserted) {
 
 				if (inserted == 1) {
 
@@ -775,39 +1008,70 @@ exports.get = function(req, res) {
 	});
 };
 
-function insertTag(document, node, req, callback) {
+function insertTags(docIndex, tagged, req, callback) {
 
-	var insertQuery = "INSERT INTO tags VALUES(" + document + ", " + node
-			+ ", NULL)";
+	var multipleInsertQuery = "INSERT IGNORE INTO tags VALUES ";
 
-	console.log(insertQuery);
+	var separator = '';
+	for (tagsIndex in tagged) {
+
+		multipleInsertQuery += separator + '(' + docIndex + ', '
+				+ tagged[tagsIndex] + ', NULL)';
+		separator = ', ';
+	}
+
+	console.log(multipleInsertQuery);
 
 	req.getConnection(function(err, connection) {
 
-		connection.query(insertQuery, function(err, rows) {
+		connection.query(multipleInsertQuery, function(err, rows) {
 
 			if (err) {
 
 				console.log("Error Inserting : %s ", err);
+				callback(-1);
 
 			} else {
 
-				if (rows.affectedRows > 0) {
-
-					console.log("New tag inserted");
-					callback(1);
-
-				} else {
-
-					console.log("New tag not inserted");
-					callback(-1);
-				}
+				callback(1);
 			}
 		});
 	});
-};
+}
 
-function insertDocument(title, date, file, owner, tagged, req, callback) {
+function insertKeywords(docIndex, keywords, req, callback) {
+
+	var multipleInsertQuery = "INSERT IGNORE INTO keywords VALUES ";
+
+	var separator = '';
+	for (keywordsIndex in keywords) {
+
+		multipleInsertQuery += separator + "(NULL, '" + keywords[keywordsIndex]
+				+ "', " + docIndex + ")";
+		separator = ', ';
+	}
+
+	console.log(multipleInsertQuery);
+
+	req.getConnection(function(err, connection) {
+
+		connection.query(multipleInsertQuery, function(err, rows) {
+
+			if (err) {
+
+				console.log("Error Inserting : %s ", err);
+				callback(-1);
+
+			} else {
+
+				callback(1);
+			}
+		});
+	});
+}
+
+function insertDocument(title, date, file, owner, tagged, keywords, req,
+		callback) {
 
 	var insertQuery = "INSERT INTO documents VALUES(NULL, '" + title
 			+ "', STR_TO_DATE('" + date + "', '%d/%m/%Y'), '" + file + "', "
@@ -830,8 +1094,6 @@ function insertDocument(title, date, file, owner, tagged, req, callback) {
 				console.log("New document with id " + info.insertId
 						+ " inserted");
 
-				var requests = 0;
-
 				var addedDocument = {
 					id : info.insertId,
 					title : title,
@@ -840,30 +1102,27 @@ function insertDocument(title, date, file, owner, tagged, req, callback) {
 					owner : owner
 				};
 
-				for (taggedIndex in tagged) {
+				if (tagged) {
 
-					requests++;
-					var taggedNode = tagged[taggedIndex];
+					insertTags(info.insertId, tagged, req, function(res) {
 
-					insertTag(info.insertId, taggedNode, req, function(
-							tagInserted) {
+						if (keywords) {
 
-						// TODO
-						// check
-						// tag
-						// inserted
+							insertKeywords(info.insertId, keywords, req,
+									function(res) {
 
-						requests--;
+										callback(addedDocument);
 
-						if (requests == 0) {
+									});
+						} else {
 
 							callback(addedDocument);
 						}
 					});
 				}
-
-				if (tagged.length == 0) {
-
+				
+				else {
+					
 					callback(addedDocument);
 				}
 			}
@@ -892,20 +1151,26 @@ exports.add = function(req, res) {
 		tagged = JSON.parse(req.query.tagged);
 	}
 
-	insertDocument(title, date, file, owner, tagged, req,
-			function(insertedDoc) {
+	var keywords = null;
+	if (req.query.keywords) {
 
-				if (!insertedDoc) {
+		keywords = JSON.parse(req.query.keywords);
+	}
 
-					res.status(NOK).json('result', {
-						"msg" : "document not added"
-					});
-				} else {
+	insertDocument(title, date, file, owner, tagged, keywords, req, function(
+			insertedDoc) {
 
-					res.status(OK).json('result', insertedDoc);
+		if (!insertedDoc) {
 
-				}
+			res.status(NOK).json('result', {
+				"msg" : "document not added"
 			});
+		} else {
+
+			res.status(OK).json('result', insertedDoc);
+
+		}
+	});
 };
 
 exports.upload = function(req, res) {

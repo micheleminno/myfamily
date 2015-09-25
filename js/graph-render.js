@@ -168,6 +168,17 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 				name : d.label
 			};
 
+			if (d.keywords) {
+				scope.keywords = d.keywords;
+			} else {
+				scope.keywords = [];
+			}
+
+			server.getAllKeywords().then(function(data) {
+
+				scope.availableKeywords = data;
+			});
+
 			scope.taggableUsers = [];
 			scope.taggedUsers = [];
 			scope.taggedUsers.push(scope.nodeUser);

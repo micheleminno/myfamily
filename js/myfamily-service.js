@@ -853,12 +853,16 @@ app
 					};
 
 					this.addDocument = function(fileName, title, date,
-							taggedUsers, owner) {
+							taggedUsers, keywords, owner) {
 
 						var deferred = $q.defer();
 
 						var taggedUsersIds = taggedUsers.map(function(user) {
 							return user.id;
+						});
+
+						var keywordLabels = keywords.map(function(keyword) {
+							return keyword.label;
 						});
 
 						if (!date) {
@@ -871,6 +875,8 @@ app
 										+ fileName + "&title=" + title
 										+ "&date=" + date + "&tagged="
 										+ JSON.stringify(taggedUsersIds)
+										+ "&keywords="
+										+ JSON.stringify(keywordLabels)
 										+ '&owner=' + owner).success(
 
 						function(data) {
@@ -917,9 +923,10 @@ app
 								serverUrl + '/documents/' + docId
 										+ '/update?title=' + title + '&date='
 										+ date + '&tagged='
-										+ JSON.stringify(taggedUsersIds) + '&keywords='
-										+ JSON.stringify(keywords))
-								.success(function(data) {
+										+ JSON.stringify(taggedUsersIds)
+										+ '&keywords='
+										+ JSON.stringify(keywords)).success(
+								function(data) {
 
 									if (data) {
 

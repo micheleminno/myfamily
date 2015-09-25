@@ -388,7 +388,7 @@ var mainController = controllers
 						MyFamilyService
 								.addDocument(fileName, $scope.addTitle,
 										$scope.addDate, $scope.taggedUsers,
-										$scope.graph.user.id)
+										$scope.keywords, $scope.graph.user.id)
 								.then(
 										function(addedDoc) {
 
