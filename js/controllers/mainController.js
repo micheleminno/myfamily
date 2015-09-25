@@ -1,11 +1,35 @@
 var mainController = controllers
 		.controller(
 				"MainCtrl",
-				function($scope, $location, dateFilter, MyFamilyService,
+				function($scope, $location, dateFilter, MyFamilyService, $modal,
 						AuthenticationService) {
 
-					d3.select("svg").attr("opacity", 1);
 
+					var modalUploadIinstance = null;
+
+					$scope.openUploadModal = function(b){
+
+						if(b){
+							modalUploadIinstance = $modal.open({
+								animation: true,
+								templateUrl: 'addDocumentModal.html',
+								scope: $scope,
+								controller: 'FileUploadController'
+							});
+
+							modalUploadIinstance.result.then(function (selectedItem) {
+								//$scope.selected = selectedItem;
+							}, function () {
+								//console.info('Modal dismissed at: ' + new Date());
+							});
+						}else{
+							modalUploadIinstance.dismiss('cancel');
+						}
+					};
+
+
+					d3.select("svg").attr("opacity", 1);
+					
 					function entityIsForbidden(entity, entityType) {
 
 						var forbidden = false;
@@ -371,23 +395,12 @@ var mainController = controllers
 						$location.path('/login');
 					};
 
-					$scope.uploadNewDocument = function() {
+					$scope.uploadNewDocument = function(fileName, addTitle, addDate, taggedUsers) {
 
-						$('#uploadDocumentForm').attr(
-								'action',
-								MyFamilyService.getServerUrl()
-										+ '/documents/upload');
-
-						$('#uploadDocumentForm').submit();
-
-						var filePath = $('#document-upload').val();
-
-						fileName = filePath.substring(filePath
-								.lastIndexOf("\\") + 1);
-
+						
 						MyFamilyService
-								.addDocument(fileName, $scope.addTitle,
-										$scope.addDate, $scope.taggedUsers,
+								.addDocument(fileName, addTitle,
+										addDate, taggedUsers,
 										$scope.graph.user.id)
 								.then(
 										function(addedDoc) {
