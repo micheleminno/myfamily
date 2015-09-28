@@ -860,7 +860,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 															+ ": "
 															+ commons
 																	.getDate(event.date))
-											.attr("y", 50 + offset)
+											.attr("y", 62 + offset)
 											.attr(
 													"x",
 													configuration.centerX + 1000);
@@ -869,7 +869,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 											.append("circle")
 											.attr("class", "infoButton")
 											.attr("r", 20)
-											.attr("cy", 40 + offset)
+											.attr("cy", 52 + offset)
 											.attr(
 													"cx",
 													configuration.centerX + 1600)
@@ -881,7 +881,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 											.text("x")
 											.attr("fill", "white")
 											.attr("font-size", "25px")
-											.attr("y", 48 + offset)
+											.attr("y", 60 + offset)
 											.attr(
 													"x",
 													configuration.centerX + 1593)
