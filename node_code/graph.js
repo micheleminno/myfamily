@@ -655,19 +655,23 @@ function insertLink(source, target, linkVisible, req, callback) {
 	});
 };
 
-function getDefaultLabel(isPerson, sourceIndex, targetIndex) {
+function getDefaultLabel(isPerson, sourceIndex, targetIndex, linkVisible) {
 
 	var label;
 
 	if (isPerson) {
 
-		if (sourceIndex) {
+		if (sourceIndex && linkVisible) {
 
 			label = "New child";
 
 		} else if (targetIndex) {
 
 			label = "New parent";
+
+		} else if (!linkVisible) {
+
+			label = "New other";
 
 		} else {
 
@@ -699,18 +703,18 @@ exports.addNode = function(req, res) {
 
 	var isPerson = type == "person" ? true : false;
 
-	var label = req.query.label;
-
-	if (!label) {
-
-		label = getDefaultLabel(isPerson, sourceIndex, targetIndex);
-	}
-
 	var linkVisible = true;
 
 	if (req.query.link && req.query.link == 'invisible') {
 
 		linkVisible = false;
+	}
+
+	var label = req.query.label;
+
+	if (!label) {
+
+		label = getDefaultLabel(isPerson, sourceIndex, targetIndex, linkVisible);
 	}
 
 	insertNode(label, isPerson, req, function(insertedId) {

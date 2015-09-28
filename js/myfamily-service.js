@@ -64,7 +64,7 @@ app
 						}
 
 						internalAddNode('person', userId, familyNodeId,
-								familyNodeRole, partnerName).then(
+								familyNodeRole, partnerName, false, false).then(
 								function(data) {
 
 									if (data.newNode) {
@@ -141,7 +141,7 @@ app
 								// Family user + partner
 
 								internalAddNode('family', userId, userId,
-										'source').then(
+										'source', false, false).then(
 										function(data) {
 
 											var familyNodeId = data.newNode;
@@ -160,7 +160,7 @@ app
 								// Family user + parents + brothers/sisters
 
 								internalAddNode('family', userId, userId,
-										'target')
+										'target', false, false)
 										.then(
 												function(data) {
 
@@ -355,7 +355,7 @@ app
 					};
 
 					var internalAddNode = function(type, userId, otherNodeId,
-							otherNodeRole, label, visible) {
+							otherNodeRole, label, invisible) {
 
 						var deferred = $q.defer();
 
@@ -368,7 +368,7 @@ app
 							url += '&label=' + label;
 						}
 
-						if (!visible) {
+						if (invisible) {
 
 							url += '&link=invisible';
 						}
@@ -387,10 +387,10 @@ app
 					};
 
 					this.addNode = function(type, userId, otherNodeId,
-							otherNodeRole, visible) {
+							otherNodeRole, invisible) {
 
 						return internalAddNode(type, userId, otherNodeId,
-								otherNodeRole, visible);
+								otherNodeRole, false, invisible);
 					};
 
 					this.removeNode = function(userId, nodeId) {

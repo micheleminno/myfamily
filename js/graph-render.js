@@ -140,7 +140,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 				action : function(elm, d, i) {
 
 					server.addNode('person', graph.user.id, d.originalId,
-							'source', false).then(function() {
+							'source', true).then(function() {
 
 						scope.drawGraph(false, true);
 					});
@@ -1389,8 +1389,19 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 			d.taggedNodes.forEach(function(taggedNode) {
 
 				docContainer.append("text").attr("class", "docText").attr(
-						"style", "fill: white").attr("x", 1015).attr("y",
+						"style", "fill: black").attr("x", 1015).attr("y",
 						-50 + offset).text(taggedNode.label);
+
+				offset += 50;
+			});
+
+			offset = 0;
+
+			d.keywords.forEach(function(keyword) {
+
+				docContainer.append("text").attr("class", "docText").attr(
+						"style", "fill: black").attr("x", 2030).attr("y",
+						-50 + offset).text(keyword.label);
 
 				offset += 50;
 			});
