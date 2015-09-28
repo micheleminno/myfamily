@@ -64,7 +64,7 @@ app
 						}
 
 						internalAddNode('person', userId, familyNodeId,
-								familyNodeRole, partnerName, visible).then(
+								familyNodeRole, partnerName).then(
 								function(data) {
 
 									if (data.newNode) {

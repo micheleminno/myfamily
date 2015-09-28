@@ -564,7 +564,7 @@ exports.view = function(req, res) {
 function insertNode(label, isPerson, req, callback) {
 
 	var insertNodeQuery = "INSERT INTO nodes VALUES(NULL, '" + label
-			+ "', '', " + isPerson + ")";
+			+ "', '', " + isPerson + ", '')";
 
 	console.log(insertNodeQuery);
 
