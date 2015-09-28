@@ -156,6 +156,7 @@ app.directive('d3Tree', [
 					scope.drawGraph();
 
 					var interestingEntities = "[graphData.nodes + "
+							+ "graphData.updatedNodeName + "
 							+ "graphData.blacklist.blacklistedNodes + "
 							+ "graphData.blacklist.blacklistingUsers + "
 							+ "graphData.documents + "

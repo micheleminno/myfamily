@@ -269,7 +269,10 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 									label.textContent = result;
 
 									server.updateNode(d.originalId,
-											graph.user.id, 'label', result);
+											graph.user.id, 'label', result).then(function() {
+
+												graph.updatedNodeName = result;
+											});
 								}
 
 							}
