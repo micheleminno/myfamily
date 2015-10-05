@@ -86,6 +86,7 @@ app.get('/:user/graph/view', graph.view);
 app.get('/:user/graph/add', graph.addNode);
 app.get('/:user/graph/remove/:node', graph.removeNode);
 app.get('/:user/graph/update/:node', graph.updateNode);
+app.get('/:user/graph/:node/parents', graph.getParents);
 app.post('/:user/:view/graph/resetPositions', graph.resetPositions);
 app.post('/:user/graph/profileImage/:node', graph.updateProfileImage);
 app.get('/graph/namesakes', graph.namesakes);

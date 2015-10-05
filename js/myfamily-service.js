@@ -64,18 +64,21 @@ app
 						}
 
 						internalAddNode('person', userId, familyNodeId,
-								familyNodeRole, partnerName, false, false).then(
-								function(data) {
+								familyNodeRole, partnerName, false, false)
+								.then(
+										function(data) {
 
-									if (data.newNode) {
+											if (data.newNode) {
 
-										deferred.resolve("Relative "
-												+ data.newNode + " added");
-									} else {
-										deferred.resolve("Relative "
-												+ data.newNode + " not added");
-									}
-								});
+												deferred.resolve("Relative "
+														+ data.newNode
+														+ " added");
+											} else {
+												deferred.resolve("Relative "
+														+ data.newNode
+														+ " not added");
+											}
+										});
 					}
 
 					this.getUsers = function(username, firstParentName,
@@ -350,6 +353,21 @@ app
 
 							deferred.resolve(graphView);
 						});
+
+						return deferred.promise;
+					};
+
+					this.getParents = function(userId, familyId) {
+
+						var deferred = $q.defer();
+
+						$http.get(
+								serverUrl + "/" + userId + "/graph/" + familyId
+										+ "/parents").success(
+								function(graphView) {
+
+									deferred.resolve(graphView);
+								});
 
 						return deferred.promise;
 					};

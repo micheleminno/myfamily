@@ -117,11 +117,24 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 				title : 'Add parent',
 				action : function(elm, d, i) {
 
-					server.addNode('person', graph.user.id, d.originalId,
-							'target').then(function() {
+					server.getParents(graph.user.id, d.originalId).then(
+							function(parents) {
 
-						scope.drawGraph(false, true);
-					});
+								if (parents.length < 2) {
+
+									server.addNode('person', graph.user.id,
+											d.originalId, 'target').then(
+											function() {
+
+												scope.drawGraph(false, true);
+											});
+								}
+								else {
+									
+									alert("This family already has two parents");
+								}
+							});
+
 				}
 			},
 			{

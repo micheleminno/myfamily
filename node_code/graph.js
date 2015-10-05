@@ -115,6 +115,7 @@ function getFamilyMembers(familyIndex, nodeIndex, memberType, graph, req,
 			if (memberType == 'child') {
 
 				whereClause += 'l.source = ' + familyIndex;
+
 			} else if (memberType == 'parent') {
 
 				whereClause += 'l.target = ' + familyIndex;
@@ -500,6 +501,21 @@ function getFamilyType(viewIndex) {
 function output(graph, res) {
 
 	res.status(OK).json('graph', graph);
+};
+
+exports.getParents = function(req, res) {
+
+	var user = req.param('user');
+	var familyIndex = req.param('node');
+
+	getFamilyMembers(familyIndex, user, 'parent', {}, req, function(graphView) {
+
+		res.status(OK).json('parents', graphView.nodes.filter(function(n) {
+
+			return n.person == 1;
+		}));
+	});
+
 };
 
 /*
