@@ -98,16 +98,11 @@ function setObjects(row, idsField, labelsField, aggregateField) {
 }
 
 /*
- * Get all documents in the heritage container which are owned by one of the
- * given nodes.
+ * Get all documents in the mixed stuff container.
  */
-exports.heritageList = function(req, res) {
+exports.mixedStuffList = function(req, res) {
 
-	var viewNodes = req.body.nodes;
-
-	var nodesIds = viewNodes.map(function(n) {
-		return n.originalId;
-	});
+	var userId = req.param("user");
 
 	var query = "SELECT d.id, d.title, t1.position, d.date, d.file, d.owner, "
 			+ "GROUP_CONCAT(t2.node SEPARATOR ', ') as taggedNodeIds, "
@@ -117,8 +112,7 @@ exports.heritageList = function(req, res) {
 			+ "FROM tags as t1 JOIN documents as d ON t1.document = d.id "
 			+ "JOIN tags as t2 ON t2.document = d.id JOIN nodes as n ON t2.node = n.id "
 			+ "LEFT JOIN keywords as k ON k.document = d.id "
-			+ "WHERE t1.node = -1 AND d.owner IN (" + nodesIds.join()
-			+ ") GROUP BY d.id";
+			+ "WHERE t1.node = -1 AND d.owner = " + userId + " GROUP BY d.id";
 
 	console.log(query);
 
@@ -1120,9 +1114,9 @@ function insertDocument(title, date, file, owner, tagged, keywords, req,
 						}
 					});
 				}
-				
+
 				else {
-					
+
 					callback(addedDocument);
 				}
 			}

@@ -833,26 +833,15 @@ app
 						return deferred.promise;
 					};
 
-					this.getGroundDocuments = function(owners) {
+					this.getMixedStuffDocuments = function(userId) {
 
 						var deferred = $q.defer();
 
-						var httpPostConfig = {
+						$http.get(serverUrl + '/' + userId + '/mixedStuff')
+								.success(function(documents) {
 
-							url : serverUrl + '/heritage/documents',
-							method : "POST",
-							data : {
-								nodes : owners
-							},
-							headers : {
-								'Content-Type' : 'application/json'
-							}
-						};
-
-						$http(httpPostConfig).success(function(events) {
-
-							deferred.resolve(events);
-						});
+									deferred.resolve(documents);
+								});
 
 						return deferred.promise;
 					};
@@ -879,9 +868,10 @@ app
 							return user.id;
 						});
 
-						var keywordLabels = keywords.map(function(keyword) {
+						var keywordLabels = keywords ? keywords.map(function(
+								keyword) {
 							return keyword.label;
-						});
+						}) : [];
 
 						if (!date) {
 

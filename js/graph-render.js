@@ -33,19 +33,19 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 		var groundContainer = svgRoot.append("g");
 
-		groundContainer.append("rect").attr("class", "ground").attr("width",
+		groundContainer.append("rect").attr("class", "closet").attr("width",
 				600).attr("height", 200).attr("x", -700).attr("y", 1100).attr(
-				"cursor", "pointer").on("click", groundClicked);
+				"cursor", "pointer").on("click", drawersClicked);
 
 		groundContainer.append("text").attr('class', "nodeLabel").attr("y",
-				1080).attr("x", -650).text("Heritage");
+				1080).attr("x", -650).text("Drawers");
 
-		groundContainer.append("rect").attr("class", "ground").attr("width",
+		groundContainer.append("rect").attr("class", "closet").attr("width",
 				500).attr("height", 200).attr("x", 1900).attr("y", 1100).attr(
-				"cursor", "pointer").on("click", groundClicked);
+				"cursor", "pointer").on("click", mixedStuffClicked);
 
 		groundContainer.append("text").attr('class', "nodeLabel").attr("y",
-				1080).attr("x", 2220).text("Heritage");
+				1080).attr("x", 2220).text("Mixed Stuff");
 
 		container = svgRoot.append("g");
 
@@ -281,8 +281,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 									var label = selection[0][0];
 									label.textContent = result;
 
-									server.updateNode(d.originalId,
-											graph.user.id, 'label', result).then(function() {
+									server.updateNode(d.originalId, graph.user.id, 'label', result).then(function() {
 
 												graph.updatedNodeName = result;
 											});
@@ -521,7 +520,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 		if (graph.selectedNode && graph.selectedNode.id == -1) {
 
-			selectGround();
+			selectMixedStuff();
 		}
 
 		if (graph.selectedDocument) {
@@ -1057,18 +1056,18 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 		d3.event.stopPropagation();
 	}
 
-	function selectGround() {
+	function selectMixedStuff() {
 
 		var selectedNode = svgRoot.append("g").attr("class", "selection")
 				.style("pointer-events", "click");
 
 		selectedNode
 				.append("rect")
-				.attr("class", "ground--selected")
-				.attr("width", 3100)
-				.attr("height", 350)
-				.attr("x", -700)
-				.attr("y", 1050)
+				.attr("class", "mixedStuff--selected")
+				.attr("width", 2000)
+				.attr("height", 2000)
+				.attr("x", -100)
+				.attr("y", -1000)
 				.attr("cursor", "auto")
 				.on(
 						'contextmenu',
@@ -1089,23 +1088,30 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 										}));
 
 		selectedNode.append("text").attr('class', "label--selected").attr("y",
-				1130).attr("x", -650).text("Heritage");
+				-150).attr("x", -50).text("Mixed Stuff");
 
 		svg.selectedNodeId = -1;
 
 		var centerX = -200;
-		var centerY = 1100;
+		var centerY = -900;
 		var maxRowSize = 40;
 
 		placeDocuments(-1, "tagged", selectedNode, centerX, centerY, maxRowSize);
 	}
 
-	function groundClicked(d) {
+	function mixedStuffClicked(d) {
 
 		graph.selectedNode = {};
 		graph.selectedNode.id = -1;
 
-		selectGround();
+		selectMixedStuff();
+
+		d3.event.stopPropagation();
+	}
+
+	function drawersClicked(d) {
+
+		selectDrawers();
 
 		d3.event.stopPropagation();
 	}
@@ -1578,7 +1584,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 					});
 		} else {
 
-			server.getGroundDocuments(graph.nodes).then(
+			server.getMixedStuffDocuments(graph.user.id).then(
 					function(data) {
 
 						displayDocuments(data.documents, -1, selectedNode,

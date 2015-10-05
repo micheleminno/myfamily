@@ -2,12 +2,12 @@
 	fill: white;
 }
 
-.ground {
+.closet {
 	fill: orange;
 	opacity: .6;
 }
 
-.ground--selected {
+.mixedStuff--selected {
 	fill: orange;
 	opacity: 1;
 }
