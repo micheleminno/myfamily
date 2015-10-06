@@ -7,11 +7,6 @@
 	opacity: .6;
 }
 
-.mixedStuff--selected {
-	fill: orange;
-	opacity: 1;
-}
-
 .link {
 	stroke: brown;
 	fill: none;
@@ -92,6 +87,13 @@
 .family--selected {
 	opacity: 1;
 	fill: darkred;
+	stroke: black;
+	stroke-width: 4px;
+}
+
+.mixedStuff--selected {
+	fill: orange;
+	opacity: 1;
 	stroke: black;
 	stroke-width: 4px;
 }

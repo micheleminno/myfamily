@@ -1075,9 +1075,9 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 				.append("rect")
 				.attr("class", "mixedStuff--selected")
 				.attr("width", 2000)
-				.attr("height", 2000)
+				.attr("height", 1200)
 				.attr("x", -100)
-				.attr("y", -1000)
+				.attr("y", -240)
 				.attr("cursor", "auto")
 				.on(
 						'contextmenu',
