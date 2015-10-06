@@ -137,7 +137,10 @@ exports.mixedStuffList = function(req, res) {
 
 					setObjects(row, 'keywordIds', 'keywordValues', 'keywords');
 
-					documents.push(row);
+					if (row['taggedNodes'].length == 1) {
+
+						documents.push(row);
+					}
 				}
 
 				console.log("Heritage docs: " + JSON.stringify(documents));

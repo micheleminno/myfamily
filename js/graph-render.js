@@ -117,23 +117,31 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 				title : 'Add parent',
 				action : function(elm, d, i) {
 
-					server.getParents(graph.user.id, d.originalId).then(
-							function(parents) {
+					server
+							.getParents(graph.user.id, d.originalId)
+							.then(
+									function(parents) {
 
-								if (parents.length < 2) {
+										if (parents.length < 2) {
 
-									server.addNode('person', graph.user.id,
-											d.originalId, 'target').then(
-											function() {
+											server
+													.addNode('person',
+															graph.user.id,
+															d.originalId,
+															'target')
+													.then(
+															function() {
 
-												scope.drawGraph(false, true);
-											});
-								}
-								else {
-									
-									alert("This family already has two parents");
-								}
-							});
+																scope
+																		.drawGraph(
+																				false,
+																				true);
+															});
+										} else {
+
+											alert("This family already has two parents");
+										}
+									});
 
 				}
 			},
@@ -199,7 +207,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 			scope.excludableUsers = [];
 			scope.excludedUsers = [];
 
-			scope.inHeritage = false;
+			scope.inMixedStuff = false;
 
 			for (nodeIndex in graph.nodes) {
 
@@ -237,7 +245,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 			scope.$apply();
 
-			scope.inHeritage = true;
+			scope.inMixedStuff = true;
 
 			$('#addDocumentModal #tagged').hide();
 			$('#addDocumentModal').modal('show');
@@ -281,7 +289,9 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 									var label = selection[0][0];
 									label.textContent = result;
 
-									server.updateNode(d.originalId, graph.user.id, 'label', result).then(function() {
+									server.updateNode(d.originalId,
+											graph.user.id, 'label', result)
+											.then(function() {
 
 												graph.updatedNodeName = result;
 											});
@@ -1190,8 +1200,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 				return user.id;
 			});
 
-			if (node.person && currentUser.id != scope.owner.id
-					&& actualUsersIds.indexOf(currentUser.id) == -1) {
+			if (node.person && actualUsersIds.indexOf(currentUser.id) == -1) {
 
 				potentialUsers.push(currentUser);
 			}
@@ -1269,13 +1278,13 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 			return user.id;
 		});
 
-		if (taggedUsersIds.indexOf(-1) > -1) {
-
-			scope.inHeritage = true;
-		}
-
 		scope.taggableUsers = [];
 		scope.taggedUsers = [];
+
+		if (taggedUsersIds.indexOf(-1) > -1) {
+
+			scope.inMixedStuff = true;
+		}
 
 		populateUsers(d.taggedNodes, scope.taggedUsers, scope.taggableUsers);
 
@@ -1410,23 +1419,28 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 			d.taggedNodes.forEach(function(taggedNode) {
 
-				docContainer.append("text").attr("class", "docText").attr(
-						"style", "fill: black").attr("x", 1015).attr("y",
-						-50 + offset).text(taggedNode.label);
+				if (taggedNode.id != -1) {
+					docContainer.append("text").attr("class", "docText").attr(
+							"style", "fill: black").attr("x", 1015).attr("y",
+							-50 + offset).text(taggedNode.label);
 
-				offset += 50;
+					offset += 50;
+				}
 			});
 
 			offset = 0;
 
-			d.keywords.forEach(function(keyword) {
+			if (d.keywords) {
 
-				docContainer.append("text").attr("class", "docText").attr(
-						"style", "fill: black").attr("x", 2030).attr("y",
-						-50 + offset).text(keyword.label);
+				d.keywords.forEach(function(keyword) {
 
-				offset += 50;
-			});
+					docContainer.append("text").attr("class", "docText").attr(
+							"style", "fill: black").attr("x", 2030).attr("y",
+							-50 + offset).text(keyword.label);
+
+					offset += 50;
+				});
+			}
 		}
 	}
 
