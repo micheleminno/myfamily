@@ -3,6 +3,8 @@ var exploreController = controllers.controller("ExploreCtrl", function($scope,
 
 	init();
 
+	var defaultDocumentImg = "default_pdf.png";
+
 	$scope.search = function() {
 
 		MyFamilyService.getGraphView(AuthenticationService.getUserId(), 4)
@@ -116,11 +118,6 @@ var exploreController = controllers.controller("ExploreCtrl", function($scope,
 		currentSearch.excludeTagged = $scope.uncheckedPeopleIds.toString();
 
 		$location.search(currentSearch);
-	};
-
-	$scope.getFilePath = function(docName) {
-
-		return MyFamilyService.getFilePath(docName);
 	};
 
 	$scope.sumResults = function(start, pageSize) {
@@ -357,5 +354,12 @@ var exploreController = controllers.controller("ExploreCtrl", function($scope,
 				$scope.updateKeywords();
 			}
 		});
+
+		$scope.getFileName = function(docName) {
+
+			return docName.substr(-4) === ".pdf" ? MyFamilyService
+					.getFilePath(defaultDocumentImg) : MyFamilyService
+					.getFilePath(docName);
+		};
 	}
 });

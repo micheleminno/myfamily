@@ -134,16 +134,16 @@
 
 								<div>
 									<div>
-										<a prettyp ng-href="{{ getFilePath(document.file) }}"
+										<a prettyp ng-href="{{ getFileName(document.file) }}"
 											rel="prettyPhoto[main]" target="_blank"
 											title="{{document.title}}"><img
-											ng-src="{{ getFilePath(document.file) }}" width="150" /></a>
+											ng-src="{{ getFileName(document.file) }}" width="150" /></a>
 
 									</div>
 								</div>
 							</div>
 							<div id="document_meta_col"
-								class="col-lg-4 col-md-4 col-sm-8 col-xs-12">
+								class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
 								<div id="profile_data" class="row">
 									<div>
 										<h5>{{document.title}}</h5>
@@ -154,7 +154,7 @@
 
 							</div>
 							<div id="document_tagged_col"
-								class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
+								class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
 								<div class="tagged_list">
 
 									<div ng-repeat="taggedNode in document.taggedNodes">
@@ -162,6 +162,20 @@
 										<span class="label label-default">{{taggedNode.label}}</span>
 										<img src="img/tag.png" style="display: inline-block"
 											width="25" class="img-responsive" alt="Responsive image">
+
+									</div>
+								</div>
+							</div>
+
+							<div id="document_keyword_col"
+								class="col-lg-2 col-md-2 col-sm-2 col-xs-12">
+								<div class="keyword_list">
+
+									<div ng-repeat="keyword in document.keywords">
+
+										<span class="label label-default">{{keyword.label}}</span> <img
+											src="img/keyword.png" style="display: inline-block"
+											width="21" class="img-responsive" alt="Responsive image">
 
 									</div>
 								</div>
