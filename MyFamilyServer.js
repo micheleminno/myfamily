@@ -15,6 +15,7 @@ var notification = require('./node_code/notification.js');
 var blacklist = require('./node_code/blacklist.js');
 var bookmark = require('./node_code/bookmark.js');
 var keyword = require('./node_code/keyword.js');
+var drawer = require('./node_code/drawer.js');
 
 var app = express();
 
@@ -100,7 +101,7 @@ app.get('/:user/events/add/:entityType/:entityId', event.add);
 app.get('/:user/events/remove/:entityType/:entityId', event.remove);
 app.post('/events', event.list);
 
-//Node events
+// Node events
 app.get('/nodeEvents/add/:node', nodeEvent.add);
 app.get('/nodeEvents/remove/:eventId', nodeEvent.remove);
 app.get('/nodeEvents/:node', nodeEvent.list);
@@ -128,8 +129,14 @@ app.get('/:user/bookmarks', bookmark.list);
 app.get('/:user/bookmarks/add/:document', bookmark.add);
 app.get('/:user/bookmarks/remove/:document', bookmark.remove);
 
-//Keywords
+// Keywords
 app.get('/:user/keywords', keyword.listAll);
 app.get('/:user/:document/keywords', keyword.list);
 app.get('/:user/:document/keywords/add/:keyword', keyword.add);
 app.get('/:user/:document/keywords/remove/:keyword', keyword.remove);
+
+// Drawers
+app.get('/:user/drawers/initialise', drawer.initialise);
+app.get('/:user/drawers', drawer.list);
+app.get('/:user/drawers/add', drawer.add);
+app.get('/:user/drawers/remove/:drawer', drawer.remove);

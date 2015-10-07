@@ -1221,4 +1221,43 @@ app
 						return deferred.promise;
 					};
 
+					// Drawers
+
+					this.createDefaultDrawers = function(userId) {
+
+						var deferred = $q.defer();
+
+						$http.get(
+								serverUrl + '/' + userId
+										+ '/drawers/initialise').success(
+
+						function(data) {
+
+							if (data) {
+
+								deferred.resolve(data);
+							}
+						});
+
+						return deferred.promise;
+					};
+
+					this.getDrawers = function(userId) {
+
+						var deferred = $q.defer();
+
+						$http.get(serverUrl + '/' + userId + '/drawers')
+								.success(
+
+								function(data) {
+
+									if (data) {
+
+										deferred.resolve(data);
+									}
+								});
+
+						return deferred.promise;
+					};
+
 				});

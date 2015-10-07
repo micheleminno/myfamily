@@ -47,17 +47,15 @@ exports.remove = function(req, res) {
  */
 exports.list = function(req, res) {
 
-	// TODO
-	var document = parseInt(req.param('document'));
+	var user = parseInt(req.param('user'));
 
-	var selectKeywordsQuery = "SELECT * from bookmarks WHERE document = "
-			+ document;
+	var selectDrawersQuery = "SELECT * from drawers WHERE user = " + user;
 
-	console.log(selectKeywordsQuery);
+	console.log(selectDrawersQuery);
 
 	req.getConnection(function(err, connection) {
 
-		connection.query(selectKeywordsQuery, function(err, rows) {
+		connection.query(selectDrawersQuery, function(err, rows) {
 
 			if (err) {
 
@@ -65,15 +63,15 @@ exports.list = function(req, res) {
 
 			} else {
 
-				var keywords = [];
+				var drawers = [];
 
 				for ( var rowIndex in rows) {
 
 					console.log(JSON.stringify(rows[rowIndex]));
-					keywords.push(rows[rowIndex]);
+					drawers.push(rows[rowIndex]);
 				}
 
-				res.status(OK).json('keywords', keywords);
+				res.status(OK).json('drawers', drawers);
 			}
 		});
 	});

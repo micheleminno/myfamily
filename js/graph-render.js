@@ -33,12 +33,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 		var groundContainer = svgRoot.append("g");
 
-		groundContainer.append("rect").attr("class", "closet").attr("width",
-				600).attr("height", 200).attr("x", -700).attr("y", 1100).attr(
-				"cursor", "pointer").on("click", drawersClicked);
-
-		groundContainer.append("text").attr('class', "nodeLabel").attr("y",
-				1080).attr("x", -650).text("Drawers");
+		populateDrawers(groundContainer);
 
 		groundContainer.append("rect").attr("class", "closet").attr("width",
 				500).attr("height", 200).attr("x", 1900).attr("y", 1100).attr(
@@ -75,6 +70,48 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 		svg.link = container.selectAll(".link");
 		svg.node = container.selectAll(".node");
+	}
+
+	function populateDrawers(container) {
+
+		var drawersContainer = container.append("g");
+		drawersContainer.append("rect").attr("class", "closet").attr("width",
+				600).attr("height", 200).attr("x", -700).attr("y", 1100).attr(
+				"cursor", "auto");
+
+		drawersContainer.append("text").attr('class', "nodeLabel").attr("y",
+				1080).attr("x", -650).text("Drawers");
+
+		server.getDrawers(graph.user.id).then(
+				function(drawers) {
+
+					var offset = 0;
+
+					drawers.forEach(function(drawer) {
+
+						drawersContainer.append("rect").attr("class", "drawer")
+								.attr("width", 100).attr("height", 200).attr(
+										"x", -200 + offset).attr("y", 1100)
+								.attr("cursor", "pointer").on("click",
+										drawerClicked);
+
+						var xVal = -140 + offset;
+						var yVal = 1270;
+
+						drawersContainer.append("text").attr('class',
+								"nodeLabel").attr("y", yVal).attr("x", xVal)
+								.text(drawer.label).attr(
+										"transform",
+										function(d) {
+
+											return "rotate(-90 " + xVal + ", "
+													+ yVal + ")";
+										});
+
+						offset += 120;
+					});
+				});
+
 	}
 
 	var onPersonMenu = [
@@ -1121,9 +1158,9 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 		d3.event.stopPropagation();
 	}
 
-	function drawersClicked(d) {
+	function drawerClicked(d) {
 
-		selectDrawers();
+		// TODO
 
 		d3.event.stopPropagation();
 	}

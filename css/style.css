@@ -7,6 +7,11 @@
 	opacity: .6;
 }
 
+.drawer {
+	fill: green;
+	opacity: .6;
+}
+
 .link {
 	stroke: brown;
 	fill: none;

@@ -91,6 +91,9 @@ var loginController = controllers
 															$scope.username,
 															user.nodeId);
 
+											MyFamilyService
+													.createDefaultDrawers(user.nodeId);
+
 											$location.path('/home');
 										});
 					};
@@ -190,6 +193,9 @@ var loginController = controllers
 																					$scope.credentials,
 																					$scope.username,
 																					nodeId);
+
+																	MyFamilyService
+																			.createDefaultDrawers(nodeId);
 
 																	$location
 																			.path('/home');
