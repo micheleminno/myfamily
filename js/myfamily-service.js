@@ -1260,4 +1260,25 @@ app
 						return deferred.promise;
 					};
 
+					// User
+
+					this.updateUser = function(nodeId, username) {
+
+						var deferred = $q.defer();
+
+						$http.get(
+								serverUrl + '/user/update?node=' + nodeId
+										+ '&username=' + username).success(
+
+						function(data) {
+
+							if (data) {
+
+								deferred.resolve(data);
+							}
+						});
+
+						return deferred.promise;
+					};
+
 				});

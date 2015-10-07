@@ -1,10 +1,10 @@
 var commons = window.commons || {};
 
-commons.getCircleSize = function(thisLabel, thisLevel, userLabel) {
+commons.getCircleSize = function(thisId, thisLevel, userId) {
 
 	var circleSize;
 
-	if (thisLabel.toUpperCase() == userLabel.toUpperCase()) {
+	if (thisId == userId) {
 
 		circleSize = 20 * thisLevel * 2;
 
@@ -16,9 +16,9 @@ commons.getCircleSize = function(thisLabel, thisLevel, userLabel) {
 	return circleSize;
 };
 
-commons.getNodeClass = function(d, userLabel) {
+commons.getNodeClass = function(d, userId) {
 
-	if (d.label.toUpperCase() == userLabel.toUpperCase()) {
+	if (d.originalId == userId) {
 
 		nodeClass = "node me";
 

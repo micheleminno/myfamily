@@ -302,38 +302,45 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 						"click",
 						function(d) {
 
-							if (d.label.toUpperCase() == graph.user.label
-									.toUpperCase()) {
+							var result = prompt('Enter a new name', d.name);
 
-								alert("If you want to change your name go to the setting menu");
+							if (result) {
 
-							} else {
+								var node = d3
+										.select(this.parentNode.parentNode);
+								var selection = node.selectAll(".nodeLabel");
 
-								var result = prompt('Enter a new name', d.name);
+								var label = selection[0][0];
+								label.textContent = result;
 
-								if (result) {
+								d.label = result;
+								var selection = d3.select(this);
+								var label = selection[0][0];
+								label.textContent = result;
 
-									var node = d3
-											.select(this.parentNode.parentNode);
-									var selection = node
-											.selectAll(".nodeLabel");
+								server
+										.updateNode(d.originalId,
+												graph.user.id, 'label', result)
+										.then(
+												function() {
 
-									var label = selection[0][0];
-									label.textContent = result;
+													if (d.originalId == graph.user.id) {
 
-									d.label = result;
-									var selection = d3.select(this);
-									var label = selection[0][0];
-									label.textContent = result;
+														server
+																.updateUser(
+																		graph.user.id,
+																		result)
+																.then(
+																		function() {
 
-									server.updateNode(d.originalId,
-											graph.user.id, 'label', result)
-											.then(function() {
+																			graph.updatedNodeName = result;
+																		});
+													} else {
 
-												graph.updatedNodeName = result;
-											});
-								}
+														graph.updatedNodeName = result;
+													}
 
+												});
 							}
 
 							d3.event.stopPropagation();
@@ -508,11 +515,10 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 						clipPath = defs.append("svgRoot:clipPath").attr("id",
 								"clipPath_" + d.originalId);
 
-						var circleSize = commons.getCircleSize(d.label,
-								d.level, graph.user.label);
+						var circleSize = commons.getCircleSize(d.originalId,
+								d.level, graph.user.id);
 
-						var nodeClass = commons.getNodeClass(d,
-								graph.user.label);
+						var nodeClass = commons.getNodeClass(d, graph.user.id);
 
 						clipPath.append("circle").attr("class", nodeClass)
 								.attr("r", circleSize).attr("id",
@@ -651,8 +657,8 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 				"y",
 				function(d) {
 					return d.y
-							+ commons.getCircleSize(d.label, d.level,
-									graph.user.label);
+							+ commons.getCircleSize(d.originalId, d.level,
+									graph.user.id);
 				});
 
 		svg.node.selectAll(".my-nodeLabel").attr("x", function(d) {
@@ -661,8 +667,8 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 				"y",
 				function(d) {
 					return d.y
-							+ commons.getCircleSize(d.label, d.level,
-									graph.user.label);
+							+ commons.getCircleSize(d.originalId, d.level,
+									graph.user.id);
 				});
 
 		svg.node.selectAll(".profile-image").attr(
@@ -670,16 +676,16 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 				function(d) {
 
 					return d.x
-							- commons.getCircleSize(d.label, d.level,
-									graph.user.label);
+							- commons.getCircleSize(d.originalId, d.level,
+									graph.user.id);
 
 				}).attr(
 				"y",
 				function(d) {
 
 					return d.y
-							- commons.getCircleSize(d.label, d.level,
-									graph.user.label);
+							- commons.getCircleSize(d.originalId, d.level,
+									graph.user.id);
 				});
 
 		svg.node.selectAll("ellipse").attr("cx", function(d) {
@@ -712,7 +718,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 			return d.originalId == svg.nodeIdToUpdate;
 
-		}).attr("xlink:href", server.getFilePath(svg.fileName));
+		}).attr("xlink:href", server.getFilePath(svg.server.e));
 
 		svgRoot.selectAll(".profile-image--selected").attr("xlink:href",
 				server.getFilePath(svg.fileName));
@@ -1674,9 +1680,8 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 								var currentNode = d3.select(n);
 								var currentCircle = n.childNodes[0].childNodes[0].childNodes[0];
 								var circleSize = commons.getCircleSize(n
-										.getAttribute("label"), n
-										.getAttribute("level"),
-										graph.user.label);
+										.getAttribute("id"), n
+										.getAttribute("level"), graph.user.id);
 
 								currentNode.append("circle").attr("r",
 										circleSize + 100).attr("class",

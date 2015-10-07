@@ -102,47 +102,49 @@ exports.register = function(req, res) {
 
 exports.update = function(req, res) {
 
+	//TODO: update also other user fields
+	
 	var username = req.query.username;
-	var credentials = req.query.credentials;
 	var nodeId = req.query.node;
 
 	req.getConnection(function(err, connection) {
 
-		var updateUserQuery = "UPDATE users SET credentials = '" + credentials
-				+ "' WHERE username = '" + username + "' AND node = " + nodeId;
+		var updateUserQuery = "UPDATE users SET username = '" + username
+				+ "' WHERE node = " + nodeId;
 
 		console.log(updateUserQuery);
 
 		req.getConnection(function(err, connection) {
 
-			connection.query(updateUserQuery, function(err, rows) {
+			connection.query(updateUserQuery,
+					function(err, rows) {
 
-				if (err) {
+						if (err) {
 
-					console.log("Error Selecting : %s ", err);
+							console.log("Error Selecting : %s ", err);
 
-				} else {
+						} else {
 
-					if (rows.affectedRows > 0) {
+							if (rows.affectedRows > 0) {
 
-						console.log("User with username " + username
-								+ " updated");
+								console.log("User with node id " + nodeId
+										+ " updated");
 
-						res.status(OK).json('result', {
-							"userUpdated" : 1
-						});
+								res.status(OK).json('result', {
+									"userUpdated" : 1
+								});
 
-					} else {
+							} else {
 
-						console.log("User with username " + username
-								+ " not updated");
+								console.log("User with node id " + nodeId
+										+ " not updated");
 
-						res.status(OK).json('result', {
-							"userUpdated" : 0
-						});
-					}
-				}
-			});
+								res.status(OK).json('result', {
+									"userUpdated" : 0
+								});
+							}
+						}
+					});
 		});
 	});
 };
