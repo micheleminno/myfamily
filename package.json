@@ -1,0 +1,31 @@
+{
+  "name": "myfamily",
+  "version": "1.0.0",
+  "description": "",
+  "main": "MyFamilyServer.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "dependencies": {
+    "body-parser": "^1.13.1",
+    "cors": "^2.5.3",
+    "express": "^4.13.3",
+    "express-myconnection": "^1.0.4",
+    "forever": "^0.14.1",
+    "fs": "^0.0.2",
+    "multer": "^0.1.8",
+    "mysql": "^2.6.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://danielemeucci3@bitbucket.org/micheleminno/myfamily.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "homepage": "https://bitbucket.org/micheleminno/myfamily#readme"
+}
