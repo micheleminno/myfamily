@@ -211,7 +211,7 @@ exports.view = function(req, res) {
 
 	if (excludedNodeIds != null) {
 
-		excludedNodeIdsPart = " AND t1.node NOT IN (" + excludedNodeIds + ")";
+		excludedNodeIdsPart = " AND t.node NOT IN (" + excludedNodeIds + ")";
 	}
 
 	var viewNodes = req.body.nodes;
