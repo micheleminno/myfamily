@@ -1478,7 +1478,7 @@ exports.namesakes = function(req, res) {
 
 		parentsSelectPart = ", n5.label as firstParentName, n6.label as secondParentName";
 		parentsFromPart = " LEFT JOIN links as l4 ON n4.id = l4.target LEFT JOIN nodes as n5 ON l4.source = n5.id "
-				+ "LEFT JOIN links as l5 ON n4.id = l5.target LEFT JOIN nodes as n6 ON l5.source = n6.id "
+				+ "LEFT JOIN links as l5 ON n4.id = l5.target LEFT JOIN nodes as n6 ON l5.source = n6.id ";
 		parentsWherePart = " AND n5.label != n6.label";
 	}
 
@@ -1503,26 +1503,6 @@ exports.namesakes = function(req, res) {
 			+ parentsFromPart + siblingsFromPart + userWherePart
 			+ asParentWherePart + asChildWherePart + parentsWherePart
 			+ siblingsWherePart;
-
-	/*
-	 * var selectNamesakes = "SELECT n1.label as username, n1.id as id, n1.img
-	 * as img, n2.label as familyAsParentName, " + "n3.label as partnerName,
-	 * n4.label as familyAsChildName, n5.label as firstParentName, " + "n6.label
-	 * as secondParentName, n7.label as firstSiblingName, n8.label as
-	 * secondSiblingName " + "FROM nodes as n1 LEFT JOIN links as l1 ON n1.id =
-	 * l1.source LEFT JOIN nodes as n2 ON l1.target = n2.id " + "LEFT JOIN links
-	 * as l2 ON n2.id = l2.target LEFT JOIN nodes as n3 ON l2.source = n3.id " +
-	 * "LEFT JOIN links as l3 ON n1.id = l3.target LEFT JOIN nodes as n4 ON
-	 * l3.source = n4.id " + "LEFT JOIN links as l4 ON n4.id = l4.target LEFT
-	 * JOIN nodes as n5 ON l4.source = n5.id " + "LEFT JOIN links as l5 ON n4.id =
-	 * l5.target LEFT JOIN nodes as n6 ON l5.source = n6.id " + "LEFT JOIN links
-	 * as l6 ON n4.id = l6.source LEFT JOIN nodes as n7 ON l6.target = n7.id " +
-	 * "LEFT JOIN links as l7 ON n4.id = l7.source LEFT JOIN nodes as n8 ON
-	 * l7.target = n8.id " + "WHERE (n1.label != n3.label OR n3.label IS NULL)
-	 * AND (n1.label != n7.label OR n7.label IS NULL) " + "AND (n1.label !=
-	 * n8.label OR n8.label IS NULL) AND n5.label != n6.label " + "AND n1.label = '" +
-	 * name + "'";
-	 */
 
 	if (partnerName) {
 
