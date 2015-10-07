@@ -79,7 +79,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 				600).attr("height", 200).attr("x", -700).attr("y", 1100).attr(
 				"cursor", "auto");
 
-		drawersContainer.append("text").attr('class', "nodeLabel").attr("y",
+		drawersContainer.append("text").attr('class', "simpleLabel").attr("y",
 				1080).attr("x", -650).text("Drawers");
 
 		server.getDrawers(graph.user.id).then(

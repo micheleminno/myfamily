@@ -75,6 +75,13 @@
 	cursor: pointer;
 }
 
+.simpleLabel {
+	fill: brown;
+	font-size: 25px;
+	font-family: cursive;
+	cursor: auto;
+}
+
 .my-nodeLabel {
 	fill: brown;
 	font-size: 40px;

@@ -1228,7 +1228,7 @@ function getX(order, levelSize) {
 
 function getY(level) {
 
-	return offset * level - 2 * offset;
+	return offset * level - 1.65 * offset;
 };
 
 function assignPositions(graph, viewIndex, user, req, callback) {
