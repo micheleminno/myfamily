@@ -230,18 +230,18 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 		}
 	} ];
 
-	var onHeritageMenu = [ {
+	var onMixedStuffMenu = [ {
 		title : 'Add document',
 		action : function(elm, d, i) {
 
-			var heritageNode = {
+			var mixedStuffNode = {
 				id : -1,
-				name : "Heritage"
+				name : "Mixed stuff"
 			};
 
 			scope.taggableUsers = [];
 			scope.taggedUsers = [];
-			scope.taggedUsers.push(heritageNode);
+			scope.taggedUsers.push(mixedStuffNode);
 
 			scope.$apply();
 
@@ -726,7 +726,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 		d3.event.stopPropagation();
 	}
 
-	function profileNodeClicked(d) {
+	function nodeClicked(d) {
 
 		$(".d3-context-menu").css("display", "none");
 
@@ -830,7 +830,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 			svgRoot.selectAll(".infoButton").attr("class", "firedInfoButton");
 
 			var infoContainer = svg.selectedNode.append("g").attr("class",
-					"infoSelection").on("click", profileNodeClicked);
+					"infoSelection").on("click", nodeClicked);
 
 			infoContainer.append("rect").attr("class", "infoBox").attr("width",
 					1000).attr("height", 800).attr("x",
@@ -977,10 +977,11 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 		selectedNode.append("circle").attr('r', 615).attr("cx",
 				configuration.centerX).attr("cy", configuration.centerY).attr(
-				'class', "person--selected").on("click", profileNodeClicked)
-				.attr("cursor", "auto").on(
-						'contextmenu',
-						d3.contextMenu(onSelectedNodeMenu, function() {
+				'class', "person--selected").on("click", nodeClicked).attr(
+				"cursor", "auto").on(
+				'contextmenu',
+				d3.contextMenu(onSelectedNodeMenu,
+						function() {
 
 							svg.uploadedDocumentPosition = [ this.event.x,
 									this.event.y ];
@@ -988,7 +989,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 		var profileContainer = selectedNode.append("g").on("mouseover",
 				profileMouseovered).on("mouseout", profileMouseouted).on(
-				"click", profileNodeClicked);
+				"click", nodeClicked);
 
 		profileContainer.append("rect").attr("width", 220).attr("height", 220)
 				.attr('class', "profile-frame").attr("x",
@@ -1079,11 +1080,12 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 				.attr("x", -100)
 				.attr("y", -240)
 				.attr("cursor", "auto")
+				.on("click", nodeClicked)
 				.on(
 						'contextmenu',
 						d3
 								.contextMenu(
-										onHeritageMenu,
+										onMixedStuffMenu,
 										function() {
 
 											var x = this.event.x > -700
