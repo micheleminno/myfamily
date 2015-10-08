@@ -12,6 +12,14 @@
 	opacity: .6;
 }
 
+.drawerTitle {
+	fill: brown;
+	font-size: 25px;
+	font-family: cursive;
+	margin-top: 10px;
+	margin-left: 30px;
+}
+
 .link {
 	stroke: brown;
 	fill: none;

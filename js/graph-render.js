@@ -74,22 +74,27 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 	function populateDrawers(container) {
 
-		var drawersContainer = container.append("g");
-		drawersContainer.append("rect").attr("class", "closet").attr("width",
+		svg.drawersNode = container.append("g");
+
+		svg.drawersNode.append("rect").attr("class", "closet").attr("width",
 				600).attr("height", 200).attr("x", -700).attr("y", 1100).attr(
 				"cursor", "auto");
 
-		drawersContainer.append("text").attr('class', "simpleLabel").attr("y",
+		svg.drawersNode.append("text").attr('class', "simpleLabel").attr("y",
 				1080).attr("x", -650).text("Drawers");
+
+		svg.drawer = svg.drawersNode.selectAll(".drawer");
 
 		server.getDrawers(graph.user.id).then(
 				function(drawers) {
 
 					var offset = 0;
 
-					drawers.forEach(function(drawer) {
+					svg.drawer = svg.drawer.data(drawers).enter().append("g");
 
-						drawersContainer.append("rect").attr("class", "drawer")
+					svg.drawer.each(function(d) {
+
+						d3.select(this).append("rect").attr("class", "drawer")
 								.attr("width", 100).attr("height", 200).attr(
 										"x", -200 + offset).attr("y", 1100)
 								.attr("cursor", "pointer").on("click",
@@ -98,17 +103,18 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 						var xVal = -140 + offset;
 						var yVal = 1270;
 
-						drawersContainer.append("text").attr('class',
+						d3.select(this).append("text").attr('class',
 								"nodeLabel").attr("y", yVal).attr("x", xVal)
-								.text(drawer.label).attr(
+								.text(d.label).attr(
 										"transform",
 										function(d) {
 
 											return "rotate(-90 " + xVal + ", "
 													+ yVal + ")";
-										});
+										}).on("click", drawerClicked);
 
 						offset += 120;
+
 					});
 				});
 
@@ -1168,6 +1174,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 		// TODO
 
+		scope.openDrawer(d);
 		d3.event.stopPropagation();
 	}
 

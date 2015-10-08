@@ -148,6 +148,14 @@ var exploreController = controllers.controller("ExploreCtrl", function($scope,
 		return Math.ceil($scope.results.total / $scope.pageSize);
 	};
 
+	$scope.updateTitle = function() {
+
+		var currentSearch = $location.search();
+		currentSearch.title = $scope.title;
+
+		$location.search(currentSearch);
+	};
+
 	$scope.updateKeywords = function() {
 
 		var currentSearch = $location.search();
@@ -279,6 +287,17 @@ var exploreController = controllers.controller("ExploreCtrl", function($scope,
 
 				$scope.selectedFilter = currentFilterCriteria;
 			}
+		}
+
+		var urlTitle = $location.search().title;
+
+		if (urlTitle) {
+
+			$scope.title = urlTitle;
+
+		} else {
+
+			$scope.title = "";
 		}
 
 		var urlKeywords = $location.search().keywords;

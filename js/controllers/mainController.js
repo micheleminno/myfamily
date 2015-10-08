@@ -371,6 +371,14 @@ var mainController = controllers
 						$location.path('/login');
 					};
 
+					$scope.openDrawer = function(drawer) {
+
+						$location.path('/explore')
+								.search('title', drawer.label);
+						
+						$scope.$apply();
+					};
+
 					$scope.uploadNewDocument = function() {
 
 						$('#uploadDocumentForm').attr(
