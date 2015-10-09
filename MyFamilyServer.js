@@ -141,4 +141,4 @@ app.get('/:user/drawers', drawer.list);
 app.get('/drawers/:drawer', drawer.get);
 app.get('/:user/drawers/add', drawer.add);
 app.get('/drawers/:drawer/update', drawer.update);
-app.get('/:user/drawers/remove/:drawer', drawer.remove);
+app.get('/drawers/:drawer/remove', drawer.remove);

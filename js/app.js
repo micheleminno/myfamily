@@ -167,6 +167,7 @@ app.directive('d3Tree', [
 							+ "graphData.selectedDocument.date + "
 							+ "graphData.selectedDocument.taggedNodes + "
 							+ "graphData.notifications + "
+							+ "graphData.drawers + "
 							+ "graphData.resetPositions]";
 
 					scope.$watchCollection(interestingEntities, function(

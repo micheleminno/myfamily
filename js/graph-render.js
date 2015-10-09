@@ -72,6 +72,20 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 		svg.node = container.selectAll(".node");
 	}
 
+	var onDrawerMenu = [ {
+		title : 'Remove',
+		action : function(elm, d, i) {
+
+			server.removeDrawer(d.id).then(function() {
+
+				var indexDrawerToRemove = scope.graph.drawers.indexOf(d);
+
+				scope.graph.drawers.splice(indexDrawerToRemove, 1);
+				scope.drawGraph();
+			});
+		}
+	} ];
+
 	function populateDrawers(container) {
 
 		svg.drawersNode = container.append("g");
@@ -88,6 +102,8 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 		server.getDrawers(graph.user.id).then(
 				function(drawers) {
 
+					scope.graph.drawers = drawers;
+
 					var offset = 0;
 
 					svg.drawer = svg.drawer.data(drawers).enter().append("g");
@@ -98,7 +114,8 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 								.attr("width", 100).attr("height", 200).attr(
 										"x", -200 + offset).attr("y", 1100)
 								.attr("cursor", "pointer").on("click",
-										drawerClicked);
+										drawerClicked).on('contextmenu',
+										d3.contextMenu(onDrawerMenu));
 
 						var xVal = -140 + offset;
 						var yVal = 1270;
@@ -111,13 +128,14 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 											return "rotate(-90 " + xVal + ", "
 													+ yVal + ")";
-										}).on("click", drawerClicked);
+										}).on("click", drawerClicked).on(
+										'contextmenu',
+										d3.contextMenu(onDrawerMenu));
 
-						offset += 120;
+						offset -= 110;
 
 					});
 				});
-
 	}
 
 	var onPersonMenu = [

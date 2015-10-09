@@ -1277,6 +1277,45 @@ app
 						return deferred.promise;
 					};
 
+					this.addDrawer = function(userId, label, taggedIds) {
+
+						var deferred = $q.defer();
+
+						$http.get(
+								serverUrl + '/' + userId
+										+ '/drawers/add?label=' + label
+										+ '&tagged=' + taggedIds).success(
+
+						function(data) {
+
+							if (data) {
+
+								deferred.resolve(data);
+							}
+						});
+
+						return deferred.promise;
+					};
+
+					this.removeDrawer = function(drawerId) {
+
+						var deferred = $q.defer();
+
+						$http.get(
+								serverUrl + '/drawers/' + drawerId + '/remove')
+								.success(
+
+								function(data) {
+
+									if (data) {
+
+										deferred.resolve(data);
+									}
+								});
+
+						return deferred.promise;
+					};
+
 					this.updateDrawer = function(drawerId, label, taggedNodeIds) {
 
 						var deferred = $q.defer();

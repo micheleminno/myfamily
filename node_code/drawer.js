@@ -3,35 +3,39 @@ var NOK = 400;
 
 exports.add = function(req, res) {
 
-	// TODO
-	var document = parseInt(req.param('document'));
-	var keyword = req.param('keyword');
+	var userId = parseInt(req.param('user'));
 
-	var insertKeywordQuery = "INSERT INTO keywords VALUES(NULL, '" + keyword
-			+ "', " + document + ")";
+	var label = req.query.label;
+	var tagged = req.query.tagged;
 
-	console.log(insertKeywordQuery);
+	var insertDrawerQuery = "INSERT INTO drawers VALUES(NULL, " + userId
+			+ ", '" + label + "', '" + tagged + "', NULL, NULL, NULL, NULL)";
+
+	console.log(insertDrawerQuery);
 
 	req.getConnection(function(err, connection) {
 
-		connection.query(insertKeywordQuery, function(err, info) {
+		connection.query(insertDrawerQuery, function(err, info) {
 
 			if (err) {
 
 				console.log("Error Inserting : %s ", err);
-				console.log("Keyword not added");
+				console.log("Drawer not added");
 
 				res.status(NOK).json('result', {
-					"msg" : "keyword not added"
+					"msg" : "drawer not added"
 				});
 
 			} else {
 
-				console.log("Keyword with id " + info.insertId + " added");
+				console.log("Drawer with id " + info.insertId + " added");
 
-				res.status(OK).json('result', {
-					"msg" : "keyword added"
-				});
+				var insertedDrawer = {
+					id : info.insertId,
+					label : label
+				};
+
+				res.status(OK).json('result', insertedDrawer);
 			}
 		});
 	});
@@ -91,7 +95,41 @@ exports.update = function(req, res) {
 
 exports.remove = function(req, res) {
 
-	// TODO
+	var drawerIndex = parseInt(req.param('drawer'));
+
+	var deleteDrawerQuery = "DELETE FROM drawers WHERE id = " + drawerIndex;
+
+	console.log(deleteDrawerQuery);
+
+	req.getConnection(function(err, connection) {
+
+		connection.query(deleteDrawerQuery, function(err, rows) {
+
+			if (err) {
+
+				console.log("Error Deleting : %s ", err);
+
+			} else {
+
+				if (rows.affectedRows > 0) {
+
+					console.log("Drawer " + drawerIndex + " deleted");
+
+					res.status(OK).json('result', {
+						"msg" : "Drawer removed"
+					});
+
+				} else {
+
+					console.log("Drawer " + drawerIndex + " not deleted");
+
+					res.status(NOK).json('result', {
+						"msg" : "Drawer not removed"
+					});
+				}
+			}
+		});
+	});
 };
 
 /*

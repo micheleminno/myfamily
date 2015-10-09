@@ -197,6 +197,21 @@ var exploreController = controllers
 						}
 					};
 
+					$scope.addDrawer = function() {
+
+						var checkedNodeIdsString = $scope.checkedNodeIds.join();
+
+						MyFamilyService.addDrawer(
+								AuthenticationService.getUserId(),
+								"New drawer", checkedNodeIdsString).then(
+								function(newDrawer) {
+
+									$location.path('/explore').search('title',
+											newDrawer.label).search('drawer',
+											newDrawer.id);
+								});
+					};
+
 					$scope.sumResults = function(start, pageSize) {
 
 						var sum = start + pageSize;
