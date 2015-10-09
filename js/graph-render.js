@@ -1172,8 +1172,6 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 	function drawerClicked(d) {
 
-		// TODO
-
 		scope.openDrawer(d);
 		d3.event.stopPropagation();
 	}

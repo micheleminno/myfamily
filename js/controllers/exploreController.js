@@ -1,384 +1,481 @@
-var exploreController = controllers.controller("ExploreCtrl", function($scope,
-		$location, MyFamilyService, AuthenticationService) {
+var exploreController = controllers
+		.controller(
+				"ExploreCtrl",
+				function($scope, $location, MyFamilyService,
+						AuthenticationService) {
 
-	init();
+					init();
 
-	var defaultDocumentImg = "default_pdf.png";
+					var defaultDocumentImg = "default_pdf.png";
 
-	$scope.search = function() {
+					$scope.search = function() {
 
-		MyFamilyService.getGraphView(AuthenticationService.getUserId(), 4)
-				.then(
-						function(resultData) {
+						MyFamilyService
+								.getGraphView(
+										AuthenticationService.getUserId(), 4)
+								.then(
+										function(resultData) {
 
-							$scope.nodes = resultData.nodes;
+											$scope.nodes = resultData.nodes;
 
-							var data = {
-								nodes : $scope.nodes
-							};
+											var data = {
+												nodes : $scope.nodes
+											};
 
-							$scope.taggedPeople = resultData.nodes
-									.filter(function(n) {
+											$scope.taggedPeople = resultData.nodes
+													.filter(function(n) {
 
-										return n.person == 1;
-									});
+														return n.person == 1;
+													});
 
-							$scope.taggedPeople.forEach(function(n) {
+											$scope.taggedPeople
+													.forEach(function(n) {
 
-								n.count = 0;
-								n.checked = false;
-							});
+														n.count = 0;
+														n.checked = false;
+													});
 
-							MyFamilyService.getViewDocuments(
-									AuthenticationService.getUserId(), data,
-									$scope.start, $scope.pageSize,
-									$scope.keywords,
-									$scope.selectedSorting.field,
-									$scope.selectedFilter.name,
-									$scope.uncheckedPeopleIds).then(
-									function(resultData) {
+											MyFamilyService
+													.getViewDocuments(
+															AuthenticationService
+																	.getUserId(),
+															data,
+															$scope.start,
+															$scope.pageSize,
+															$scope.keywords,
+															$scope.selectedSorting.field,
+															$scope.selectedFilter.name,
+															$scope.uncheckedPeopleIds)
+													.then(
+															function(resultData) {
 
-										$scope.results = resultData;
+																$scope.results = resultData;
 
-										fillStars();
-										fillTaggedPeople();
+																fillStars();
+																fillTaggedPeople(function() {
+																	$scope.checkedNodeIds = $scope.taggedPeople
+																			.filter(
+																					function(
+																							n) {
+																						return n.checked;
+																					})
+																			.map(
+																					function(
+																							n) {
 
-										$scope.documentsReady = true;
-									});
-						});
-	};
+																						return n.originalId;
 
-	function fillStars() {
+																					});
 
-		$scope.results.documents.forEach(function(doc) {
+																	MyFamilyService
+																			.getDrawer(
+																					$scope.drawerId)
+																			.then(
+																					function(
+																							drawer) {
 
-			if (doc.bookmarked == null) {
+																						var checkedNodeIdsString = JSON
+																								.stringify($scope.checkedNodeIds);
 
-				doc.starFilePath = $scope.emptyStar;
+																						if ("["
+																								+ drawer.tagged
+																								+ "]" != checkedNodeIdsString) {
 
-			} else {
+																							$scope.drawerUpdated = false;
+																						}
+																					});
 
-				doc.starFilePath = $scope.fullStar;
-			}
-		});
-	}
+																	$scope.documentsReady = true;
+																});
 
-	function fillTaggedPeople() {
+															});
+										});
+					};
 
-		var data = {
-			nodes : $scope.nodes
-		};
+					function fillStars() {
 
-		MyFamilyService.getViewDocuments(AuthenticationService.getUserId(),
-				data, null, null, $scope.keywords, null,
-				$scope.selectedFilter.name, []).then(
-				function(resultData) {
+						$scope.results.documents.forEach(function(doc) {
 
-					var allDocuments = resultData.documents;
-					allDocuments.forEach(function(doc) {
+							if (doc.bookmarked == null) {
 
-						for (taggedNodesIndex in doc.taggedNodes) {
+								doc.starFilePath = $scope.emptyStar;
 
-							var taggedNode = doc.taggedNodes[taggedNodesIndex];
-
-							$scope.taggedPeople.forEach(function(n) {
-
-								if (n.originalId == taggedNode.id) {
-
-									if ($scope.uncheckedPeopleIds
-											.indexOf(n.originalId) == -1) {
-
-										found = true;
-										n.checked = true;
-									}
-
-									n.count++;
-								}
-							});
-						}
-					});
-				});
-
-	}
-
-	$scope.toggleTaggedUser = function(user) {
-
-		var userIndex = $scope.uncheckedPeopleIds.indexOf(user.originalId);
-
-		if (userIndex > -1) {
-
-			$scope.uncheckedPeopleIds.splice(userIndex, 1);
-
-		} else {
-
-			$scope.uncheckedPeopleIds.push(user.originalId);
-		}
-
-		var currentSearch = $location.search();
-		currentSearch.excludeTagged = $scope.uncheckedPeopleIds.toString();
-
-		$location.search(currentSearch);
-	};
-
-	$scope.sumResults = function(start, pageSize) {
-
-		var sum = start + pageSize;
-
-		if (sum > $scope.results.total) {
-
-			return $scope.results.total;
-		}
-
-		return sum;
-	};
-
-	$scope.navigateToPage = function(nextPage, nextStart) {
-
-		$scope.currentPage = nextPage;
-
-		var currentSearch = $location.search();
-		currentSearch.page = nextPage;
-		currentSearch.start = nextStart;
-
-		$location.search(currentSearch);
-	};
-
-	$scope.numberOfPages = function() {
-
-		return Math.ceil($scope.results.total / $scope.pageSize);
-	};
-
-	$scope.updateTitle = function() {
-
-		var currentSearch = $location.search();
-		currentSearch.title = $scope.title;
-
-		$location.search(currentSearch);
-	};
-
-	$scope.updateKeywords = function() {
-
-		var currentSearch = $location.search();
-		currentSearch.keywords = $scope.keywords;
-
-		$location.search(currentSearch);
-	};
-
-	$scope.updateSort = function() {
-
-		var currentSearch = $location.search();
-		currentSearch.sort = $scope.selectedSorting.field;
-
-		$location.search(currentSearch);
-	};
-
-	$scope.updateFilter = function() {
-
-		var currentSearch = $location.search();
-		currentSearch.filter = $scope.selectedFilter.name;
-
-		$location.search(currentSearch);
-	};
-
-	$scope.toggleBookmark = function(document) {
-
-		if (document.starFilePath == $scope.emptyStar) {
-
-			MyFamilyService.addToBookmarks(AuthenticationService.getUserId(),
-					document.id).then(function(result) {
-
-				if (result.msg == "bookmark added") {
-
-					document.starFilePath = $scope.fullStar;
-				}
-			});
-
-		} else {
-
-			MyFamilyService.removeFromBookmarks(
-					AuthenticationService.getUserId(), document.id).then(
-					function(result) {
-
-						if (result.msg == "bookmark deleted") {
-
-							if ($scope.selectedFilter.name == "All") {
-
-								document.starFilePath = $scope.emptyStar;
 							} else {
 
-								$scope.search();
+								doc.starFilePath = $scope.fullStar;
+							}
+						});
+					}
+
+					function fillTaggedPeople(callback) {
+
+						var data = {
+							nodes : $scope.nodes
+						};
+
+						MyFamilyService
+								.getViewDocuments(
+										AuthenticationService.getUserId(),
+										data, null, null, $scope.keywords,
+										null, $scope.selectedFilter.name, [])
+								.then(
+										function(resultData) {
+
+											var allDocuments = resultData.documents;
+											allDocuments
+													.forEach(function(doc) {
+
+														for (taggedNodesIndex in doc.taggedNodes) {
+
+															var taggedNode = doc.taggedNodes[taggedNodesIndex];
+
+															$scope.taggedPeople
+																	.forEach(function(
+																			n) {
+
+																		if (n.originalId == taggedNode.id) {
+
+																			if ($scope.uncheckedPeopleIds
+																					.indexOf(n.originalId) == -1) {
+
+																				n.checked = true;
+																			}
+
+																			n.count++;
+																		}
+																	});
+														}
+													});
+
+											callback();
+										});
+					}
+
+					$scope.toggleTaggedUser = function(user) {
+
+						var userIndex = $scope.uncheckedPeopleIds
+								.indexOf(user.originalId);
+
+						if (userIndex > -1) {
+
+							$scope.uncheckedPeopleIds.splice(userIndex, 1);
+
+						} else {
+
+							$scope.uncheckedPeopleIds.push(user.originalId);
+						}
+
+						var currentSearch = $location.search();
+						currentSearch.excludeTagged = $scope.uncheckedPeopleIds
+								.toString();
+
+						$location.search(currentSearch);
+					};
+
+					$scope.updateDrawer = function() {
+
+						var checkedNodeIdsString = $scope.checkedNodeIds.join();
+						MyFamilyService.updateDrawer($scope.drawerId, null,
+								checkedNodeIdsString).then(function(updated) {
+
+							$scope.drawerUpdated = true;
+						});
+					};
+
+					$scope.editDrawerName = function() {
+
+						var result = prompt('Enter a new name for this drawer',
+								$scope.title);
+
+						if (result) {
+
+							MyFamilyService.updateDrawer($scope.drawerId,
+									result, null).then(function(updated) {
+
+								$scope.title = result;
+							});
+						}
+					};
+
+					$scope.sumResults = function(start, pageSize) {
+
+						var sum = start + pageSize;
+
+						if (sum > $scope.results.total) {
+
+							return $scope.results.total;
+						}
+
+						return sum;
+					};
+
+					$scope.navigateToPage = function(nextPage, nextStart) {
+
+						$scope.currentPage = nextPage;
+
+						var currentSearch = $location.search();
+						currentSearch.page = nextPage;
+						currentSearch.start = nextStart;
+
+						$location.search(currentSearch);
+					};
+
+					$scope.numberOfPages = function() {
+
+						return Math
+								.ceil($scope.results.total / $scope.pageSize);
+					};
+
+					$scope.updateTitle = function() {
+
+						var currentSearch = $location.search();
+						currentSearch.title = $scope.title;
+
+						$location.search(currentSearch);
+					};
+
+					$scope.updateKeywords = function() {
+
+						var currentSearch = $location.search();
+						currentSearch.keywords = $scope.keywords;
+
+						$location.search(currentSearch);
+					};
+
+					$scope.updateSort = function() {
+
+						var currentSearch = $location.search();
+						currentSearch.sort = $scope.selectedSorting.field;
+
+						$location.search(currentSearch);
+					};
+
+					$scope.updateFilter = function() {
+
+						var currentSearch = $location.search();
+						currentSearch.filter = $scope.selectedFilter.name;
+
+						$location.search(currentSearch);
+					};
+
+					$scope.toggleBookmark = function(document) {
+
+						if (document.starFilePath == $scope.emptyStar) {
+
+							MyFamilyService.addToBookmarks(
+									AuthenticationService.getUserId(),
+									document.id).then(function(result) {
+
+								if (result.msg == "bookmark added") {
+
+									document.starFilePath = $scope.fullStar;
+								}
+							});
+
+						} else {
+
+							MyFamilyService
+									.removeFromBookmarks(
+											AuthenticationService.getUserId(),
+											document.id)
+									.then(
+											function(result) {
+
+												if (result.msg == "bookmark deleted") {
+
+													if ($scope.selectedFilter.name == "All") {
+
+														document.starFilePath = $scope.emptyStar;
+													} else {
+
+														$scope.search();
+													}
+												}
+											});
+						}
+					};
+
+					$scope.getDate = function(unformattedDate) {
+
+						return commons.getDate(unformattedDate);
+					};
+
+					function init() {
+
+						d3.select("svg").remove();
+
+						$scope.drawerUpdated = true;
+						$scope.documentsReady = false;
+						$scope.results = {};
+						$scope.results.total = 0;
+
+						$scope.sortingCriteria =
+
+						[ {
+							name : 'Date',
+							field : 'date',
+							url : 'date'
+						}, {
+							name : 'Last uploaded',
+							field : 'upload',
+							url : 'upload'
+						}, {
+							name : 'Last updated',
+							field : 'update',
+							url : 'update'
+						} ];
+
+						for ( var i = 0; i < $scope.sortingCriteria.length; i++) {
+
+							var currentSortingCriteria = $scope.sortingCriteria[i];
+
+							if (currentSortingCriteria.url == $location
+									.search().sort) {
+
+								$scope.selectedSorting = currentSortingCriteria;
 							}
 						}
-					});
-		}
-	};
 
-	$scope.getDate = function(unformattedDate) {
+						if (!$scope.selectedSorting) {
 
-		return commons.getDate(unformattedDate);
-	};
+							$scope.selectedSorting = $scope.sortingCriteria[0];
+						}
 
-	function init() {
+						$scope.filterCriteria =
 
-		d3.select("svg").remove();
+						[ {
+							name : 'All',
+						}, {
+							name : 'Bookmarked',
+						} ];
 
-		$scope.documentsReady = false;
-		$scope.results = {};
-		$scope.results.total = 0;
+						$scope.fullStar = "/myfamily/img/star-yellow-full.png";
+						$scope.emptyStar = "/myfamily/img/star-yellow-empty.png";
 
-		$scope.sortingCriteria =
+						var urlFilter = $location.search().filter;
+						if (urlFilter) {
 
-		[ {
-			name : 'Date',
-			field : 'date',
-			url : 'date'
-		}, {
-			name : 'Last uploaded',
-			field : 'upload',
-			url : 'upload'
-		}, {
-			name : 'Last updated',
-			field : 'update',
-			url : 'update'
-		} ];
+							$scope.selectedFilter = {};
+							$scope.selectedFilter.name = urlFilter;
 
-		for ( var i = 0; i < $scope.sortingCriteria.length; i++) {
+						} else {
 
-			var currentSortingCriteria = $scope.sortingCriteria[i];
+							$scope.selectedFilter = $scope.filterCriteria[0];
+						}
 
-			if (currentSortingCriteria.url == $location.search().sort) {
+						for ( var i = 0; i < $scope.filterCriteria.length; i++) {
 
-				$scope.selectedSorting = currentSortingCriteria;
-			}
-		}
+							var currentFilterCriteria = $scope.filterCriteria[i];
 
-		if (!$scope.selectedSorting) {
+							if (currentFilterCriteria.name == $location
+									.search().filter) {
 
-			$scope.selectedSorting = $scope.sortingCriteria[0];
-		}
+								$scope.selectedFilter = currentFilterCriteria;
+							}
+						}
 
-		$scope.filterCriteria =
+						var urlDrawerId = $location.search().drawer;
 
-		[ {
-			name : 'All',
-		}, {
-			name : 'Bookmarked',
-		} ];
+						if (urlDrawerId) {
 
-		$scope.fullStar = "/myfamily/img/star-yellow-full.png";
-		$scope.emptyStar = "/myfamily/img/star-yellow-empty.png";
+							$scope.drawerId = urlDrawerId;
 
-		var urlFilter = $location.search().filter;
-		if (urlFilter) {
+						} else {
 
-			$scope.selectedFilter = {};
-			$scope.selectedFilter.name = urlFilter;
+							$scope.drawerId = "";
+						}
 
-		} else {
+						var urlTitle = $location.search().title;
 
-			$scope.selectedFilter = $scope.filterCriteria[0];
-		}
+						if (urlTitle) {
 
-		for ( var i = 0; i < $scope.filterCriteria.length; i++) {
+							$scope.title = urlTitle;
 
-			var currentFilterCriteria = $scope.filterCriteria[i];
+						} else {
 
-			if (currentFilterCriteria.name == $location.search().filter) {
+							$scope.title = "";
+						}
 
-				$scope.selectedFilter = currentFilterCriteria;
-			}
-		}
+						var urlKeywords = $location.search().keywords;
 
-		var urlTitle = $location.search().title;
+						if (urlKeywords) {
 
-		if (urlTitle) {
+							$scope.keywords = urlKeywords;
 
-			$scope.title = urlTitle;
+						} else {
 
-		} else {
+							$scope.keywords = "";
+						}
 
-			$scope.title = "";
-		}
+						var urlCurrentPage = parseInt($location.search().page);
 
-		var urlKeywords = $location.search().keywords;
+						if (urlCurrentPage) {
 
-		if (urlKeywords) {
+							$scope.currentPage = urlCurrentPage;
 
-			$scope.keywords = urlKeywords;
+						} else {
 
-		} else {
+							$scope.currentPage = 1;
+						}
 
-			$scope.keywords = "";
-		}
+						var urlPageSize = parseInt($location.search().pageSize);
 
-		var urlCurrentPage = parseInt($location.search().page);
+						if (urlPageSize) {
 
-		if (urlCurrentPage) {
+							$scope.pageSize = urlPageSize;
 
-			$scope.currentPage = urlCurrentPage;
+						} else {
 
-		} else {
+							$scope.pageSize = 10;
+						}
 
-			$scope.currentPage = 1;
-		}
+						var urlStart = parseInt($location.search().start);
 
-		var urlPageSize = parseInt($location.search().pageSize);
+						if (urlStart) {
 
-		if (urlPageSize) {
+							$scope.start = urlStart;
 
-			$scope.pageSize = urlPageSize;
+						} else {
 
-		} else {
+							$scope.start = 0;
+						}
 
-			$scope.pageSize = 10;
-		}
+						var urlSort = parseInt($location.search().sort);
 
-		var urlStart = parseInt($location.search().start);
+						if (urlSort) {
 
-		if (urlStart) {
+							$scope.sort = urlSort;
 
-			$scope.start = urlStart;
+						} else {
 
-		} else {
+							$scope.sort = 0;
+						}
 
-			$scope.start = 0;
-		}
+						var excludeTagged = $location.search().excludeTagged;
 
-		var urlSort = parseInt($location.search().sort);
+						if (excludeTagged) {
 
-		if (urlSort) {
+							$scope.uncheckedPeopleIds = JSON.parse("["
+									+ excludeTagged + "]");
 
-			$scope.sort = urlSort;
+						} else {
 
-		} else {
+							$scope.uncheckedPeopleIds = [];
+						}
 
-			$scope.sort = 0;
-		}
+						$scope.$watch('keywords', function(newValue, oldValue) {
 
-		var excludeTagged = $location.search().excludeTagged;
+							if (oldValue != "" && newValue == "") {
 
-		if (excludeTagged) {
+								$scope.updateKeywords();
+							}
+						});
 
-			$scope.uncheckedPeopleIds = JSON.parse("[" + excludeTagged + "]");
+						$scope.getFileName = function(docName) {
 
-		} else {
-
-			$scope.uncheckedPeopleIds = [];
-		}
-
-		$scope.$watch('keywords', function(newValue, oldValue) {
-
-			if (oldValue != "" && newValue == "") {
-
-				$scope.updateKeywords();
-			}
-		});
-
-		$scope.getFileName = function(docName) {
-
-			return docName.substr(-4) === ".pdf" ? MyFamilyService
-					.getFilePath(defaultDocumentImg) : MyFamilyService
-					.getFilePath(docName);
-		};
-	}
-});
+							return docName.substr(-4) === ".pdf" ? MyFamilyService
+									.getFilePath(defaultDocumentImg)
+									: MyFamilyService.getFilePath(docName);
+						};
+					}
+				});

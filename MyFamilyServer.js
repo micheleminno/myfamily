@@ -138,5 +138,7 @@ app.get('/:user/:document/keywords/remove/:keyword', keyword.remove);
 // Drawers
 app.get('/:user/drawers/initialise', drawer.initialise);
 app.get('/:user/drawers', drawer.list);
+app.get('/drawers/:drawer', drawer.get);
 app.get('/:user/drawers/add', drawer.add);
+app.get('/drawers/:drawer/update', drawer.update);
 app.get('/:user/drawers/remove/:drawer', drawer.remove);

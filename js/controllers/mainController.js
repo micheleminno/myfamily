@@ -374,8 +374,34 @@ var mainController = controllers
 					$scope.openDrawer = function(drawer) {
 
 						$location.path('/explore')
-								.search('title', drawer.label);
-						
+								.search('title', drawer.label).search('drawer',
+										drawer.id);
+
+						if (drawer.tagged) {
+
+							var taggedIds = JSON.parse("[" + drawer.tagged
+									+ "]");
+
+							var nodeIds = $scope.graph.nodes.map(function(n) {
+								return n.originalId;
+							});
+
+							var excludedIds = nodeIds.filter(function(n) {
+
+								var found = false;
+								taggedIds.forEach(function(t) {
+									if (n == t) {
+
+										found = true;
+									}
+								});
+
+								return !found;
+							});
+
+							$location.search('excludeTagged', excludedIds.join());
+						}
+
 						$scope.$apply();
 					};
 

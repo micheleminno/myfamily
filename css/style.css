@@ -16,8 +16,13 @@
 	fill: brown;
 	font-size: 25px;
 	font-family: cursive;
-	margin-top: 10px;
+	margin-top: 9px;
 	margin-left: 30px;
+	cursor: pointer;
+}
+
+li.drawerTitle:hover {
+	color: red;
 }
 
 .link {

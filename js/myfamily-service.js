@@ -1260,6 +1260,62 @@ app
 						return deferred.promise;
 					};
 
+					this.getDrawer = function(drawerId) {
+
+						var deferred = $q.defer();
+
+						$http.get(serverUrl + '/drawers/' + drawerId).success(
+
+						function(data) {
+
+							if (data) {
+
+								deferred.resolve(data);
+							}
+						});
+
+						return deferred.promise;
+					};
+
+					this.updateDrawer = function(drawerId, label, taggedNodeIds) {
+
+						var deferred = $q.defer();
+						var url = serverUrl + '/drawers/' + drawerId
+								+ '/update';
+
+						if (label || taggedNodeIds) {
+
+							url += '?';
+						}
+
+						if (label) {
+
+							url += 'label=' + label;
+						}
+
+						if (label && taggedNodeIds) {
+
+							url += '&';
+						}
+
+						if (taggedNodeIds) {
+
+							url += 'tagged=' + taggedNodeIds;
+						}
+
+						$http.get(url).success(
+
+						function(data) {
+
+							if (data) {
+
+								deferred.resolve(data);
+							}
+						});
+
+						return deferred.promise;
+					};
+
 					// User
 
 					this.updateUser = function(nodeId, username) {
