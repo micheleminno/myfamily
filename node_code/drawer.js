@@ -207,10 +207,8 @@ exports.initialise = function(req, res) {
 
 	var user = parseInt(req.param('user'));
 
-	// TODO
-
 	var insertDefaultDrawersQuery = "INSERT INTO drawers VALUES(NULL, " + user
-			+ ", 'family photos', NULL, NULL, NULL, NULL, NULL)";
+			+ ", 'Photos with me', '" + user + "', NULL, NULL, NULL, NULL)";
 
 	console.log(insertDefaultDrawersQuery);
 

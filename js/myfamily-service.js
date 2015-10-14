@@ -253,14 +253,33 @@ app
 						return deferred.promise;
 					};
 
-					this.getRegisteredUser = function(username, credentials) {
+					this.getRegisteredUser = function(username, credentials,
+							nodeId) {
 
 						var deferred = $q.defer();
 
-						$http.get(
-								serverUrl + '/user/getRegistered?user='
-										+ username + '&credentials='
-										+ credentials).success(function(data) {
+						var url = serverUrl + '/user/getRegistered?';
+
+						var operator = '';
+
+						if (username) {
+
+							url += operator + 'user=' + username;
+							operator = '&';
+						}
+
+						if (credentials) {
+
+							url += operator + 'credentials=' + credentials;
+							operator = '&';
+						}
+
+						if (nodeId) {
+
+							url += operator + 'node=' + nodeId;
+						}
+
+						$http.get(url).success(function(data) {
 
 							deferred.resolve(data.registeredUser);
 						});

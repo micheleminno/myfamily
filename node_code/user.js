@@ -7,18 +7,28 @@ exports.getRegistered = function(req, res) {
 	var credentials = req.query.credentials;
 	var nodeId = req.query.node;
 
-	var queryPart;
+	var queryPart = "";
+
+	var operator = '';
+
+	if (username) {
+
+		queryPart += operator + " username = '" + username + "'";
+		operator = " AND";
+	}
 
 	if (credentials) {
 
-		queryPart = "AND credentials = '" + credentials + "'";
-	} else {
-
-		queryPart = "AND node = " + nodeId;
+		queryPart += operator + " credentials = '" + credentials + "'";
+		operator = " AND";
 	}
 
-	var getUserQuery = "SELECT * from users WHERE username = '" + username
-			+ "' " + queryPart;
+	if (nodeId) {
+
+		queryPart += operator + " node = " + nodeId;
+	}
+
+	var getUserQuery = "SELECT * from users WHERE" + queryPart;
 
 	console.log(getUserQuery);
 
@@ -102,8 +112,8 @@ exports.register = function(req, res) {
 
 exports.update = function(req, res) {
 
-	//TODO: update also other user fields
-	
+	// TODO: update also other user fields
+
 	var username = req.query.username;
 	var nodeId = req.query.node;
 

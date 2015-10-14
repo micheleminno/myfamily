@@ -103,7 +103,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 				function(drawers) {
 
 					scope.graph.drawers = drawers;
-				
+
 					var offset = 0;
 
 					svg.drawer = svg.drawer.data(drawers).enter().append("g");
@@ -313,6 +313,18 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 		}
 	} ];
 
+	function updateNodeName(firstLabel, secondLabel, newName, nodeElement) {
+
+		firstLabel.textContent = newName;
+		secondLabel.textContent = newName;
+		nodeElement.label = newName;
+
+		graph.updatedNodeName = newName;
+
+		server.updateNode(nodeElement.originalId, graph.user.id, 'label',
+				newName);
+	}
+
 	function editName(d) {
 
 		this
@@ -326,45 +338,71 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 						"click",
 						function(d) {
 
+							var node = d3.select(this.parentNode.parentNode);
+							var selection = node.selectAll(".nodeLabel");
+
+							var firstLabel = selection[0][0];
+
+							selection = d3.select(this);
+							var secondLabel = selection[0][0];
+
 							var result = prompt('Enter a new name', d.name);
 
 							if (result) {
 
-								var node = d3
-										.select(this.parentNode.parentNode);
-								var selection = node.selectAll(".nodeLabel");
+								if (d.originalId == graph.user.id) {
 
-								var label = selection[0][0];
-								label.textContent = result;
+									updateNodeName(firstLabel, secondLabel,
+											result, d);
 
-								d.label = result;
-								var selection = d3.select(this);
-								var label = selection[0][0];
-								label.textContent = result;
-
-								server
-										.updateNode(d.originalId,
-												graph.user.id, 'label', result)
-										.then(
-												function() {
-
-													if (d.originalId == graph.user.id) {
+									server
+											.updateUser(graph.user.id, result)
+											.then(
+													function() {
 
 														server
-																.updateUser(
-																		graph.user.id,
-																		result)
+																.getRegisteredUser(
+																		graph.updatedNodeName,
+																		null,
+																		null)
 																.then(
-																		function() {
+																		function(
+																				user) {
 
-																			graph.updatedNodeName = result;
+																			server
+																					.sendMail(
+																							"family.place notifications",
+																							"Hi "
+																									+ user.username
+																									+ ", your username has been successfully updated!",
+																							user.email);
 																		});
-													} else {
+													});
 
-														graph.updatedNodeName = result;
-													}
+								} else {
 
-												});
+									server
+											.getRegisteredUser(null, null,
+													d.originalId)
+											.then(
+													function(user) {
+
+														if (!user) {
+
+															updateNodeName(
+																	firstLabel,
+																	secondLabel,
+																	result, d);
+
+														} else {
+
+															window
+																	.alert("You can't change this: "
+																			+ user.username
+																			+ " is an active user");
+														}
+													});
+								}
 							}
 
 							d3.event.stopPropagation();
@@ -1789,8 +1827,8 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 	function wrap(text, width) {
 		text
 				.each(function() {
-					var text = d3.select(this), words = text.text().split(/\s+/)
-							.reverse(), word, line = [], lineNumber = 0, lineHeight = 1.1, // ems
+					var text = d3.select(this), words = text.text()
+							.split(/\s+/).reverse(), word, line = [], lineNumber = 0, lineHeight = 1.1, // ems
 					x = text.attr("x"), y = text.attr("y"), dy = 0, // parseFloat(text.attr("dy")),
 					tspan = text.text(null).append("tspan").attr("x", x).attr(
 							"y", y).attr("dy", dy + "em");
