@@ -67,23 +67,29 @@ var exploreController = controllers
 
 																					});
 
-																	MyFamilyService
-																			.getDrawer(
-																					$scope.drawerId)
-																			.then(
-																					function(
-																							drawer) {
+																	if ($scope.drawerId) {
 
-																						var checkedNodeIdsString = JSON
-																								.stringify($scope.checkedNodeIds);
+																		MyFamilyService
+																				.getDrawer(
+																						$scope.drawerId)
+																				.then(
+																						function(
+																								drawer) {
 
-																						if ("["
-																								+ drawer.tagged
-																								+ "]" != checkedNodeIdsString) {
+																							var checkedNodeIdsString = JSON
+																									.stringify($scope.checkedNodeIds);
 
-																							$scope.drawerUpdated = false;
-																						}
-																					});
+																							if ("["
+																									+ drawer.tagged
+																									+ "]" != checkedNodeIdsString) {
+
+																								$scope.drawerUpdated = false;
+																							}
+																						});
+																	} else {
+
+																		$scope.addNewDrawer = true;
+																	}
 
 																	$scope.documentsReady = true;
 																});
@@ -320,6 +326,18 @@ var exploreController = controllers
 						d3.select("svg").remove();
 
 						$scope.drawerUpdated = true;
+
+						// Check drawers limit
+						MyFamilyService.getDrawers(
+								AuthenticationService.getUserId()).then(
+								function(drawers) {
+
+									if (drawers.length == 5) {
+
+										$scope.drawersLimitReached = true;
+									}
+								});
+
 						$scope.documentsReady = false;
 						$scope.results = {};
 						$scope.results.total = 0;

@@ -3,13 +3,14 @@
 }
 
 .closet {
-	fill: orange;
-	opacity: .6;
+	fill: #76C676;
+	opacity: 1;
 }
 
 .drawer {
-	fill: green;
-	opacity: .6;
+	fill: #FDCA51;
+	opacity: 1;
+	cursor: pointer;
 }
 
 .drawerTitle {
@@ -88,6 +89,13 @@ li.drawerTitle:hover {
 	cursor: pointer;
 }
 
+.addDrawer {
+	fill: brown;
+	font-size: 30px;
+	font-family: cursive;
+	cursor: pointer;
+}
+
 .simpleLabel {
 	fill: brown;
 	font-size: 25px;
@@ -117,7 +125,7 @@ li.drawerTitle:hover {
 }
 
 .mixedStuff--selected {
-	fill: orange;
+	fill: #FDCA51;
 	opacity: 1;
 	stroke: black;
 	stroke-width: 4px;

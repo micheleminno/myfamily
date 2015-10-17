@@ -31,10 +31,11 @@
 			<ul class="nav navbar-nav">
 				<li><a href="" ng-click="updateDrawer()"
 					ng-show="!drawerUpdated" style="color: red">Update drawer</a></li>
-				<li><a style="cursor: default" href="" ng-show="drawerUpdated">Drawer
-						updated</a></li>
+				<li><a style="cursor: default" href=""
+					ng-show="drawerUpdated && title">Drawer updated</a></li>
 
-				<li><a href="" ng-click="addDrawer()" ng-show="!drawerUpdated"
+				<li><a href="" ng-click="addDrawer()"
+					ng-show="!drawersLimitReached && (!drawerUpdated || addNewDrawer)"
 					style="color: red">Save in a new drawer</a></li>
 			</ul>
 		</div>

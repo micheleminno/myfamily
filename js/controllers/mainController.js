@@ -399,10 +399,29 @@ var mainController = controllers
 								return !found;
 							});
 
-							$location.search('excludeTagged', excludedIds.join());
+							$location.search('excludeTagged', excludedIds
+									.join());
 						}
 
 						$scope.$apply();
+					};
+
+					$scope.goToExplorePage = function() {
+
+						$location.path('/explore');
+					};
+
+					$scope.addDrawer = function() {
+
+						MyFamilyService.addDrawer(
+								AuthenticationService.getUserId(),
+								"New drawer", '').then(
+								function(newDrawer) {
+
+									$location.path('/explore').search('title',
+											newDrawer.label).search('drawer',
+											newDrawer.id);
+								});
 					};
 
 					$scope.uploadNewDocument = function() {

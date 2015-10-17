@@ -9,6 +9,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 	var svgRoot = null;
 	var container = null;
+	var groundContainer = null;
 	var force = null;
 	var nodeDrag = null;
 
@@ -31,13 +32,16 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 		svgRoot.append("circle").attr("r", configuration.width * 10).attr(
 				"class", "lens").style("pointer-events", "all").call(zoom);
 
-		var groundContainer = svgRoot.append("g");
+		groundContainer = svgRoot.append("g");
 
 		populateDrawers(groundContainer);
 
 		groundContainer.append("rect").attr("class", "closet").attr("width",
-				500).attr("height", 200).attr("x", 1900).attr("y", 1100).attr(
-				"cursor", "pointer").on("click", mixedStuffClicked);
+				500).attr("height", 200).attr("x", 1900).attr("y", 1100);
+
+		groundContainer.append("rect").attr("class", "drawer").attr("width",
+				410).attr("height", 180).attr("x", 1930).attr("y", 1110).attr(
+				"rx", 10).attr("ry", 10).on("click", mixedStuffClicked);
 
 		groundContainer.append("text").attr('class', "nodeLabel").attr("y",
 				1080).attr("x", 2220).text("Mixed Stuff");
@@ -86,6 +90,11 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 		}
 	} ];
 
+	function addDrawerClicked() {
+
+		scope.addDrawer();
+	}
+
 	function populateDrawers(container) {
 
 		svg.drawersNode = container.append("g");
@@ -104,21 +113,23 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 					scope.graph.drawers = drawers;
 
-					var offset = 0;
+					var offset = -30;
+					var xVal = 0;
+					var yVal = 0;
 
 					svg.drawer = svg.drawer.data(drawers).enter().append("g");
 
 					svg.drawer.each(function(d) {
 
 						d3.select(this).append("rect").attr("class", "drawer")
-								.attr("width", 100).attr("height", 200).attr(
-										"x", -200 + offset).attr("y", 1100)
-								.attr("cursor", "pointer").on("click",
+								.attr("width", 100).attr("height", 180).attr(
+										"x", -200 + offset).attr("y", 1110)
+								.attr("rx", 10).attr("ry", 10).on("click",
 										drawerClicked).on('contextmenu',
 										d3.contextMenu(onDrawerMenu));
 
-						var xVal = -145 + offset;
-						var yVal = 1270;
+						xVal = -145 + offset;
+						yVal = 1270;
 
 						d3.select(this).append("text").attr('class',
 								"nodeLabel").attr("y", yVal).attr("x", xVal)
@@ -135,6 +146,19 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 						offset -= 110;
 
 					});
+
+					if (drawers.length < 5) {
+
+						groundContainer.append("circle")
+								.attr("class", "drawer").attr("r", 25).attr(
+										"cy", yVal - 70).attr("cx", xVal - 110)
+								.on("click", addDrawerClicked);
+
+						groundContainer.append("text").attr('class',
+								"addDrawer").attr("y", yVal - 61).attr("x",
+								xVal - 120).text("+").on("click",
+								addDrawerClicked);
+					}
 				});
 	}
 
