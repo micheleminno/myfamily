@@ -114,8 +114,8 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 					scope.graph.drawers = drawers;
 
 					var offset = -30;
-					var xVal = 0;
-					var yVal = 0;
+					var xVal = -50;
+					var yVal = 1270;
 
 					svg.drawer = svg.drawer.data(drawers).enter().append("g");
 
@@ -129,8 +129,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 										d3.contextMenu(onDrawerMenu));
 
 						xVal = -145 + offset;
-						yVal = 1270;
-
+						
 						d3.select(this).append("text").attr('class',
 								"nodeLabel").attr("y", yVal).attr("x", xVal)
 								.text(d.label).call(wrap, 150).attr(
