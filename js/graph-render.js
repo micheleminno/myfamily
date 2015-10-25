@@ -1233,7 +1233,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 		svg.selectedNodeId = -1;
 
 		var centerX = -200;
-		var centerY = -900;
+		var centerY = 0;
 		var maxRowSize = 40;
 
 		placeDocuments(-1, "tagged", selectedNode, centerX, centerY, maxRowSize);
