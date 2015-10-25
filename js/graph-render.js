@@ -1232,7 +1232,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 		svg.selectedNodeId = -1;
 
-		var centerX = -200;
+		var centerX = 0;
 		var centerY = 0;
 		var maxRowSize = 40;
 
