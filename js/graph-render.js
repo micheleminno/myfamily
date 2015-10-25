@@ -803,7 +803,7 @@ var graphRender = function(scope, graph, configuration, server, svg) {
 
 			return d.originalId == svg.nodeIdToUpdate;
 
-		}).attr("xlink:href", server.getFilePath(svg.server.e));
+		}).attr("xlink:href", server.getFilePath(svg.fileName));
 
 		svgRoot.selectAll(".profile-image--selected").attr("xlink:href",
 				server.getFilePath(svg.fileName));
