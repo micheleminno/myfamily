@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Sep 23, 2015 at 06:18 PM
+-- Generation Time: Oct 25, 2015 at 11:45 AM
 -- Server version: 5.5.29
 -- PHP Version: 5.3.28
 
@@ -60,7 +60,26 @@ CREATE TABLE IF NOT EXISTS `documents` (
   `file` varchar(100) NOT NULL,
   `owner` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=93 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=107 ;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `drawers`
+--
+
+DROP TABLE IF EXISTS `drawers`;
+CREATE TABLE IF NOT EXISTS `drawers` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user` int(11) NOT NULL,
+  `label` varchar(100) DEFAULT NULL,
+  `tagged` varchar(100) DEFAULT NULL,
+  `keywords` varchar(200) DEFAULT NULL,
+  `startDate` datetime DEFAULT NULL,
+  `endDate` datetime DEFAULT NULL,
+  `type` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=43 ;
 
 -- --------------------------------------------------------
 
@@ -78,7 +97,7 @@ CREATE TABLE IF NOT EXISTS `events` (
   `date` datetime NOT NULL,
   `user` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=88 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=101 ;
 
 -- --------------------------------------------------------
 
@@ -92,7 +111,7 @@ CREATE TABLE IF NOT EXISTS `keywords` (
   `value` varchar(50) NOT NULL,
   `document` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=3 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=17 ;
 
 -- --------------------------------------------------------
 
@@ -122,7 +141,7 @@ CREATE TABLE IF NOT EXISTS `nodes` (
   `person` tinyint(1) NOT NULL,
   `email` varchar(50) NOT NULL DEFAULT 'email@address',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=100 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=184 ;
 
 -- --------------------------------------------------------
 
@@ -138,7 +157,7 @@ CREATE TABLE IF NOT EXISTS `node_events` (
   `node` int(11) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `type` (`type`,`node`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=33 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=36 ;
 
 -- --------------------------------------------------------
 
@@ -183,7 +202,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `credentials` varchar(50) NOT NULL,
   `node` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=69 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=101 ;
 
 -- --------------------------------------------------------
 
