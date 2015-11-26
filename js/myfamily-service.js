@@ -155,10 +155,10 @@ app
 										});
 							}
 
-							if (!angular.isUndefined(secondParentName)
+							if (!angular.isUndefined(firstParentName)
+									|| !angular.isUndefined(secondParentName)
 									|| !angular.isUndefined(firstSiblingName)
-									|| !angular.isUndefined(secondSiblingName)
-									|| !angular.isUndefined(partnerName)) {
+									|| !angular.isUndefined(secondSiblingName)) {
 
 								// Family user + parents + brothers/sisters
 
