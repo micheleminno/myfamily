@@ -1,7 +1,5 @@
-var app = angular.module('main', [ 'ngRoute', 'controllers',
+var app = angular.module('main', [ 'ngRoute', 'user-services',
 		'ui.bootstrap.datetimepicker', 'ngMessages', 'angucomplete-alt' ]);
-
-var controllers = angular.module('controllers', [ 'user-services' ]);
 
 window.routes = {
 
@@ -43,9 +41,10 @@ window.routes = {
 };
 
 app.config(
-		[ '$routeProvider', '$locationProvider', '$httpProvider',
-				function($routeProvider, $locationProvider, $httpProvider) {
+		[ '$routeProvider', '$locationProvider', '$httpProvider', '$qProvider',
+				function($routeProvider, $locationProvider, $httpProvider, $qProvider) {
 
+					$qProvider.errorOnUnhandledRejections(false);
 					for ( var path in window.routes) {
 						$routeProvider.when(path, window.routes[path]);
 					}

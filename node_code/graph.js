@@ -500,7 +500,7 @@ function getFamilyType(viewIndex) {
 
 function output(graph, res) {
 
-	res.status(OK).json('graph', graph);
+	res.status(OK).json(graph);
 };
 
 exports.getParents = function(req, res) {
@@ -510,7 +510,7 @@ exports.getParents = function(req, res) {
 
 	getFamilyMembers(familyIndex, user, 'parent', {}, req, function(graphView) {
 
-		res.status(OK).json('parents', graphView.nodes.filter(function(n) {
+		res.status(OK).json(graphView.nodes.filter(function(n) {
 
 			return n.person == 1;
 		}));
@@ -520,10 +520,10 @@ exports.getParents = function(req, res) {
 
 /*
  * Get the subgraph representing the selected view of the specific user.
- * 
+ *
  * 0 : my family as a child 1 : my family as a parent 2 : my pedigree 3 : my
  * descendants 4 : my extended family
- * 
+ *
  */
 exports.view = function(req, res) {
 
@@ -579,8 +579,8 @@ exports.view = function(req, res) {
 
 function insertNode(label, isPerson, req, callback) {
 
-	var insertNodeQuery = "INSERT INTO nodes VALUES(NULL, '" + label
-			+ "', '', " + isPerson + ", '')";
+	var insertNodeQuery = "INSERT INTO nodes(label, img, person) VALUES('" + label
+			+ "', '', " + isPerson + ")";
 
 	console.log(insertNodeQuery);
 
@@ -737,7 +737,7 @@ exports.addNode = function(req, res) {
 
 		if (insertedId == -1) {
 
-			res.status(NOK).json('result', {
+			res.status(NOK).json({
 				"msg" : "node and link not added"
 			});
 		} else if (sourceIndex) {
@@ -747,13 +747,13 @@ exports.addNode = function(req, res) {
 
 				if (linkInserted) {
 
-					res.status(OK).json('result', {
+					res.status(OK).json({
 						"msg" : "graph updated",
 						"newNode" : insertedId
 					});
 				} else {
 
-					res.status(NOK).json('result', {
+					res.status(NOK).json({
 						"msg" : "link not added"
 					});
 				}
@@ -765,13 +765,13 @@ exports.addNode = function(req, res) {
 
 				if (linkInserted) {
 
-					res.status(OK).json('result', {
+					res.status(OK).json({
 						"msg" : "graph updated",
 						"newNode" : insertedId
 					});
 				} else {
 
-					res.status(NOK).json('result', {
+					res.status(NOK).json({
 						"msg" : "link not added"
 					});
 				}
@@ -779,7 +779,7 @@ exports.addNode = function(req, res) {
 			});
 		} else {
 
-			res.status(OK).json('result', {
+			res.status(OK).json({
 				"msg" : "graph updated",
 				"newNode" : insertedId
 			});
@@ -795,12 +795,12 @@ exports.addPerson = function(req, res) {
 
 		if (insertedId == -1) {
 
-			res.status(NOK).json('result', {
+			res.status(NOK).json({
 				"msg" : "person not added"
 			});
 		} else {
 
-			res.status(OK).json('result', {
+			res.status(OK).json({
 				"personId" : insertedId
 			});
 		}
@@ -879,7 +879,7 @@ exports.removeNode = function(req, res) {
 
 		deleteLinks(nodeIndex, req, function() {
 
-			res.status(OK).json('result', {
+			res.status(OK).json({
 				"msg" : "graph updated"
 			});
 		});
@@ -901,12 +901,12 @@ exports.updateNode = function(req, res) {
 
 		if (updated) {
 
-			res.status(OK).json('result', {
+			res.status(OK).json({
 				"msg" : "node updated"
 			});
 		} else {
 
-			res.status(NOK).json('result', {
+			res.status(NOK).json({
 				"msg" : "node not updated"
 			});
 		}
@@ -940,7 +940,6 @@ exports.resetPositions = function(req, res) {
 							+ view + " deleted");
 
 					res.status(OK).json(
-							'result',
 							{
 								"msg" : "Positions of user " + user
 										+ " and view " + view + " deleted"
@@ -952,7 +951,6 @@ exports.resetPositions = function(req, res) {
 							+ view + " not deleted: nothing to delete");
 
 					res.status(NOK).json(
-							'result',
 							{
 								"msg" : "Positions of user " + user
 										+ " and view " + view
@@ -1560,7 +1558,7 @@ exports.namesakes = function(req, res) {
 					}
 				}
 
-				res.status(OK).json('namesakes', namesakes);
+				res.status(OK).json(namesakes);
 			}
 		});
 	});

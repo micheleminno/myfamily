@@ -21,6 +21,8 @@ app
 
 					this.sendMail = function(subject, body, to) {
 
+						var deferred = $q.defer();
+
 						var data = {
 							subject : subject,
 							body : body,
@@ -29,7 +31,7 @@ app
 
 						var httpPostConfig = {
 
-							url : "php/notify.php",
+							url : "mail/notify.php",
 							method : "POST",
 							data : JSON.stringify(data),
 							headers : {
@@ -37,14 +39,17 @@ app
 							}
 						};
 
-						$http(httpPostConfig).success(function() {
+						$http(httpPostConfig).then(function(response) {
 
 							// Nothing to do
+							deferred.resolve("Email sent");
 
-						}).error(function(textStatus) {
+						}, function(response) {
 
-							alert("Email not sent: " + textStatus);
+							deferred.reject("Email not sent: " + JSON.stringify(response));
 						});
+
+						return deferred.promise;
 					};
 
 					// User
@@ -72,11 +77,11 @@ app
 
 												deferred.resolve("Relative "
 														+ data.newNode
-														+ " added");
+														+ " added to user with id = " + userId);
 											} else {
 												deferred.resolve("Relative "
 														+ data.newNode
-														+ " not added");
+														+ " not added to user with id = " + userId);
 											}
 										});
 					}
@@ -115,7 +120,7 @@ app
 							url += '&partnerName=' + partnerName;
 						}
 
-						$http.get(url).success(function(namesakes) {
+						$http.get(url).then(function(namesakes) {
 
 							deferred.resolve(namesakes);
 						});
@@ -135,7 +140,7 @@ app
 								&& angular.isUndefined(secondSiblingName)
 								&& angular.isUndefined(partnerName)) {
 
-							deferred.resolve("No relative to add");
+							deferred.resolve("No relative to add to user with id = " + userId);
 
 						} else {
 
@@ -224,7 +229,7 @@ app
 						this
 								.addUser(username)
 								.then(
-										function(addedUserId) {
+									function(addedUserId) {
 
 											addRelatives(addedUserId,
 													firstParentName,
@@ -233,7 +238,7 @@ app
 													secondSiblingName,
 													partnerName)
 													.then(
-															function() {
+															function(result) {
 
 																internalRegisterUserFromNode(
 																		username,
@@ -279,9 +284,11 @@ app
 							url += operator + 'node=' + nodeId;
 						}
 
-						$http.get(url).success(function(data) {
+						$http.get(url).then(function(data) {
 
 							deferred.resolve(data.registeredUser);
+						}, function (error){
+
 						});
 
 						return deferred.promise;
@@ -303,7 +310,7 @@ app
 								serverUrl + '/user/register?username='
 										+ username + '&credentials='
 										+ credentials + '&email=' + email
-										+ '&node=' + nodeId).success(
+										+ '&node=' + nodeId).then(
 								function(data) {
 
 									deferred.resolve(data.user);
@@ -319,7 +326,7 @@ app
 						$http.get(
 								serverUrl + '/user/getRegistered?user='
 										+ username + '&node=' + nodeId)
-								.success(function(data) {
+								.then(function(data) {
 
 									deferred.resolve(data.registeredUser);
 								});
@@ -335,7 +342,7 @@ app
 						$http.get(
 								serverUrl + '/user/update?username=' + username
 										+ '&credentials=' + newCredentials
-										+ '&node=' + nodeId).success(
+										+ '&node=' + nodeId).then(
 								function(data) {
 
 									deferred.resolve(data.userUpdated);
@@ -347,14 +354,16 @@ app
 					this.addUser = function(name) {
 
 						var deferred = $q.defer();
+						var url = serverUrl + "/graph/addPerson?name="
+								+ name;
 
-						$http.get(serverUrl + '/graph/addPerson?name=' + name)
-								.success(function(data) {
+						$http.get(url)
+								.then(function(data) {
 
-									if (data) {
+									deferred.resolve(data.personId);
+								}, function(data) {
 
-										deferred.resolve(data.personId);
-									}
+									deferred.reject(data);
 								});
 
 						return deferred.promise;
@@ -368,7 +377,7 @@ app
 
 						$http.get(
 								serverUrl + "/" + userId + "/graph/view?view="
-										+ viewId).success(function(graphView) {
+										+ viewId).then(function(graphView) {
 
 							deferred.resolve(graphView);
 						});
@@ -382,7 +391,7 @@ app
 
 						$http.get(
 								serverUrl + "/" + userId + "/graph/" + familyId
-										+ "/parents").success(
+										+ "/parents").then(
 								function(graphView) {
 
 									deferred.resolve(graphView);
@@ -410,7 +419,7 @@ app
 							url += '&link=invisible';
 						}
 
-						$http.get(url).success(
+						$http.get(url).then(
 
 						function(data) {
 
@@ -436,7 +445,7 @@ app
 
 						$http.get(
 								serverUrl + "/" + userId + '/graph/remove/'
-										+ nodeId).success(
+										+ nodeId).then(
 
 						function(data) {
 
@@ -458,7 +467,7 @@ app
 								serverUrl + '/' + userId + '/view/' + viewId
 										+ '/update?node=' + nodeId + '&x='
 										+ xPosition + '&y=' + yPosition)
-								.success(
+								.then(
 
 								function(data) {
 
@@ -486,7 +495,7 @@ app
 							}
 						};
 
-						$http(httpPostConfig).success(function(data) {
+						$http(httpPostConfig).then(function(data) {
 
 							deferred.resolve(data);
 						});
@@ -501,7 +510,7 @@ app
 						$http.get(
 								serverUrl + "/" + userId + '/graph/update/'
 										+ nodeId + '?field=' + field
-										+ '&value=' + value).success(
+										+ '&value=' + value).then(
 
 						function(data) {
 
@@ -530,7 +539,7 @@ app
 							}
 						};
 
-						$http(httpPostConfig).success(function(events) {
+						$http(httpPostConfig).then(function(events) {
 
 							deferred.resolve(events);
 						});
@@ -547,7 +556,7 @@ app
 								serverUrl + '/' + userId + '/events/add/'
 										+ entityType + '/' + entityId
 										+ '?type=' + eventType + '&node='
-										+ nodeId).success(
+										+ nodeId).then(
 
 						function(data) {
 
@@ -566,7 +575,7 @@ app
 
 						$http.get(
 								serverUrl + '/' + userId + '/events/remove/'
-										+ entityType + '/' + entityId).success(
+										+ entityType + '/' + entityId).then(
 
 						function(data) {
 
@@ -588,7 +597,7 @@ app
 						$http.get(
 								serverUrl + '/nodeEvents/add/' + nodeId
 										+ '?type=' + eventType + '&date='
-										+ date).success(
+										+ date).then(
 
 						function(data) {
 
@@ -608,7 +617,7 @@ app
 						$http
 								.get(
 										serverUrl + '/nodeEvents/remove/'
-												+ nodeEventId).success(
+												+ nodeEventId).then(
 
 								function(data) {
 
@@ -625,7 +634,7 @@ app
 
 						var deferred = $q.defer();
 
-						$http.get(serverUrl + '/nodeEvents/' + nodeId).success(
+						$http.get(serverUrl + '/nodeEvents/' + nodeId).then(
 
 						function(data) {
 
@@ -648,7 +657,7 @@ app
 								.get(
 										serverUrl + '/' + userId
 												+ '/notifications/1')
-								.success(
+								.then(
 
 										function(data) {
 
@@ -699,7 +708,7 @@ app
 							}
 						};
 
-						$http(httpPostConfig).success(function(data) {
+						$http(httpPostConfig).then(function(data) {
 
 							deferred.resolve(data);
 						});
@@ -714,7 +723,7 @@ app
 						$http.get(
 								serverUrl + '/' + userId
 										+ '/notifications/remove/' + eventId)
-								.success(
+								.then(
 
 								function(data) {
 
@@ -733,7 +742,7 @@ app
 
 						$http.get(
 								serverUrl + '/notifications/remove/'
-										+ entityType + '/' + entityId).success(
+										+ entityType + '/' + entityId).then(
 
 						function(data) {
 
@@ -753,7 +762,7 @@ app
 						$http.get($.get(
 								serverUrl + '/' + userId + '/notifications/'
 										+ eventId + '/setStatus?status=read')
-								.success(
+								.then(
 
 								function(data) {
 
@@ -829,7 +838,7 @@ app
 							}
 						};
 
-						$http(httpPostConfig).success(function(documents) {
+						$http(httpPostConfig).then(function(documents) {
 
 							deferred.resolve(documents);
 						});
@@ -843,7 +852,7 @@ app
 
 						$http.get(
 								serverUrl + "/documents?node=" + nodeId
-										+ "&relation=" + relationType).success(
+										+ "&relation=" + relationType).then(
 								function(documents) {
 
 									deferred.resolve(documents);
@@ -857,7 +866,7 @@ app
 						var deferred = $q.defer();
 
 						$http.get(serverUrl + '/' + userId + '/mixedStuff')
-								.success(function(documents) {
+								.then(function(documents) {
 
 									deferred.resolve(documents);
 								});
@@ -869,7 +878,7 @@ app
 
 						var deferred = $q.defer();
 
-						$http.get(serverUrl + "/documents/" + docId).success(
+						$http.get(serverUrl + "/documents/" + docId).then(
 								function(document) {
 
 									deferred.resolve(document);
@@ -904,7 +913,7 @@ app
 										+ JSON.stringify(taggedUsersIds)
 										+ "&keywords="
 										+ JSON.stringify(keywordLabels)
-										+ '&owner=' + owner).success(
+										+ '&owner=' + owner).then(
 
 						function(data) {
 
@@ -924,7 +933,7 @@ app
 						$http
 								.get(
 										serverUrl + '/documents/' + docId
-												+ '/remove').success(
+												+ '/remove').then(
 
 								function(data) {
 
@@ -952,7 +961,7 @@ app
 										+ date + '&tagged='
 										+ JSON.stringify(taggedUsersIds)
 										+ '&keywords='
-										+ JSON.stringify(keywords)).success(
+										+ JSON.stringify(keywords)).then(
 								function(data) {
 
 									if (data) {
@@ -974,7 +983,7 @@ app
 										serverUrl + '/documents/' + docId
 												+ '/updatePosition?node='
 												+ nodeId + '&x=' + xPosition
-												+ '&y=' + yPosition).success(
+												+ '&y=' + yPosition).then(
 
 								function(data) {
 
@@ -997,7 +1006,7 @@ app
 						$http.get(
 								serverUrl + '/' + userId + '/blacklists/add/'
 										+ blockedUserId + '/' + documentId)
-								.success(
+								.then(
 
 								function(data) {
 
@@ -1028,7 +1037,7 @@ app
 							}
 						};
 
-						$http(httpPostConfig).success(function(events) {
+						$http(httpPostConfig).then(function(events) {
 
 							deferred.resolve(events);
 						});
@@ -1054,7 +1063,7 @@ app
 							}
 						};
 
-						$http(httpPostConfig).success(function(res) {
+						$http(httpPostConfig).then(function(res) {
 
 							deferred.resolve(res);
 						});
@@ -1070,7 +1079,7 @@ app
 						$http.get(
 								serverUrl + '/' + userId
 										+ '/blacklists/remove/' + blockedUserId
-										+ '/' + documentId).success(
+										+ '/' + documentId).then(
 
 						function(data) {
 
@@ -1089,7 +1098,7 @@ app
 
 						$http.get(
 								serverUrl + '/' + userId + '/blacklists/nodes')
-								.success(
+								.then(
 
 								function(data) {
 
@@ -1109,7 +1118,7 @@ app
 
 						$http.get(
 								serverUrl + '/' + userId + '/blacklists/'
-										+ docId).success(
+										+ docId).then(
 
 						function(data) {
 
@@ -1128,7 +1137,7 @@ app
 
 						$http.get(
 								serverUrl + '/' + userId
-										+ '/forbiddenDocuments').success(
+										+ '/forbiddenDocuments').then(
 
 						function(data) {
 
@@ -1149,7 +1158,7 @@ app
 								.get(
 										serverUrl + '/' + userId
 												+ '/blacklistingUsers')
-								.success(
+								.then(
 
 								function(data) {
 
@@ -1170,7 +1179,7 @@ app
 
 						$http.get(
 								serverUrl + '/' + userId + '/bookmarks/add/'
-										+ documentId).success(
+										+ documentId).then(
 
 						function(data) {
 
@@ -1189,7 +1198,7 @@ app
 
 						$http.get(
 								serverUrl + '/' + userId + '/bookmarks/remove/'
-										+ documentId).success(
+										+ documentId).then(
 
 						function(data) {
 
@@ -1207,7 +1216,7 @@ app
 						var deferred = $q.defer();
 
 						$http.get(serverUrl + '/' + userId + '/bookmarks')
-								.success(
+								.then(
 
 								function(data) {
 
@@ -1227,7 +1236,7 @@ app
 						var deferred = $q.defer();
 
 						$http.get(serverUrl + '/' + userId + '/keywords')
-								.success(
+								.then(
 
 								function(data) {
 
@@ -1248,7 +1257,7 @@ app
 
 						$http.get(
 								serverUrl + '/' + userId
-										+ '/drawers/initialise').success(
+										+ '/drawers/initialise').then(
 
 						function(data) {
 
@@ -1266,7 +1275,7 @@ app
 						var deferred = $q.defer();
 
 						$http.get(serverUrl + '/' + userId + '/drawers')
-								.success(
+								.then(
 
 								function(data) {
 
@@ -1283,7 +1292,7 @@ app
 
 						var deferred = $q.defer();
 
-						$http.get(serverUrl + '/drawers/' + drawerId).success(
+						$http.get(serverUrl + '/drawers/' + drawerId).then(
 
 						function(data) {
 
@@ -1303,7 +1312,7 @@ app
 						$http.get(
 								serverUrl + '/' + userId
 										+ '/drawers/add?label=' + label
-										+ '&tagged=' + taggedIds).success(
+										+ '&tagged=' + taggedIds).then(
 
 						function(data) {
 
@@ -1322,7 +1331,7 @@ app
 
 						$http.get(
 								serverUrl + '/drawers/' + drawerId + '/remove')
-								.success(
+								.then(
 
 								function(data) {
 
@@ -1361,7 +1370,7 @@ app
 							url += 'tagged=' + taggedNodeIds;
 						}
 
-						$http.get(url).success(
+						$http.get(url).then(
 
 						function(data) {
 
@@ -1382,7 +1391,7 @@ app
 
 						$http.get(
 								serverUrl + '/user/update?node=' + nodeId
-										+ '&username=' + username).success(
+										+ '&username=' + username).then(
 
 						function(data) {
 

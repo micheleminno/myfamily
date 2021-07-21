@@ -54,7 +54,7 @@ exports.getRegistered = function(req, res) {
 
 					console.log("User " + username + " is not registered");
 
-					res.status(NOK).json('result', {
+					res.status(OK).json({
 						"registeredUser" : null
 					});
 				}
@@ -72,8 +72,8 @@ exports.register = function(req, res) {
 
 	req.getConnection(function(err, connection) {
 
-		var insertUserQuery = "INSERT INTO users VALUES(NULL, '" + username
-				+ "', 'NULL', '" + email + "', '" + credentials + "', "
+		var insertUserQuery = "INSERT INTO users(username, email, credentials, node) VALUES('" + username
+				+ "', '" + email + "', '" + credentials + "', "
 				+ nodeId + ")";
 
 		console.log(insertUserQuery);
@@ -85,9 +85,9 @@ exports.register = function(req, res) {
 				if (err) {
 
 					console.log("Error Inserting : %s ", err);
-					console.log("New user not inserted");
+					console.log("New user " + username + " not inserted");
 
-					res.status(OK).json('result', {
+					res.status(OK).json({
 						"user" : null
 					});
 
@@ -101,7 +101,7 @@ exports.register = function(req, res) {
 
 					console.log("New user with id " + user.id + " inserted");
 
-					res.status(OK).json('result', {
+					res.status(OK).json({
 						"user" : user
 					});
 				}
@@ -140,7 +140,7 @@ exports.update = function(req, res) {
 								console.log("User with node id " + nodeId
 										+ " updated");
 
-								res.status(OK).json('result', {
+								res.status(OK).json({
 									"userUpdated" : 1
 								});
 
@@ -149,7 +149,7 @@ exports.update = function(req, res) {
 								console.log("User with node id " + nodeId
 										+ " not updated");
 
-								res.status(OK).json('result', {
+								res.status(OK).json({
 									"userUpdated" : 0
 								});
 							}

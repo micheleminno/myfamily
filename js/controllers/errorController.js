@@ -1,4 +1,4 @@
-var errorController = controllers.controller('ErrorCtrl', [ '$scope',
+var errorController = app.controller('ErrorCtrl', [ '$scope',
 		'$rootScope', '$location', 'ErrorService',
 		function($scope, $rootScope, $location, ErrorService) {
 

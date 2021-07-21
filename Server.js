@@ -58,7 +58,7 @@ app.listen(8091, function() {
 
 app.get('/', function(req, res) {
 
-	res.sendfile('server_index.html');
+	res.sendFile('server_index.html', {root: __dirname});
 });
 
 // User

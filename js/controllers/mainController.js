@@ -1,4 +1,4 @@
-var mainController = controllers
+var mainController = app
 		.controller(
 				"MainCtrl",
 				function($scope, $location, dateFilter, MyFamilyService,

@@ -1,4 +1,4 @@
-var loginController = controllers
+var loginController = app
 		.controller(
 				"LoginCtrl",
 				function($scope, $q, $http, $location, dateFilter,
@@ -74,6 +74,8 @@ var loginController = controllers
 										$scope.partnerName)
 								.then(
 										function(user) {
+
+											$scope.user = user; // for testing purposes
 
 											MyFamilyService
 													.sendMail(

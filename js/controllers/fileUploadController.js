@@ -2,7 +2,7 @@
  * Created by daniele on 15/09/15.
  */
 
-controllers.controller('FileUploadController', ['$scope', 'FileUploader', 'dateFilter', function($scope, FileUploader, dateFilter) {
+app.controller('FileUploadController', ['$scope', 'FileUploader', 'dateFilter', function($scope, FileUploader, dateFilter) {
 
         var uploader = $scope.uploader = new FileUploader({
             url: 'http://localhost:8091/documents/upload'

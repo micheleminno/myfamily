@@ -1,4 +1,4 @@
-var exploreController = controllers
+var exploreController = app
 		.controller(
 				"ExploreCtrl",
 				function($scope, $location, MyFamilyService,

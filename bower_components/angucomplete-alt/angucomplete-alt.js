@@ -7,9 +7,8 @@
 
 /*! Copyright (c) 2014 Hidenari Nozaki and contributors | Licensed under the MIT license */
 
-'use strict';
-
 (function (root, factory) {
+  'use strict';
   if (typeof module !== 'undefined' && module.exports) {
     // CommonJS
     module.exports = factory(require('angular'));
@@ -21,6 +20,7 @@
     factory(root.angular);
   }
 }(window, function (angular) {
+  'use strict';
 
   angular.module('angucomplete-alt', []).directive('angucompleteAlt', ['$q', '$parse', '$http', '$sce', '$timeout', '$templateCache', '$interpolate', function ($q, $parse, $http, $sce, $timeout, $templateCache, $interpolate) {
     // keyboard events
@@ -30,8 +30,6 @@
     var KEY_LF  = 37;
     var KEY_ES  = 27;
     var KEY_EN  = 13;
-    var KEY_BS  =  8;
-    var KEY_DEL = 46;
     var KEY_TAB =  9;
 
     var MIN_LENGTH = 3;
@@ -48,7 +46,7 @@
     // Set the default template for this directive
     $templateCache.put(TEMPLATE_URL,
         '<div class="angucomplete-holder" ng-class="{\'angucomplete-dropdown-visible\': showDropdown}">' +
-        '  <input id="{{id}}_value" name="{{inputName}}" ng-class="{\'angucomplete-input-not-empty\': notEmpty}" ng-model="searchStr" ng-disabled="disableInput" type="{{inputType}}" placeholder="{{placeholder}}" maxlength="{{maxlength}}" ng-focus="onFocusHandler()" class="{{inputClass}}" ng-focus="resetHideResults()" ng-blur="hideResults($event)" autocapitalize="off" autocorrect="off" autocomplete="off" ng-change="inputChangeHandler(searchStr)"/>' +
+        '  <input id="{{id}}_value" name="{{inputName}}" tabindex="{{fieldTabindex}}" ng-class="{\'angucomplete-input-not-empty\': notEmpty}" ng-model="searchStr" ng-disabled="disableInput" type="{{inputType}}" placeholder="{{placeholder}}" maxlength="{{maxlength}}" ng-focus="onFocusHandler()" class="{{inputClass}}" ng-focus="resetHideResults()" ng-blur="hideResults($event)" autocapitalize="off" autocorrect="off" autocomplete="off" ng-change="inputChangeHandler(searchStr)"/>' +
         '  <div id="{{id}}_dropdown" class="angucomplete-dropdown" ng-show="showDropdown">' +
         '    <div class="angucomplete-searching" ng-show="searching" ng-bind="textSearching"></div>' +
         '    <div class="angucomplete-searching" ng-show="!searching && (!results || results.length == 0)" ng-bind="textNoResults"></div>' +
@@ -75,6 +73,7 @@
       var responseFormatter;
       var validState = null;
       var httpCanceller = null;
+      var httpCallInProgress = false;
       var dd = elem[0].querySelector('.angucomplete-dropdown');
       var isScrollOn = false;
       var mousedownOn = null;
@@ -96,23 +95,26 @@
 
       scope.currentIndex = scope.focusFirst ? 0 : null;
       scope.searching = false;
-      unbindInitialValue = scope.$watch('initialValue', function(newval, oldval) {
-
+      unbindInitialValue = scope.$watch('initialValue', function(newval) {
         if (newval) {
+          // remove scope listener
           unbindInitialValue();
+          // change input
+          handleInputChange(newval, true);
+        }
+      });
 
-          if (typeof newval === 'object') {
-            scope.searchStr = extractTitle(newval);
-            callOrAssign({originalObject: newval});
-          } else if (typeof newval === 'string' && newval.length > 0) {
-            scope.searchStr = newval;
-          } else {
-            if (console && console.error) {
-              console.error('Tried to set initial value of angucomplete to', newval, 'which is an invalid value');
-            }
+      scope.$watch('fieldRequired', function(newval, oldval) {
+        if (newval !== oldval) {
+          if (!newval) {
+            ctrl[scope.inputName].$setValidity(requiredClassName, true);
           }
-
-          handleRequired(true);
+          else if (!validState || scope.currentIndex === -1) {
+            handleRequired(false);
+          }
+          else {
+            handleRequired(true);
+          }
         }
       });
 
@@ -124,6 +126,29 @@
           clearResults();
         }
       });
+
+      scope.$on('angucomplete-alt:changeInput', function (event, elementId, newval) {
+        if (!!elementId && elementId === scope.id) {
+          handleInputChange(newval);
+        }
+      });
+
+      function handleInputChange(newval, initial) {
+        if (newval) {
+          if (typeof newval === 'object') {
+            scope.searchStr = extractTitle(newval);
+            callOrAssign({originalObject: newval});
+          } else if (typeof newval === 'string' && newval.length > 0) {
+            scope.searchStr = newval;
+          } else {
+            if (console && console.error) {
+              console.error('Tried to set ' + (!!initial ? 'initial' : '') + ' value of angucomplete to', newval, 'which is an invalid value');
+            }
+          }
+
+          handleRequired(true);
+        }
+      }
 
       // #194 dropdown list not consistent in collapsing (bug).
       function clickoutHandlerForDropdown(event) {
@@ -139,7 +164,7 @@
 
       function callOrAssign(value) {
         if (typeof scope.selectedObject === 'function') {
-          scope.selectedObject(value);
+          scope.selectedObject(value, scope.selectedObjectData);
         }
         else {
           scope.selectedObject = value;
@@ -213,8 +238,8 @@
       function handleRequired(valid) {
         scope.notEmpty = valid;
         validState = scope.searchStr;
-        if (scope.fieldRequired && ctrl) {
-          ctrl.$setValidity(requiredClassName, valid);
+        if (scope.fieldRequired && ctrl && scope.inputName) {
+          ctrl[scope.inputName].$setValidity(requiredClassName, valid);
         }
       }
 
@@ -395,13 +420,17 @@
               handleOverrideSuggestions();
             }
           }
+        } else if (which === KEY_ES) {
+          // This is very specific to IE10/11 #272
+          // without this, IE clears the input text
+          event.preventDefault();
         }
       }
 
       function httpSuccessCallbackGen(str) {
         return function(responseData, status, headers, config) {
           // normalize return obejct from promise
-          if (!status && !headers && !config) {
+          if (!status && !headers && !config && responseData.data) {
             responseData = responseData.data;
           }
           scope.searching = false;
@@ -412,18 +441,21 @@
       }
 
       function httpErrorCallback(errorRes, status, headers, config) {
+        scope.searching = httpCallInProgress;
+
         // normalize return obejct from promise
         if (!status && !headers && !config) {
           status = errorRes.status;
         }
-        if (status !== 0) {
-          if (scope.remoteUrlErrorCallback) {
-            scope.remoteUrlErrorCallback(errorRes, status, headers, config);
-          }
-          else {
-            if (console && console.error) {
-              console.error('http error');
-            }
+
+        // cancelled/aborted
+        if (status === 0 || status === -1) { return; }
+        if (scope.remoteUrlErrorCallback) {
+          scope.remoteUrlErrorCallback(errorRes, status, headers, config);
+        }
+        else {
+          if (console && console.error) {
+            console.error('http error');
           }
         }
       }
@@ -447,9 +479,11 @@
         cancelHttpRequest();
         httpCanceller = $q.defer();
         params.timeout = httpCanceller.promise;
+        httpCallInProgress = true;
         $http.get(url, params)
-          .success(httpSuccessCallbackGen(str))
-          .error(httpErrorCallback);
+          .then(httpSuccessCallbackGen(str))
+          .catch(httpErrorCallback)
+          .finally(function(){httpCallInProgress=false;});
       }
 
       function getRemoteResultsWithCustomHandler(str) {
@@ -486,7 +520,9 @@
         var i, match, s, value,
             searchFields = scope.searchFields.split(','),
             matches = [];
-
+        if (typeof scope.parseInput() !== 'undefined') {
+          str = scope.parseInput()(str);
+        }
         for (i = 0; i < scope.localData.length; i++) {
           match = false;
 
@@ -499,9 +535,7 @@
             matches[matches.length] = scope.localData[i];
           }
         }
-
-        scope.searching = false;
-        processResults(matches, str);
+        return matches;
       }
 
       function checkExactMatch(result, obj, str){
@@ -522,7 +556,14 @@
         }
         if (scope.localData) {
           scope.$apply(function() {
-            getLocalResults(str);
+            var matches;
+            if (typeof scope.localSearch() !== 'undefined') {
+              matches = scope.localSearch()(str, scope.localData);
+            } else {
+              matches = getLocalResults(str);
+            }
+            scope.searching = false;
+            processResults(matches, str);
           });
         }
         else if (scope.remoteApiHandler) {
@@ -583,12 +624,15 @@
 
       function showAll() {
         if (scope.localData) {
+          scope.searching = false;
           processResults(scope.localData, '');
         }
         else if (scope.remoteApiHandler) {
+          scope.searching = true;
           getRemoteResultsWithCustomHandler('');
         }
         else {
+          scope.searching = true;
           getRemoteResults('');
         }
       }
@@ -604,7 +648,7 @@
         }
       };
 
-      scope.hideResults = function(event) {
+      scope.hideResults = function() {
         if (mousedownOn &&
             (mousedownOn === scope.id + '_dropdown' ||
              mousedownOn.indexOf('angucomplete') >= 0)) {
@@ -662,10 +706,10 @@
 
       scope.inputChangeHandler = function(str) {
         if (str.length < minlength) {
+          cancelHttpRequest();
           clearResults();
         }
         else if (str.length === 0 && minlength === 0) {
-          scope.searching = false;
           showAll();
         }
 
@@ -724,15 +768,10 @@
 
       // register events
       inputField.on('keydown', keydownHandler);
-      inputField.on('keyup input', keyupHandler);
+      inputField.on('keyup compositionend', keyupHandler);
 
       // set response formatter
       responseFormatter = callFunctionOrIdentity('remoteUrlResponseFormatter');
-
-      scope.$on('$destroy', function() {
-        // take care of required validity when it gets destroyed
-        handleRequired(true);
-      });
 
       // set isScrollOn
       $timeout(function() {
@@ -746,9 +785,11 @@
       require: '^?form',
       scope: {
         selectedObject: '=',
+        selectedObjectData: '=',
         disableInput: '=',
         initialValue: '=',
         localData: '=',
+        localSearch: '&',
         remoteUrlRequestFormatter: '=',
         remoteUrlRequestWithCredentials: '@',
         remoteUrlResponseFormatter: '=',
@@ -757,6 +798,8 @@
         id: '@',
         type: '@',
         placeholder: '@',
+        textSearching: '@',
+        textNoResults: '@',
         remoteUrl: '@',
         remoteUrlDataField: '@',
         titleField: '@',
@@ -769,19 +812,21 @@
         matchClass: '@',
         clearSelected: '@',
         overrideSuggestions: '@',
-        fieldRequired: '@',
+        fieldRequired: '=',
         fieldRequiredClass: '@',
         inputChanged: '=',
         autoMatch: '@',
         focusOut: '&',
         focusIn: '&',
+        fieldTabindex: '@',
         inputName: '@',
-        focusFirst: '@'
+        focusFirst: '@',
+        parseInput: '&'
       },
       templateUrl: function(element, attrs) {
         return attrs.templateUrl || TEMPLATE_URL;
       },
-      compile: function(tElement, tAttrs) {
+      compile: function(tElement) {
         var startSym = $interpolate.startSymbol();
         var endSym = $interpolate.endSymbol();
         if (!(startSym === '{{' && endSym === '}}')) {
