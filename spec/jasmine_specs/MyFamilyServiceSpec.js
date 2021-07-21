@@ -63,7 +63,7 @@ describe('MyFamilyService', function() {
 
                 console.log(result);
                 expect(result).toBeDefined();
-                expect(result.personId).toEqual(jasmine.any(Number));
+                expect(result).toEqual(jasmine.any(Number));
             });
     });
  });

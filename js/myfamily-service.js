@@ -31,7 +31,7 @@ app
 
 						var httpPostConfig = {
 
-							url : "mail/notify.php",
+							url : "js/mail/notify.php",
 							method : "POST",
 							data : JSON.stringify(data),
 							headers : {
@@ -357,14 +357,10 @@ app
 						var url = serverUrl + "/graph/addPerson?name="
 								+ name;
 
-						$http.get(url)
-								.then(function(data) {
+						$http.get(url).then(function(response) {
 
-									deferred.resolve(data.personId);
-								}, function(data) {
-
-									deferred.reject(data);
-								});
+							deferred.resolve(response.data.personId);
+						});
 
 						return deferred.promise;
 					};

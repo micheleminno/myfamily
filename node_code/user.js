@@ -46,7 +46,7 @@ exports.getRegistered = function(req, res) {
 
 					console.log("User " + username + " is a registered user");
 
-					res.status(OK).json('result', {
+					res.status(OK).json({
 						"registeredUser" : rows[0]
 					});
 
