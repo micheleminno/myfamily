@@ -75,8 +75,6 @@ var loginController = app
 								.then(
 										function(user) {
 
-											$scope.user = user; // for testing purposes
-
 											MyFamilyService
 													.sendMail(
 															"family.place notifications",
