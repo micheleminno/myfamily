@@ -51,7 +51,6 @@ describe('MyFamilyService', function() {
                                         "", "")
             .then(function (result) {
 
-                //console.log(result);
                 expect(result.data).toEqual(jasmine.any(Array));
             });
     });
@@ -61,7 +60,6 @@ describe('MyFamilyService', function() {
         return myfamilyService.addUser("Michele")
             .then(function (result) {
 
-                console.log(result);
                 expect(result).toBeDefined();
                 expect(result).toEqual(jasmine.any(Number));
             });
@@ -75,10 +73,23 @@ describe('MyFamilyService', function() {
                                                             -1)
             .then(function (result) {
 
-                console.log(result);
                 expect(result).toBeDefined();
                 expect(result.id).toEqual(jasmine.any(Number));
             });
     });
+
+    it('should register a new user', function() {
+
+        return myfamilyService.registerNewUser("Michele",
+                                               "ABC123", "mic.min@gmail.com","",
+                                               "", "",
+                                               "", "")
+            .then(function (result) {
+
+                expect(result).toBeDefined();
+                expect(result.id).toEqual(jasmine.any(Number));
+            });
+    });
+
 
  });

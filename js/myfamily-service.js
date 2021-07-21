@@ -54,7 +54,7 @@ app
 
 					// User
 
-					function addComponentToFamily(userId, familyNodeId,
+					var addComponentToFamily = function(userId, familyNodeId,
 							partnerName, asParent, deferred) {
 
 						var familyNodeRole = null;
@@ -73,7 +73,7 @@ app
 								.then(
 										function(response) {
 
-											if (data.newNode) {
+											if (response.data.newNode) {
 
 												deferred.resolve("Relative "
 														+ data.newNode
@@ -84,7 +84,7 @@ app
 														+ " not added to user with id = " + userId);
 											}
 										});
-					}
+					};
 
 					this.getUsers = function(username, firstParentName,
 							secondParentName, firstSiblingName,
@@ -128,7 +128,7 @@ app
 						return deferred.promise;
 					};
 
-					var addRelatives = function(userId, firstParentName,
+					this.addRelatives = function(userId, firstParentName,
 							secondParentName, firstSiblingName,
 							secondSiblingName, partnerName) {
 
@@ -152,7 +152,7 @@ app
 										'source', false, false).then(
 										function(response) {
 
-											var familyNodeId = data.newNode;
+											var familyNodeId = response.data.newNode;
 
 											addComponentToFamily(userId,
 													familyNodeId, partnerName,
@@ -172,7 +172,7 @@ app
 										.then(
 												function(response) {
 
-													var familyNodeId = data.newNode;
+													var familyNodeId = response.data.newNode;
 
 													if (!angular
 															.isUndefined(firstParentName)) {
@@ -286,7 +286,7 @@ app
 
 						$http.get(url).then(function(response) {
 
-							deferred.resolve(data.registeredUser);
+							deferred.resolve(response.data.registeredUser);
 						}, function (error){
 
 						});
@@ -328,7 +328,7 @@ app
 										+ username + '&node=' + nodeId)
 								.then(function(response) {
 
-									deferred.resolve(data.registeredUser);
+									deferred.resolve(response.data.registeredUser);
 								});
 
 						return deferred.promise;
@@ -345,7 +345,7 @@ app
 										+ '&node=' + nodeId).then(
 								function(response) {
 
-									deferred.resolve(data.userUpdated);
+									deferred.resolve(response.data.userUpdated);
 								});
 
 						return deferred.promise;
