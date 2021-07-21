@@ -66,4 +66,19 @@ describe('MyFamilyService', function() {
                 expect(result).toEqual(jasmine.any(Number));
             });
     });
+
+    it('should add a new user by node', function() {
+
+        return myfamilyService.internalRegisterUserFromNode("Michele",
+                                                            "ABC123",
+                                                            "mic.min@gmail.com",
+                                                            -1)
+            .then(function (result) {
+
+                console.log(result);
+                expect(result).toBeDefined();
+                expect(result.id).toEqual(jasmine.any(Number));
+            });
+    });
+
  });

@@ -71,7 +71,7 @@ app
 						internalAddNode('person', userId, familyNodeId,
 								familyNodeRole, partnerName, false, false)
 								.then(
-										function(data) {
+										function(response) {
 
 											if (data.newNode) {
 
@@ -150,7 +150,7 @@ app
 
 								internalAddNode('family', userId, userId,
 										'source', false, false).then(
-										function(data) {
+										function(response) {
 
 											var familyNodeId = data.newNode;
 
@@ -170,7 +170,7 @@ app
 								internalAddNode('family', userId, userId,
 										'target', false, false)
 										.then(
-												function(data) {
+												function(response) {
 
 													var familyNodeId = data.newNode;
 
@@ -284,7 +284,7 @@ app
 							url += operator + 'node=' + nodeId;
 						}
 
-						$http.get(url).then(function(data) {
+						$http.get(url).then(function(response) {
 
 							deferred.resolve(data.registeredUser);
 						}, function (error){
@@ -301,7 +301,7 @@ app
 								credentials, email, nodeId);
 					};
 
-					var internalRegisterUserFromNode = function(username,
+					this.internalRegisterUserFromNode = function(username,
 							credentials, email, nodeId) {
 
 						var deferred = $q.defer();
@@ -311,9 +311,9 @@ app
 										+ username + '&credentials='
 										+ credentials + '&email=' + email
 										+ '&node=' + nodeId).then(
-								function(data) {
+								function(response) {
 
-									deferred.resolve(data.user);
+									deferred.resolve(response.data.user);
 								});
 
 						return deferred.promise;
@@ -326,7 +326,7 @@ app
 						$http.get(
 								serverUrl + '/user/getRegistered?user='
 										+ username + '&node=' + nodeId)
-								.then(function(data) {
+								.then(function(response) {
 
 									deferred.resolve(data.registeredUser);
 								});
@@ -343,7 +343,7 @@ app
 								serverUrl + '/user/update?username=' + username
 										+ '&credentials=' + newCredentials
 										+ '&node=' + nodeId).then(
-								function(data) {
+								function(response) {
 
 									deferred.resolve(data.userUpdated);
 								});
@@ -417,11 +417,11 @@ app
 
 						$http.get(url).then(
 
-						function(data) {
+						function(response) {
 
-							if (data) {
+							if (response) {
 
-								deferred.resolve(data);
+								deferred.resolve(response.data);
 							}
 						});
 
@@ -443,11 +443,11 @@ app
 								serverUrl + "/" + userId + '/graph/remove/'
 										+ nodeId).then(
 
-						function(data) {
+						function(response) {
 
-							if (data) {
+							if (response) {
 
-								deferred.resolve(data);
+								deferred.resolve(response.data);
 							}
 						});
 
@@ -465,11 +465,11 @@ app
 										+ xPosition + '&y=' + yPosition)
 								.then(
 
-								function(data) {
+								function(response) {
 
-									if (data) {
+									if (response) {
 
-										deferred.resolve(data);
+										deferred.resolve(response.data);
 									}
 								});
 
@@ -491,9 +491,9 @@ app
 							}
 						};
 
-						$http(httpPostConfig).then(function(data) {
+						$http(httpPostConfig).then(function(response) {
 
-							deferred.resolve(data);
+							deferred.resolve(response.data);
 						});
 
 						return deferred.promise;
@@ -508,11 +508,11 @@ app
 										+ nodeId + '?field=' + field
 										+ '&value=' + value).then(
 
-						function(data) {
+						function(response) {
 
-							if (data) {
+							if (response) {
 
-								deferred.resolve(data);
+								deferred.resolve(response.data);
 							}
 						});
 
@@ -535,9 +535,9 @@ app
 							}
 						};
 
-						$http(httpPostConfig).then(function(events) {
+						$http(httpPostConfig).then(function(response) {
 
-							deferred.resolve(events);
+							deferred.resolve(response.events);
 						});
 
 						return deferred.promise;
@@ -554,11 +554,11 @@ app
 										+ '?type=' + eventType + '&node='
 										+ nodeId).then(
 
-						function(data) {
+						function(response) {
 
-							if (data) {
+							if (response) {
 
-								deferred.resolve(data);
+								deferred.resolve(response.data);
 							}
 						});
 
@@ -573,11 +573,11 @@ app
 								serverUrl + '/' + userId + '/events/remove/'
 										+ entityType + '/' + entityId).then(
 
-						function(data) {
+						function(response) {
 
-							if (data) {
+							if (response) {
 
-								deferred.resolve(data);
+								deferred.resolve(response.data);
 							}
 						});
 
@@ -595,11 +595,11 @@ app
 										+ '?type=' + eventType + '&date='
 										+ date).then(
 
-						function(data) {
+						function(response) {
 
-							if (data) {
+							if (response) {
 
-								deferred.resolve(data);
+								deferred.resolve(response.data);
 							}
 						});
 
@@ -615,11 +615,11 @@ app
 										serverUrl + '/nodeEvents/remove/'
 												+ nodeEventId).then(
 
-								function(data) {
+								function(response) {
 
-									if (data) {
+									if (response) {
 
-										deferred.resolve(data);
+										deferred.resolve(response.data);
 									}
 								});
 
@@ -632,11 +632,11 @@ app
 
 						$http.get(serverUrl + '/nodeEvents/' + nodeId).then(
 
-						function(data) {
+						function(response) {
 
-							if (data) {
+							if (response) {
 
-								deferred.resolve(data);
+								deferred.resolve(response.data);
 							}
 						});
 
@@ -655,11 +655,11 @@ app
 												+ '/notifications/1')
 								.then(
 
-										function(data) {
+										function(response) {
 
-											if (data) {
+											if (response) {
 
-												var notifications = data
+												var notifications = response.data
 														.map(function(item) {
 															return {
 
@@ -704,9 +704,9 @@ app
 							}
 						};
 
-						$http(httpPostConfig).then(function(data) {
+						$http(httpPostConfig).then(function(response) {
 
-							deferred.resolve(data);
+							deferred.resolve(response.data);
 						});
 
 						return deferred.promise;
@@ -721,11 +721,11 @@ app
 										+ '/notifications/remove/' + eventId)
 								.then(
 
-								function(data) {
+								function(response) {
 
-									if (data) {
+									if (response) {
 
-										deferred.resolve(data);
+										deferred.resolve(response.data);
 									}
 								});
 
@@ -740,11 +740,11 @@ app
 								serverUrl + '/notifications/remove/'
 										+ entityType + '/' + entityId).then(
 
-						function(data) {
+						function(response) {
 
-							if (data) {
+							if (response) {
 
-								deferred.resolve(data);
+								deferred.resolve(response.data);
 							}
 						});
 
@@ -760,11 +760,11 @@ app
 										+ eventId + '/setStatus?status=read')
 								.then(
 
-								function(data) {
+								function(response) {
 
-									if (data) {
+									if (response) {
 
-										deferred.resolve(data);
+										deferred.resolve(response.data);
 									}
 								}));
 
@@ -911,11 +911,11 @@ app
 										+ JSON.stringify(keywordLabels)
 										+ '&owner=' + owner).then(
 
-						function(data) {
+						function(response) {
 
-							if (data) {
+							if (response) {
 
-								deferred.resolve(data);
+								deferred.resolve(response.data);
 							}
 						});
 
@@ -931,11 +931,11 @@ app
 										serverUrl + '/documents/' + docId
 												+ '/remove').then(
 
-								function(data) {
+								function(response) {
 
-									if (data) {
+									if (response) {
 
-										deferred.resolve(data);
+										deferred.resolve(response.data);
 									}
 								});
 
@@ -958,11 +958,11 @@ app
 										+ JSON.stringify(taggedUsersIds)
 										+ '&keywords='
 										+ JSON.stringify(keywords)).then(
-								function(data) {
+								function(response) {
 
-									if (data) {
+									if (response) {
 
-										deferred.resolve(data);
+										deferred.resolve(response.data);
 									}
 								});
 
@@ -981,11 +981,11 @@ app
 												+ nodeId + '&x=' + xPosition
 												+ '&y=' + yPosition).then(
 
-								function(data) {
+								function(response) {
 
-									if (data) {
+									if (response) {
 
-										deferred.resolve(data);
+										deferred.resolve(response.data);
 									}
 								});
 
@@ -1004,11 +1004,11 @@ app
 										+ blockedUserId + '/' + documentId)
 								.then(
 
-								function(data) {
+								function(response) {
 
-									if (data) {
+									if (response) {
 
-										deferred.resolve(data);
+										deferred.resolve(response.data);
 									}
 								});
 
@@ -1077,11 +1077,11 @@ app
 										+ '/blacklists/remove/' + blockedUserId
 										+ '/' + documentId).then(
 
-						function(data) {
+						function(response) {
 
-							if (data) {
+							if (response) {
 
-								deferred.resolve(data);
+								deferred.resolve(response.data);
 							}
 						});
 
@@ -1096,11 +1096,11 @@ app
 								serverUrl + '/' + userId + '/blacklists/nodes')
 								.then(
 
-								function(data) {
+								function(response) {
 
-									if (data) {
+									if (response) {
 
-										deferred.resolve(data);
+										deferred.resolve(response.data);
 									}
 								});
 
@@ -1116,11 +1116,11 @@ app
 								serverUrl + '/' + userId + '/blacklists/'
 										+ docId).then(
 
-						function(data) {
+						function(response) {
 
-							if (data) {
+							if (response) {
 
-								deferred.resolve(data);
+								deferred.resolve(response.data);
 							}
 						});
 
@@ -1135,11 +1135,11 @@ app
 								serverUrl + '/' + userId
 										+ '/forbiddenDocuments').then(
 
-						function(data) {
+						function(response) {
 
-							if (data) {
+							if (response) {
 
-								deferred.resolve(data);
+								deferred.resolve(response.data);
 							}
 						});
 
@@ -1156,11 +1156,11 @@ app
 												+ '/blacklistingUsers')
 								.then(
 
-								function(data) {
+								function(response) {
 
-									if (data) {
+									if (response) {
 
-										deferred.resolve(data);
+										deferred.resolve(response.data);
 									}
 								});
 
@@ -1177,11 +1177,11 @@ app
 								serverUrl + '/' + userId + '/bookmarks/add/'
 										+ documentId).then(
 
-						function(data) {
+						function(response) {
 
-							if (data) {
+							if (response) {
 
-								deferred.resolve(data);
+								deferred.resolve(response.data);
 							}
 						});
 
@@ -1196,11 +1196,11 @@ app
 								serverUrl + '/' + userId + '/bookmarks/remove/'
 										+ documentId).then(
 
-						function(data) {
+						function(response) {
 
-							if (data) {
+							if (response) {
 
-								deferred.resolve(data);
+								deferred.resolve(response.data);
 							}
 						});
 
@@ -1214,11 +1214,11 @@ app
 						$http.get(serverUrl + '/' + userId + '/bookmarks')
 								.then(
 
-								function(data) {
+								function(response) {
 
-									if (data) {
+									if (response) {
 
-										deferred.resolve(data);
+										deferred.resolve(response.data);
 									}
 								});
 
@@ -1234,11 +1234,11 @@ app
 						$http.get(serverUrl + '/' + userId + '/keywords')
 								.then(
 
-								function(data) {
+								function(response) {
 
-									if (data) {
+									if (response) {
 
-										deferred.resolve(data);
+										deferred.resolve(response.data);
 									}
 								});
 
@@ -1255,11 +1255,11 @@ app
 								serverUrl + '/' + userId
 										+ '/drawers/initialise').then(
 
-						function(data) {
+						function(response) {
 
-							if (data) {
+							if (response) {
 
-								deferred.resolve(data);
+								deferred.resolve(response.data);
 							}
 						});
 
@@ -1273,11 +1273,11 @@ app
 						$http.get(serverUrl + '/' + userId + '/drawers')
 								.then(
 
-								function(data) {
+								function(response) {
 
-									if (data) {
+									if (response) {
 
-										deferred.resolve(data);
+										deferred.resolve(response.data);
 									}
 								});
 
@@ -1290,11 +1290,11 @@ app
 
 						$http.get(serverUrl + '/drawers/' + drawerId).then(
 
-						function(data) {
+						function(response) {
 
-							if (data) {
+							if (response) {
 
-								deferred.resolve(data);
+								deferred.resolve(response.data);
 							}
 						});
 
@@ -1310,11 +1310,11 @@ app
 										+ '/drawers/add?label=' + label
 										+ '&tagged=' + taggedIds).then(
 
-						function(data) {
+						function(response) {
 
-							if (data) {
+							if (response) {
 
-								deferred.resolve(data);
+								deferred.resolve(response.data);
 							}
 						});
 
@@ -1329,11 +1329,11 @@ app
 								serverUrl + '/drawers/' + drawerId + '/remove')
 								.then(
 
-								function(data) {
+								function(response) {
 
-									if (data) {
+									if (response) {
 
-										deferred.resolve(data);
+										deferred.resolve(response.data);
 									}
 								});
 
@@ -1368,11 +1368,11 @@ app
 
 						$http.get(url).then(
 
-						function(data) {
+						function(response) {
 
-							if (data) {
+							if (response) {
 
-								deferred.resolve(data);
+								deferred.resolve(response.data);
 							}
 						});
 
@@ -1389,11 +1389,11 @@ app
 								serverUrl + '/user/update?node=' + nodeId
 										+ '&username=' + username).then(
 
-						function(data) {
+						function(response) {
 
-							if (data) {
+							if (response) {
 
-								deferred.resolve(data);
+								deferred.resolve(response.data);
 							}
 						});
 
