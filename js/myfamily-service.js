@@ -226,33 +226,43 @@ app
 
 						var deferred = $q.defer();
 
-						this
-								.addUser(username)
-								.then(
-									function(addedUserId) {
+						this.addUser(username)
+							.then(function(addedUserId) {
 
-											addRelatives(addedUserId,
-													firstParentName,
-													secondParentName,
-													firstSiblingName,
-													secondSiblingName,
-													partnerName)
-													.then(
-															function(result) {
+								this.manageUserAdding(addedUserId, username, credentials,
+										email, firstParentName, secondParentName,
+										firstSiblingName, secondSiblingName, partnerName)
+									.then(function(user) {
 
-																internalRegisterUserFromNode(
-																		username,
-																		credentials,
-																		email,
-																		addedUserId)
-																		.then(
-																				function(
-																						user) {
+										deferred.resolve(user);
+									})
+							});
 
-																					deferred.resolve(user);
-																				});
-															});
-										});
+						return deferred.promise;
+					};
+
+					this.manageUserAdding = function(addedUserId, username, credentials,
+							email, firstParentName, secondParentName,
+							firstSiblingName, secondSiblingName, partnerName) {
+
+						var deferred = $q.defer();
+
+						this.addRelatives(addedUserId, firstParentName,
+									secondParentName, firstSiblingName,
+									secondSiblingName, partnerName)
+							.then(function(result) {
+
+								console.log(result);
+								console.log("Params before internalRegisterUserFromNode call: " + username + "," + credentials + "," +
+										    email + "," + addedUserId);
+
+								this.internalRegisterUserFromNode(username, credentials,
+															email, addedUserId)
+									.then(function(user) {
+
+										deferred.resolve(user);
+									})
+							});
 
 						return deferred.promise;
 					};
@@ -302,6 +312,9 @@ app
 
 					this.internalRegisterUserFromNode = function(username,
 							credentials, email, nodeId) {
+
+						console.log("Params in internalRegisterUserFromNode: " + username + "," + credentials + "," +
+									 email + "," + nodeId);
 
 						var deferred = $q.defer();
 

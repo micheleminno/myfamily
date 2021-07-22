@@ -6,7 +6,7 @@ describe('MyFamilyService', function() {
 
   beforeEach(function() {
           originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
-          jasmine.DEFAULT_TIMEOUT_INTERVAL = 3000;
+          jasmine.DEFAULT_TIMEOUT_INTERVAL = 9000;
   });
 
   beforeEach(inject(function(_$rootScope_, _$injector_) {
@@ -65,28 +65,29 @@ describe('MyFamilyService', function() {
             });
     });
 
+    var addedUserId;
+
     it('should add a new user by name', function() {
 
-        return myfamilyService.addUser("Michele")
+        return myfamilyService.addUser("Michele AddByName")
             .then(function (result) {
 
+                addedUserId = result;
                 expect(result).toBeDefined();
                 expect(result).toEqual(jasmine.any(Number));
             });
     });
 
-    var addedUserId;
 
     it('should add a new user by node', function() {
 
-        return myfamilyService.internalRegisterUserFromNode("Michele",
+        return myfamilyService.internalRegisterUserFromNode("Michele AddByNode",
                                                             "ABC123",
                                                             "mic.min@gmail.com",
-                                                            -1)
+                                                            addedUserId)
             .then(function (result) {
 
                 expect(result).toBeDefined();
-                addedUserId = result.id;
                 expect(result.id).toEqual(jasmine.any(Number));
             });
     });
@@ -102,9 +103,22 @@ describe('MyFamilyService', function() {
             });
     });
 
+    it('should manage adding a new user', function() {
+
+        return myfamilyService.manageUserAdding(addedUserId, "Michele Manage",
+                                               "ABC123", "mic.min@gmail.com", undefined,
+                                               undefined, undefined,
+                                               undefined, undefined)
+            .then(function (result) {
+
+                expect(result).toBeDefined();
+                expect(result.id).toEqual(jasmine.any(Number));
+            });
+    });
+
     it('should register a new user', function() {
 
-        return myfamilyService.registerNewUser("Michele",
+        return myfamilyService.registerNewUser("Michele Register",
                                                "ABC123", "mic.min@gmail.com", undefined,
                                                undefined, undefined,
                                                undefined, undefined)
