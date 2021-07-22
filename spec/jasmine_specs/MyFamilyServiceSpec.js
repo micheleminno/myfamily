@@ -4,6 +4,11 @@ describe('MyFamilyService', function() {
 
   beforeEach(module('main'));
 
+  beforeEach(function() {
+          originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
+          jasmine.DEFAULT_TIMEOUT_INTERVAL = 3000;
+  });
+
   beforeEach(inject(function(_$rootScope_, _$injector_) {
 
         $rootScope = _$rootScope_;
@@ -15,6 +20,10 @@ describe('MyFamilyService', function() {
         ]);
         myfamilyService = $injector.get('MyFamilyService');
     }));
+
+    afterEach(function() {
+        jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
+    });
 
     it('should exist', function() {
           expect(myfamilyService).toBeDefined();
@@ -32,7 +41,8 @@ describe('MyFamilyService', function() {
         expect(filePath).toEqual(jasmine.any(String));
     });
 
-    it('should send an email', function() {
+    // Temporarely disabled
+    xit('should send an email', function() {
 
         return myfamilyService.sendMail("Testing myfamily service",
                                                 "This is a test",
@@ -65,6 +75,8 @@ describe('MyFamilyService', function() {
             });
     });
 
+    var addedUserId;
+
     it('should add a new user by node', function() {
 
         return myfamilyService.internalRegisterUserFromNode("Michele",
@@ -74,16 +86,28 @@ describe('MyFamilyService', function() {
             .then(function (result) {
 
                 expect(result).toBeDefined();
+                addedUserId = result.id;
                 expect(result.id).toEqual(jasmine.any(Number));
+            });
+    });
+
+    it('should add undefined relatives to a user', function() {
+
+        return myfamilyService.addRelatives(addedUserId, undefined, undefined,
+                                            undefined, undefined, undefined)
+            .then(function (result) {
+
+                expect(result).toBeDefined();
+                expect(result).toEqual(jasmine.any(String));
             });
     });
 
     it('should register a new user', function() {
 
         return myfamilyService.registerNewUser("Michele",
-                                               "ABC123", "mic.min@gmail.com","",
-                                               "", "",
-                                               "", "")
+                                               "ABC123", "mic.min@gmail.com", undefined,
+                                               undefined, undefined,
+                                               undefined, undefined)
             .then(function (result) {
 
                 expect(result).toBeDefined();

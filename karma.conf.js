@@ -7,6 +7,12 @@ module.exports = function(config) {
         terminal: true,
         level: ""
     },
+    client: {
+      clearContext: false, // leave Jasmine Spec Runner output visible in browser
+      jasmine: {
+        random: false // disable the random running order
+      }
+    },
     files: [
 
         "./bower_components/angular/angular.js",

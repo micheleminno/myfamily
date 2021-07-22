@@ -249,8 +249,7 @@ app
 																				function(
 																						user) {
 
-																					deferred
-																							.resolve(user);
+																					deferred.resolve(user);
 																				});
 															});
 										});
