@@ -54,7 +54,7 @@ exports.list = function(req, res) {
 					documents.push(row);
 				}
 
-				res.status(OK).json('documents', {
+				res.status(OK).json({
 					documents : documents
 				});
 			}
@@ -145,7 +145,7 @@ exports.mixedStuffList = function(req, res) {
 
 				console.log("Heritage docs: " + JSON.stringify(documents));
 
-				res.status(OK).json('documents', {
+				res.status(OK).json({
 					documents : documents
 				});
 			}
@@ -272,7 +272,7 @@ exports.view = function(req, res) {
 
 					console.log("Sorted: " + JSON.stringify(documents));
 
-					res.status(OK).json('documents', {
+					res.status(OK).json({
 						documents : documents,
 						total : total
 					});
