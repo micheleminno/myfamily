@@ -128,175 +128,179 @@ app
 						return deferred.promise;
 					};
 
-					this.addRelatives = function(userId, firstParentName,
-							secondParentName, firstSiblingName,
-							secondSiblingName, partnerName) {
-
-						var deferred = $q.defer();
-
-						if (angular.isUndefined(firstParentName)
-								&& angular.isUndefined(secondParentName)
-								&& angular.isUndefined(firstSiblingName)
-								&& angular.isUndefined(secondSiblingName)
-								&& angular.isUndefined(partnerName)) {
-
-							deferred.resolve("No relative to add to user with id = " + userId);
-
-						} else {
-
-							if (!angular.isUndefined(partnerName)) {
-
-								// Family user + partner
-
-								internalAddNode('family', userId, userId,
-										'source', false, false).then(
-										function(response) {
-
-											var familyNodeId = response.data.newNode;
-
-											addComponentToFamily(userId,
-													familyNodeId, partnerName,
-													true, deferred);
-										});
-							}
-
-							if (!angular.isUndefined(firstParentName)
-									|| !angular.isUndefined(secondParentName)
-									|| !angular.isUndefined(firstSiblingName)
-									|| !angular.isUndefined(secondSiblingName)) {
-
-								// Family user + parents + brothers/sisters
-
-								internalAddNode('family', userId, userId,
-										'target', false, false)
-										.then(
-												function(response) {
-
-													var familyNodeId = response.data.newNode;
-
-													if (!angular
-															.isUndefined(firstParentName)) {
-
-														addComponentToFamily(
-																userId,
-																familyNodeId,
-																firstParentName,
-																true, deferred);
-													}
-
-													if (!angular
-															.isUndefined(secondParentName)) {
-
-														addComponentToFamily(
-																userId,
-																familyNodeId,
-																secondParentName,
-																true, deferred);
-													}
-
-													if (!angular
-															.isUndefined(firstSiblingName)) {
-
-														addComponentToFamily(
-																userId,
-																familyNodeId,
-																firstSiblingName,
-																false, deferred);
-													}
-
-													if (!angular
-															.isUndefined(secondSiblingName)) {
-
-														addComponentToFamily(
-																userId,
-																familyNodeId,
-																secondSiblingName,
-																false, deferred);
-													}
-												});
-							}
-						}
-
-						return deferred.promise;
-					};
-
 					this.registerNewUser = function(username, credentials,
 							email, firstParentName, secondParentName,
 							firstSiblingName, secondSiblingName, partnerName) {
 
-						var deferred = $q.defer();
+						var addRelatives = function(userId, firstParentName,
+								secondParentName, firstSiblingName,
+								secondSiblingName, partnerName) {
 
-						this.addUser(username).then(function(addedUserId) {
+							var deferred = $q.defer();
 
-							this.manageUserAdding(addedUserId, username, credentials,
-													email, firstParentName, secondParentName,
-													firstSiblingName, secondSiblingName, partnerName)
-								.then(function(user) {
+							if (angular.isUndefined(firstParentName)
+									&& angular.isUndefined(secondParentName)
+									&& angular.isUndefined(firstSiblingName)
+									&& angular.isUndefined(secondSiblingName)
+									&& angular.isUndefined(partnerName)) {
 
-									deferred.resolve(user);
-									console.log("after manageUserAdding: user = " + JSON.stringify(user));
+								deferred.resolve("No relative to add to user with id = " + userId);
 
-								})
+							} else {
+
+								if (!angular.isUndefined(partnerName)) {
+
+									// Family user + partner
+
+									internalAddNode('family', userId, userId,
+											'source', false, false).then(
+											function(response) {
+
+												var familyNodeId = response.data.newNode;
+
+												addComponentToFamily(userId,
+														familyNodeId, partnerName,
+														true, deferred);
+											});
+								}
+
+								if (!angular.isUndefined(firstParentName)
+										|| !angular.isUndefined(secondParentName)
+										|| !angular.isUndefined(firstSiblingName)
+										|| !angular.isUndefined(secondSiblingName)) {
+
+									// Family user + parents + brothers/sisters
+
+									internalAddNode('family', userId, userId,
+											'target', false, false)
+											.then(
+													function(response) {
+
+														var familyNodeId = response.data.newNode;
+
+														if (!angular
+																.isUndefined(firstParentName)) {
+
+															addComponentToFamily(
+																	userId,
+																	familyNodeId,
+																	firstParentName,
+																	true, deferred);
+														}
+
+														if (!angular
+																.isUndefined(secondParentName)) {
+
+															addComponentToFamily(
+																	userId,
+																	familyNodeId,
+																	secondParentName,
+																	true, deferred);
+														}
+
+														if (!angular
+																.isUndefined(firstSiblingName)) {
+
+															addComponentToFamily(
+																	userId,
+																	familyNodeId,
+																	firstSiblingName,
+																	false, deferred);
+														}
+
+														if (!angular
+																.isUndefined(secondSiblingName)) {
+
+															addComponentToFamily(
+																	userId,
+																	familyNodeId,
+																	secondSiblingName,
+																	false, deferred);
+														}
+													});
+								}
+							}
+
+							return deferred.promise;
+						};
+
+						var manageUserAdding = function(
+								addedUserId, username, credentials,
+								email, firstParentName, secondParentName,
+								firstSiblingName, secondSiblingName, partnerName) {
+
+							var deferred = $q.defer();
+
+							var relativesPromise = addRelatives(addedUserId, firstParentName,
+																	secondParentName, firstSiblingName,
+																	secondSiblingName, partnerName);
+							var internalRegisterPromise = internalRegisterUserFromNode(username, credentials,
+																							email, addedUserId);
+
+
+							$q.all([relativesPromise, internalRegisterPromise]).then(function(responses) {
+
+								var user = responses[1];
+
+								deferred.resolve(user);
+								console.log("after internalRegisterUserFromNode: user = " + JSON.stringify(user));
+
+							}).catch(function(error) {
+
+							  console.log("manageUserAdding call failed", error);
 							});
 
-						return deferred.promise;
-					};
+							return deferred.promise;
 
-					this.promiseCall = function(data, timeout) {
-					    var deferred = $q.defer();
+						};
 
-					    setTimeout(function() {
-					      deferred.resolve(data);
-					      console.log(data);
-					    }, timeout);
+						var deferred = $q.defer();
 
-					    return deferred.promise;
+						var promiseAddUser = this.addUser(username).then(function(addedUserId) {
+
+							return manageUserAdding(addedUserId, username, credentials,
+													email, firstParentName, secondParentName,
+													firstSiblingName, secondSiblingName, partnerName)
+
+						});
+
+						promiseAddUser.then(function(user) {
+							console.log("after manageUserAdding: user = " + JSON.stringify(user));
+							return user;
+
+						}, function(error) {
+
+						  	console.log("registerNewUser call failed", error);
+					  	});
 					};
 
 					this.testNestedCalls = function(msg1, msg2) {
 
-						var deferred = $q.defer();
+						var promiseCall = function(data, timeout) {
+						    var deferred = $q.defer();
 
-						var promise = this.promiseCall(msg1, 100).then(function() {
-						    return this.promiseCall(msg2, 100);
-						});
+						    setTimeout(function() {
 
-						promise.then(function(res) {
+						      deferred.resolve(data);
+						      console.log(data);
 
-							deferred.resolve(res);
-							console.log("after nested call");
-						});
+							}, timeout);
 
-						return deferred.promise;
-					};
-					this.manageUserAdding = function(
-							addedUserId, username, credentials,
-							email, firstParentName, secondParentName,
-							firstSiblingName, secondSiblingName, partnerName) {
+						    return deferred.promise;
+						};
 
-						var deferred = $q.defer();
+						promiseCall(msg1, 100).then(function(res1) {
 
-						var relativesPromise = this.addRelatives(addedUserId, firstParentName,
-																secondParentName, firstSiblingName,
-																secondSiblingName, partnerName);
-						var internalRegisterPromise = this.internalRegisterUserFromNode(username, credentials,
-																						email, addedUserId);
+							return promiseCall(msg2, 100);
 
+						}).then(function(res) {
 
-						$q.all([relativesPromise, internalRegisterPromise]).then(function(responses) {
+							console.log("Nested call done - res: " + res);
 
-							var user = responses[1];
+						}, function(error) {
 
-							deferred.resolve(user);
-							console.log("after internalRegisterUserFromNode: user = " + JSON.stringify(user));
-
-						}).catch(function(error) {
-
-						  console.log("manageUserAdding call failed", error);
-						});
-
-						return deferred.promise;
-
+						  	console.log("Nested call failed", error);
+					  	});
 					};
 
 					this.getRegisteredUser = function(username, credentials,
@@ -342,7 +346,7 @@ app
 								credentials, email, nodeId);
 					};
 
-					this.internalRegisterUserFromNode = function(username,
+					var internalRegisterUserFromNode = function(username,
 							credentials, email, nodeId) {
 
 						var deferred = $q.defer();
