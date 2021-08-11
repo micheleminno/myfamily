@@ -20,7 +20,7 @@ exports.add = function(req, res) {
 				console.log("Error Inserting : %s ", err);
 				console.log("Keyword not added");
 
-				res.status(NOK).json('result', {
+				res.status(NOK).json({
 					"msg" : "keyword not added"
 				});
 
@@ -28,7 +28,7 @@ exports.add = function(req, res) {
 
 				console.log("Keyword with id " + info.insertId + " added");
 
-				res.status(OK).json('result', {
+				res.status(OK).json({
 					"msg" : "keyword added"
 				});
 			}

@@ -24,7 +24,7 @@ exports.add = function(req, res) {
 				console.log("Error Inserting : %s ", err);
 				console.log("Event not added");
 
-				res.status(NOK).json('result', {
+				res.status(NOK).json({
 					"msg" : "event not added"
 				});
 
@@ -32,7 +32,7 @@ exports.add = function(req, res) {
 
 				console.log("Event with id " + info.insertId + " added");
 
-				res.status(OK).json('result', {
+				res.status(OK).json({
 					"msg" : "event added"
 				});
 			}
@@ -66,7 +66,7 @@ exports.remove = function(req, res) {
 					console.log("Events related to " + entityType + " "
 							+ entityId + " deleted");
 
-					res.status(OK).json('result', {
+					res.status(OK).json({
 						"events" : rows
 					});
 				} else {
@@ -74,7 +74,7 @@ exports.remove = function(req, res) {
 					console.log("Events related to " + entityType + " "
 							+ entityId + " not deleted");
 
-					res.status(NOK).json('result', {
+					res.status(NOK).json({
 						"msg" : "events not deleted"
 					});
 				}

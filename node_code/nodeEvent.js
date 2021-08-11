@@ -22,7 +22,7 @@ exports.add = function(req, res) {
 				console.log("Error Inserting : %s ", err);
 				console.log("Event not added");
 
-				res.status(NOK).json('result', {
+				res.status(NOK).json({
 					"msg" : "node event not added"
 				});
 
@@ -37,7 +37,7 @@ exports.add = function(req, res) {
 					node : nodeId
 				};
 
-				res.status(OK).json('result', addedNodeEvent);
+				res.status(OK).json(addedNodeEvent);
 			}
 		});
 	});
@@ -65,14 +65,14 @@ exports.remove = function(req, res) {
 
 					console.log("Node event " + eventId + " deleted");
 
-					res.status(OK).json('result', {
+					res.status(OK).json({
 						"deleted" : true
 					});
 				} else {
 
 					console.log("Node event " + eventId + " not deleted");
 
-					res.status(NOK).json('result', {
+					res.status(NOK).json({
 						"deleted" : false
 					});
 				}

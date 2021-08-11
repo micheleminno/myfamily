@@ -22,7 +22,7 @@ exports.add = function(req, res) {
 				console.log("Error Inserting : %s ", err);
 				console.log("Drawer not added");
 
-				res.status(NOK).json('result', {
+				res.status(NOK).json({
 					"msg" : "drawer not added"
 				});
 
@@ -35,7 +35,7 @@ exports.add = function(req, res) {
 					label : label
 				};
 
-				res.status(OK).json('result', insertedDrawer);
+				res.status(OK).json(insertedDrawer);
 			}
 		});
 	});
@@ -77,7 +77,7 @@ exports.update = function(req, res) {
 				console.log("Error Updating : %s ", err);
 				console.log("Drawer not updated");
 
-				res.status(NOK).json('result', {
+				res.status(NOK).json({
 					"msg" : "drawer not updated"
 				});
 
@@ -85,7 +85,7 @@ exports.update = function(req, res) {
 
 				console.log("Drawer with id " + drawerId + " updated");
 
-				res.status(OK).json('result', {
+				res.status(OK).json({
 					"msg" : "Drawer udpated"
 				});
 			}
@@ -115,7 +115,7 @@ exports.remove = function(req, res) {
 
 					console.log("Drawer " + drawerIndex + " deleted");
 
-					res.status(OK).json('result', {
+					res.status(OK).json({
 						"msg" : "Drawer removed"
 					});
 
@@ -123,7 +123,7 @@ exports.remove = function(req, res) {
 
 					console.log("Drawer " + drawerIndex + " not deleted");
 
-					res.status(NOK).json('result', {
+					res.status(NOK).json({
 						"msg" : "Drawer not removed"
 					});
 				}
@@ -221,7 +221,7 @@ exports.initialise = function(req, res) {
 				console.log("Error Inserting : %s ", err);
 				console.log("Drawers not added");
 
-				res.status(NOK).json('result', {
+				res.status(NOK).json({
 					"msg" : "Drawers not added"
 				});
 
@@ -229,7 +229,7 @@ exports.initialise = function(req, res) {
 
 				console.log("Default drawers added");
 
-				res.status(OK).json('result', {
+				res.status(OK).json({
 					"msg" : "default drawers added"
 				});
 			}

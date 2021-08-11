@@ -393,12 +393,12 @@ exports.remove = function(req, res) {
 
 		if (deleted) {
 
-			res.status(OK).json('result', {
+			res.status(OK).json({
 				"msg" : "Document removed"
 			});
 		} else {
 
-			res.status(NOK).json('result', {
+			res.status(NOK).json({
 				"msg" : "Document not removed"
 			});
 		}
@@ -436,7 +436,7 @@ exports.updatePosition = function(req, res) {
 
 					console.log("Document " + index + " updated");
 
-					res.status(OK).json('result', {
+					res.status(OK).json({
 						"msg" : "Document " + index + " updated"
 					});
 
@@ -897,7 +897,7 @@ exports.update = function(req, res) {
 
 							console.log("Document " + index + " updated");
 
-							res.status(OK).json('result', {
+							res.status(OK).json({
 								"msg" : "Document " + index + " updated"
 							});
 						}
@@ -906,7 +906,7 @@ exports.update = function(req, res) {
 
 						console.log("Document " + index + " not updated");
 
-						res.status(NOK).json('result', {
+						res.status(NOK).json({
 							"msg" : "Document " + index + " not updated"
 						});
 					}
@@ -923,14 +923,14 @@ exports.update = function(req, res) {
 
 					console.log("Document " + index + " updated");
 
-					res.status(OK).json('result', {
+					res.status(OK).json({
 						"msg" : "Document " + index + " updated"
 					});
 				} else {
 
 					console.log("Document " + index + " not updated");
 
-					res.status(NOK).json('result', {
+					res.status(NOK).json({
 						"msg" : "Document " + index + " not updated"
 					});
 				}
@@ -988,7 +988,7 @@ exports.get = function(req, res) {
 						taggedNodes : tagged
 					};
 
-					res.status(OK).json('result', {
+					res.status(OK).json({
 						"document" : document
 					});
 
@@ -996,7 +996,7 @@ exports.get = function(req, res) {
 
 					console.log("Document " + index + " not retrieved");
 
-					res.status(NOK).json('result', {
+					res.status(NOK).json({
 						"document" : -1
 					});
 				}
@@ -1159,12 +1159,12 @@ exports.add = function(req, res) {
 
 		if (!insertedDoc) {
 
-			res.status(NOK).json('result', {
+			res.status(NOK).json({
 				"msg" : "document not added"
 			});
 		} else {
 
-			res.status(OK).json('result', insertedDoc);
+			res.status(OK).json(insertedDoc);
 
 		}
 	});
@@ -1173,7 +1173,7 @@ exports.add = function(req, res) {
 exports.upload = function(req, res) {
 
 	console.log("uploading document...");
-	res.status(OK).json('result', {
+	res.status(OK).json({
 		status : 'ok'
 	});
 };

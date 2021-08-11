@@ -84,7 +84,7 @@ exports.add = function(req, res) {
 
 		console.log("Empty notifications: nothing to add");
 
-		res.status(OK).json('result', {
+		res.status(OK).json({
 			"msg" : "no notifications: nothing to add"
 		});
 	}
@@ -160,7 +160,7 @@ var remove = function(user, event, req, res) {
 
 					console.log("Notification " + notificationId + " removed");
 
-					res.status(OK).json('result', {
+					res.status(OK).json({
 						"msg" : "Notification " + notificationId + " removed"
 					});
 				} else {
@@ -168,7 +168,7 @@ var remove = function(user, event, req, res) {
 					console.log("Notification " + notificationId
 							+ " not removed");
 
-					res.status(NOK).json('result', {
+					res.status(NOK).json({
 						"msg" : "Notification " + notificationId + " not found"
 					});
 				}
@@ -329,7 +329,7 @@ exports.setStatus = function(req, res) {
 
 					console.log("Notification " + notificationId + " updated");
 
-					res.status(OK).json('result', {
+					res.status(OK).json({
 						"msg" : "Notification " + notificationId + " updated"
 					});
 
@@ -338,7 +338,7 @@ exports.setStatus = function(req, res) {
 					console.log("Notification " + notificationId
 							+ " not updated");
 
-					res.status(NOK).json('result', {
+					res.status(NOK).json({
 						"msg" : "Notification " + notificationId + " not found"
 					});
 				}
