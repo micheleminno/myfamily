@@ -265,41 +265,13 @@ app
 						});
 
 						promiseAddUser.then(function(user) {
+							
 							console.log("after manageUserAdding: user = " + JSON.stringify(user));
 							return user;
 
 						}, function(error) {
 
 						  	console.log("registerNewUser call failed", error);
-					  	});
-					};
-
-					this.testNestedCalls = function(msg1, msg2) {
-
-						var promiseCall = function(data, timeout) {
-						    var deferred = $q.defer();
-
-						    setTimeout(function() {
-
-						      deferred.resolve(data);
-						      console.log(data);
-
-							}, timeout);
-
-						    return deferred.promise;
-						};
-
-						promiseCall(msg1, 100).then(function(res1) {
-
-							return promiseCall(msg2, 100);
-
-						}).then(function(res) {
-
-							console.log("Nested call done - res: " + res);
-
-						}, function(error) {
-
-						  	console.log("Nested call failed", error);
 					  	});
 					};
 
@@ -896,6 +868,8 @@ app
 										+ "&relation=" + relationType).then(
 								function(documents) {
 
+									console.log("Documents: " + JSON.stringify(documents));
+
 									deferred.resolve(documents);
 								});
 
@@ -1145,6 +1119,7 @@ app
 
 									if (response) {
 
+										console.log("Blacklisted nodes: " + JSON.stringify(response.data));
 										deferred.resolve(response.data);
 									}
 								});

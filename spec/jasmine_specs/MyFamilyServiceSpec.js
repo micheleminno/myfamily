@@ -5,6 +5,7 @@ describe('MyFamilyService', function() {
   beforeEach(module('main'));
 
   beforeEach(function() {
+
           originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
           jasmine.DEFAULT_TIMEOUT_INTERVAL = 9000;
   });
@@ -78,61 +79,30 @@ describe('MyFamilyService', function() {
             });
     });
 
+    it('should get the documents owned by a user', function() {
 
-    it('should add a new user by node', function() {
-
-        return myfamilyService.internalRegisterUserFromNode("Michele AddByNode",
-                                                            "ABC123",
-                                                            "mic.min@gmail.com",
-                                                            addedUserId)
-            .then(function (result) {
-
-                expect(result).toBeDefined();
-                expect(result.id).toEqual(jasmine.any(Number));
-            });
-    });
-
-    // Temporarely disabled
-    xit('should add undefined relatives to a user', function() {
-
-        return myfamilyService.addRelatives(addedUserId, undefined, undefined,
-                                            undefined, undefined, undefined)
-            .then(function (result) {
-
-                expect(result).toBeDefined();
-                expect(result).toEqual(jasmine.any(String));
-            });
-    });
-
-    it('should manage adding a new user', function() {
-
-        return myfamilyService.manageUserAdding(addedUserId, "Michele Manage",
-                                               "ABC123", "mic.min@gmail.com", undefined,
-                                               undefined, undefined,
-                                               undefined, undefined)
+        return myfamilyService.getNodeDocuments(addedUserId, "owner")
             .then(function(result) {
 
                 expect(result).toBeDefined();
-                expect(result.id).toEqual(jasmine.any(Number));
+                expect(result).toEqual(jasmine.any(Object));
             });
     });
 
-    it('should make nested calls', function() {
+    it('should get the blacklisted nodes of a user', function() {
 
-        return myfamilyService.testNestedCalls("call 1", "call 2")
+        return myfamilyService.getBlacklistedNodes(addedUserId)
             .then(function(result) {
 
                 expect(result).toBeDefined();
-                expect(result).toEqual(jasmine.any(String));
+                expect(result).toEqual(jasmine.any(Object));
             });
     });
 
     it('should register a new user', function() {
 
         return myfamilyService.registerNewUser("Michele Register",
-                                               "ABC123", "mic.min@gmail.com", undefined,
-                                               undefined, undefined,
-                                               undefined, undefined)
+                                               "ABC123", "mic.min@gmail.com")
             .then(function (result) {
 
                 expect(result).toBeDefined();
