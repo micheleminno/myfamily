@@ -109,10 +109,20 @@ describe('MyFamilyService', function() {
                                                "ABC123", "mic.min@gmail.com", undefined,
                                                undefined, undefined,
                                                undefined, undefined)
-            .then(function (result) {
+            .then(function(result) {
 
                 expect(result).toBeDefined();
                 expect(result.id).toEqual(jasmine.any(Number));
+            });
+    });
+
+    it('should make nested calls', function() {
+
+        return myfamilyService.testNestedCalls("call 1", "call 2")
+            .then(function(result) {
+
+                expect(result).toBeDefined();
+                expect(result).toEqual(jasmine.any(String));
             });
     });
 

@@ -226,45 +226,77 @@ app
 
 						var deferred = $q.defer();
 
-						this.addUser(username)
-							.then(function(addedUserId) {
+						this.addUser(username).then(function(addedUserId) {
 
-								this.manageUserAdding(addedUserId, username, credentials,
-										email, firstParentName, secondParentName,
-										firstSiblingName, secondSiblingName, partnerName)
-									.then(function(user) {
+							this.manageUserAdding(addedUserId, username, credentials,
+													email, firstParentName, secondParentName,
+													firstSiblingName, secondSiblingName, partnerName)
+								.then(function(user) {
 
-										deferred.resolve(user);
-									})
+									deferred.resolve(user);
+									console.log("after manageUserAdding: user = " + JSON.stringify(user));
+
+								})
 							});
 
 						return deferred.promise;
 					};
 
-					this.manageUserAdding = function(addedUserId, username, credentials,
+					this.promiseCall = function(data, timeout) {
+					    var deferred = $q.defer();
+
+					    setTimeout(function() {
+					      deferred.resolve(data);
+					      console.log(data);
+					    }, timeout);
+
+					    return deferred.promise;
+					};
+
+					this.testNestedCalls = function(msg1, msg2) {
+
+						var deferred = $q.defer();
+
+						var promise = this.promiseCall(msg1, 100).then(function() {
+						    return this.promiseCall(msg2, 100);
+						});
+
+						promise.then(function(res) {
+
+							deferred.resolve(res);
+							console.log("after nested call");
+						});
+
+						return deferred.promise;
+					};
+					this.manageUserAdding = function(
+							addedUserId, username, credentials,
 							email, firstParentName, secondParentName,
 							firstSiblingName, secondSiblingName, partnerName) {
 
 						var deferred = $q.defer();
 
-						this.addRelatives(addedUserId, firstParentName,
-									secondParentName, firstSiblingName,
-									secondSiblingName, partnerName)
-							.then(function(result) {
+						var relativesPromise = this.addRelatives(addedUserId, firstParentName,
+																secondParentName, firstSiblingName,
+																secondSiblingName, partnerName);
+						var internalRegisterPromise = this.internalRegisterUserFromNode(username, credentials,
+																						email, addedUserId);
 
-								console.log(result);
-								console.log("Params before internalRegisterUserFromNode call: " + username + "," + credentials + "," +
-										    email + "," + addedUserId);
 
-								this.internalRegisterUserFromNode(username, credentials,
-															email, addedUserId)
-									.then(function(user) {
+						$q.all([relativesPromise, internalRegisterPromise]).then(function(responses) {
 
-										deferred.resolve(user);
-									})
-							});
+							var user = responses[1];
+
+							deferred.resolve(user);
+							console.log("after internalRegisterUserFromNode: user = " + JSON.stringify(user));
+
+						}).catch(function(error) {
+
+						  console.log("manageUserAdding call failed", error);
+						});
 
 						return deferred.promise;
+
 					};
 
 					this.getRegisteredUser = function(username, credentials,
@@ -313,20 +345,17 @@ app
 					this.internalRegisterUserFromNode = function(username,
 							credentials, email, nodeId) {
 
-						console.log("Params in internalRegisterUserFromNode: " + username + "," + credentials + "," +
-									 email + "," + nodeId);
-
 						var deferred = $q.defer();
 
-						$http.get(
-								serverUrl + '/user/register?username='
-										+ username + '&credentials='
-										+ credentials + '&email=' + email
-										+ '&node=' + nodeId).then(
-								function(response) {
+						var url = serverUrl + '/user/register?username='
+								  + username + '&credentials='
+								  + credentials + '&email=' + email
+								  + '&node=' + nodeId;
 
-									deferred.resolve(response.data.user);
-								});
+						$http.get(url).then(function(response) {
+
+							deferred.resolve(response.data.user);
+						});
 
 						return deferred.promise;
 					};
@@ -365,16 +394,16 @@ app
 
 					this.addUser = function(name) {
 
-						var deferred = $q.defer();
 						var url = serverUrl + "/graph/addPerson?name="
 								+ name;
 
-						$http.get(url).then(function(response) {
+						return $q(function(resolve, reject) {
 
-							deferred.resolve(response.data.personId);
+							$http.get(url).then(function(response) {
+
+								resolve(response.data.personId);
+							});
 						});
-
-						return deferred.promise;
 					};
 
 					// Graph
