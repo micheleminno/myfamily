@@ -108,7 +108,7 @@ exports.list = function(req, res) {
 					bookmarks.push(rows[rowIndex]);
 				}
 
-				res.status(OK).json('bookmarks', bookmarks);
+				res.status(OK).json(bookmarks);
 			}
 		});
 	});

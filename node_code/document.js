@@ -54,6 +54,7 @@ exports.list = function(req, res) {
 					documents.push(row);
 				}
 
+				console.log("res.: " + JSON.stringify(documents));
 				res.status(OK).json({
 					documents : documents
 				});
@@ -945,7 +946,7 @@ exports.update = function(req, res) {
  */
 exports.get = function(req, res) {
 
-	var index = parseInt(req.param('document'));
+	var index = parseInt(req.param.document);
 
 	var getDocumentQuery = 'SELECT t.document, d.title, d.date, d.file, d.owner, t.node, n.id, n.label FROM tags as t JOIN documents as d '
 			+ 'ON t.document = d.id LEFT JOIN nodes as n ON t.node = n.id WHERE d.id = '

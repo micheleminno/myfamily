@@ -362,7 +362,7 @@ exports.listNodes = function(req, res) {
 
 				var blacklisted = [];
 
-				for ( var rowIndex in rows) {
+				for (var rowIndex in rows) {
 
 					blacklisted.push(rows[rowIndex]['blocked']);
 				}
