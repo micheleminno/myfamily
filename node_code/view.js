@@ -62,7 +62,7 @@ exports.updateNode = function(req, res) {
 
 					console.log("Node with id " + nodeIndex + " updated");
 
-					res.status(OK).json('result', {
+					res.status(OK).json({
 						"msg" : "node updated"
 					});
 
@@ -70,7 +70,7 @@ exports.updateNode = function(req, res) {
 
 					console.log("Node with id " + nodeIndex + " updated");
 
-					res.status(OK).json('result', {
+					res.status(OK).json({
 						"msg" : "node updated"
 					});
 				}

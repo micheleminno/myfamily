@@ -266,7 +266,7 @@ exports.update = function(req, res) {
 						removeBlacklistedUsersForDocument(userId, documentId,
 								blockedUsersToRemove, req, function(removed) {
 
-									res.status(OK).json('result', {
+									res.status(OK).json({
 										"msg" : "Blacklist items updated"
 									});
 								});
@@ -320,7 +320,7 @@ exports.remove = function(req, res) {
 
 								console.log("Blacklist item removed");
 
-								res.status(OK).json('result', {
+								res.status(OK).json({
 									"msg" : "Blacklist item removed"
 								});
 

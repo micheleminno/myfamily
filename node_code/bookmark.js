@@ -20,7 +20,7 @@ exports.add = function(req, res) {
 				console.log("Error Inserting : %s ", err);
 				console.log("Bookmark not added");
 
-				res.status(NOK).json('result', {
+				res.status(NOK).json({
 					"msg" : "bookmark not added"
 				});
 
@@ -28,7 +28,7 @@ exports.add = function(req, res) {
 
 				console.log("Bookmark with id " + info.insertId + " added");
 
-				res.status(OK).json('result', {
+				res.status(OK).json({
 					"msg" : "bookmark added"
 				});
 			}
@@ -61,7 +61,7 @@ exports.remove = function(req, res) {
 					console.log("Bookmark of user " + user
 							+ " related to document " + document + " deleted");
 
-					res.status(OK).json('result', {
+					res.status(OK).json({
 						"msg" : "bookmark deleted"
 					});
 				} else {
@@ -70,7 +70,7 @@ exports.remove = function(req, res) {
 							+ " related to document " + document
 							+ " not deleted");
 
-					res.status(NOK).json('result', {
+					res.status(NOK).json({
 						"msg" : "bookmark not deleted"
 					});
 				}
