@@ -527,7 +527,7 @@ exports.getParents = function(req, res) {
  */
 exports.view = function(req, res) {
 
-	var user = req.param('user');
+	var user = req.params.user;
 	var viewIndex = req.query.view;
 
 	console.log("viewIndex: " + viewIndex);

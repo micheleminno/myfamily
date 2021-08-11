@@ -38,7 +38,7 @@ exports.add = function(req, res) {
 
 								console.log("Blacklist item added");
 
-								res.status(OK).json('result', {
+								res.status(OK).json({
 									"msg" : "Blacklist item added"
 								});
 
@@ -46,7 +46,7 @@ exports.add = function(req, res) {
 
 								console.log("Blacklist item added");
 
-								res.status(NOK).json('result', {
+								res.status(NOK).json({
 									"msg" : "Blacklist item not added"
 								});
 							}
@@ -70,13 +70,13 @@ exports.addMany = function(req, res) {
 
 				if (added) {
 
-					res.status(OK).json('result', {
+					res.status(OK).json({
 						"msg" : "Blacklist items added"
 					});
 
 				} else {
 
-					res.status(NOK).json('result', {
+					res.status(NOK).json({
 						"msg" : "Blacklist items not added"
 					});
 				}
@@ -273,7 +273,7 @@ exports.update = function(req, res) {
 
 					} else {
 
-						res.status(NOK).json('result', {
+						res.status(NOK).json({
 							"msg" : "Blacklist items not updated"
 						});
 					}
@@ -328,7 +328,7 @@ exports.remove = function(req, res) {
 
 								console.log("Blacklist item removed");
 
-								res.status(NOK).json('result', {
+								res.status(NOK).json({
 									"msg" : "Blacklist item not removed"
 								});
 							}
@@ -368,7 +368,7 @@ exports.listNodes = function(req, res) {
 				}
 
 				console.log("res.: " + JSON.stringify(blacklisted));
-				res.status(OK).json('blacklisted', blacklisted);
+				res.status(OK).json(blacklisted);
 			}
 		});
 	});
@@ -415,7 +415,7 @@ exports.listUsersForDocument = function(req, res) {
 
 	getBlacklistedUsersForDocument(userId, docId, req, function(blacklisted) {
 
-		res.status(OK).json('blacklisted', blacklisted);
+		res.status(OK).json(blacklisted);
 	});
 };
 
@@ -449,7 +449,7 @@ exports.listBlacklistingUsers = function(req, res) {
 				}
 
 				console.log("res.: " + JSON.stringify(blacklisting));
-				res.status(OK).json('blacklisting', blacklisting);
+				res.status(OK).json(blacklisting);
 			}
 		});
 	});
@@ -485,7 +485,7 @@ exports.listForbiddenDocuments = function(req, res) {
 				}
 
 				console.log("res.: " + JSON.stringify(forbiddenDocs));
-				res.status(OK).json('forbiddenDocs', forbiddenDocs);
+				res.status(OK).json(forbiddenDocs);
 			}
 		});
 	});
